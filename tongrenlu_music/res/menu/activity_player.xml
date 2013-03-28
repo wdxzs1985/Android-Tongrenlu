@@ -1,0 +1,9 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item android:id="@+id/menu_player_stop"
+        android:icon="@drawable/av_stop"
+        android:orderInCategory="100"
+        android:showAsAction="withText|ifRoom"
+        android:title="@string/player_stop"/>
+    
+</menu>

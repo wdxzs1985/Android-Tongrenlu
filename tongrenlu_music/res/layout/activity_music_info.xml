@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    style="@style/activity_mask">
+    
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:layout_marginBottom="8dp">
+	    <ImageView android:id="@+id/article_cover"
+	        android:layout_width="100dp"
+	        android:layout_height="100dp"
+	        android:layout_marginRight="8dp"
+	        android:src="@drawable/default_cover"
+	        android:contentDescription="@string/article_cover"
+	        android:layout_alignParentLeft="true"
+	        android:layout_alignParentTop="true"
+	        />
+        <TextView
+            android:id="@+id/article_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxLines="2"
+            android:text="@string/article_title"
+            android:layout_alignTop="@+id/article_cover"
+            android:layout_toRightOf="@+id/article_cover"
+            style="@style/text_large"
+            />
+        <Button
+            android:id="@+id/action_download_all"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/action_download_all"
+            android:layout_alignBottom="@+id/article_cover"
+            android:layout_toRightOf="@+id/article_cover"
+            />
+    </RelativeLayout>
+    <include layout="@layout/fragment_list_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        />
+</LinearLayout>
