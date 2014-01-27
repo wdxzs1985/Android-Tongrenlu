@@ -10,7 +10,6 @@
         android:layout_marginTop="8dip"
         android:singleLine="true"
         android:text="@string/track_title"
-        style="@style/text_large"
     />
 
     <TextView android:id="@+id/track_artist"
@@ -19,7 +18,6 @@
         android:layout_below="@+id/track_title"
         android:layout_alignLeft="@+id/track_title"
         android:text="@string/track_artist"
-        style="@style/text_small"
     />
     
 </RelativeLayout>

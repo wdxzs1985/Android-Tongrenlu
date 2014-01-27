@@ -45,10 +45,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.telephony.TelephonyManager;
 import android.widget.Toast;
 
-public class MusicService extends Service implements OnCompletionListener,
-        OnPreparedListener, OnBufferingUpdateListener, OnInfoListener,
-        OnSeekCompleteListener, OnErrorListener,
-        OnSharedPreferenceChangeListener {
+public class MusicService extends Service implements OnCompletionListener, OnPreparedListener, OnBufferingUpdateListener, OnInfoListener, OnSeekCompleteListener, OnErrorListener, OnSharedPreferenceChangeListener {
 
     public static final String ACTION_INIT = "info.tongrenlu.android.MusicService.ACTION_INIT";
     public static final String ACTION_STOP = "info.tongrenlu.android.MusicService.ACTION_STOP";
@@ -190,9 +187,7 @@ public class MusicService extends Service implements OnCompletionListener,
     }
 
     @Override
-    public int onStartCommand(final Intent intent,
-                              final int flags,
-                              final int startId) {
+    public int onStartCommand(final Intent intent, final int flags, final int startId) {
         final String action = intent.getAction();
         if (StringUtils.equals(MusicService.ACTION_INIT, action)) {
             final ArrayList<TrackBean> trackBeanList = intent.getParcelableArrayListExtra("trackBeanList");
@@ -323,8 +318,7 @@ public class MusicService extends Service implements OnCompletionListener,
     }
 
     @Override
-    public void onSharedPreferenceChanged(final SharedPreferences sharedPreferences,
-                                          final String key) {
+    public void onSharedPreferenceChanged(final SharedPreferences sharedPreferences, final String key) {
         if (StringUtils.equals(key, SettingsActivity.PREF_KEY_SHUFFLE_PLAY)) {
             this.onShufflePlayChanged(sharedPreferences);
         } else if (StringUtils.equals(key, SettingsActivity.PREF_KEY_LOOP_PLAY)) {
@@ -579,22 +573,24 @@ public class MusicService extends Service implements OnCompletionListener,
                      .setAutoCancel(false)
                      .setOngoing(true);
 
-        final Intent stopAction = new Intent(context, MusicService.class);
-        stopAction.setAction(MusicService.ACTION_STOP);
-        final PendingIntent stopActionIntent = PendingIntent.getService(context,
-                                                                        0,
-                                                                        stopAction,
-                                                                        PendingIntent.FLAG_UPDATE_CURRENT);
-        this.mBuilder.addAction(R.drawable.av_stop,
-                                context.getString(R.string.player_stop),
-                                stopActionIntent);
+        // final Intent stopAction = new Intent(context, MusicService.class);
+        // stopAction.setAction(MusicService.ACTION_STOP);
+        // final PendingIntent stopActionIntent =
+        // PendingIntent.getService(context,
+        // 0,
+        // stopAction,
+        // PendingIntent.FLAG_UPDATE_CURRENT);
+        // this.mBuilder.addAction(R.drawable.av_stop,
+        // context.getString(R.string.player_stop),
+        // stopActionIntent);
 
     }
 
     protected void sendNotification() {
         this.mBuilder.setWhen(System.currentTimeMillis());
         // 获取通知栏系统服务对象
-        this.mNotificationManager.notify(this.hashCode(), this.mBuilder.build());
+        this.mNotificationManager.notify(this.hashCode(),
+                                         this.mBuilder.getNotification());
     }
 
     private void onShufflePlayChanged(final SharedPreferences sharedPreferences) {

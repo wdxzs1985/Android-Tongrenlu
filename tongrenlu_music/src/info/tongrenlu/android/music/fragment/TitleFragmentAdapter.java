@@ -1,4 +1,4 @@
-package com.viewpagerindicator.sample;
+package info.tongrenlu.android.music.fragment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,9 +7,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 
-
 public class TitleFragmentAdapter extends FragmentPagerAdapter {
-
     private List<TitleFragment> mContents = null;
 
     public TitleFragmentAdapter(final FragmentManager fm) {

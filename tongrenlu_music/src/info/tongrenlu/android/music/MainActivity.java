@@ -1,7 +1,8 @@
 package info.tongrenlu.android.music;
 
 import info.tongrenlu.android.music.fragment.MusicListFragment;
-import info.tongrenlu.android.music.fragment.PlaylistTrackListFragment;
+import info.tongrenlu.android.music.fragment.PlaylistFragment;
+import info.tongrenlu.android.music.fragment.TitleFragmentAdapter;
 import info.tongrenlu.app.CommonConstants;
 import info.tongrenlu.domain.ArticleBean;
 import android.content.Intent;
@@ -11,17 +12,14 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.widget.Toast;
 
-import com.viewpagerindicator.TitlePageIndicator;
-import com.viewpagerindicator.TitlePageIndicator.IndicatorStyle;
-import com.viewpagerindicator.sample.TitleFragmentAdapter;
+import com.viewpagerindicator.PageIndicator;
 
-public class MainActivity extends BaseActivity implements
-        MusicListFragment.OnArticleSelectedListener {
+public class MainActivity extends BaseActivity implements MusicListFragment.OnArticleSelectedListener {
 
     private long mExitTime = 0;
     protected FragmentPagerAdapter mAdapter;
     protected ViewPager mPager;
-    protected TitlePageIndicator mIndicator;
+    protected PageIndicator mIndicator;
 
     private Toast mToast = null;
 
@@ -32,16 +30,16 @@ public class MainActivity extends BaseActivity implements
 
         final FragmentManager fm = this.getSupportFragmentManager();
         final TitleFragmentAdapter adapter = new TitleFragmentAdapter(fm);
-        adapter.addItem(new PlaylistTrackListFragment());
+        adapter.addItem(new PlaylistFragment());
         adapter.addItem(new MusicListFragment());
         this.mAdapter = adapter;
 
         this.mPager = (ViewPager) this.findViewById(R.id.pager);
         this.mPager.setAdapter(this.mAdapter);
 
-        this.mIndicator = (TitlePageIndicator) this.findViewById(R.id.indicator);
+        this.mIndicator = (PageIndicator) this.findViewById(R.id.indicator);
         this.mIndicator.setViewPager(this.mPager);
-        this.mIndicator.setFooterIndicatorStyle(IndicatorStyle.Underline);
+        // this.mIndicator.setFooterIndicatorStyle(IndicatorStyle.Underline);
         // this.mIndicator.setOnCenterItemClickListener(this);
     }
 

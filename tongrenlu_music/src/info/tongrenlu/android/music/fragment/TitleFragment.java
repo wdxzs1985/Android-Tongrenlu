@@ -1,4 +1,4 @@
-package com.viewpagerindicator.sample;
+package info.tongrenlu.android.music.fragment;
 
 import android.support.v4.app.Fragment;
 

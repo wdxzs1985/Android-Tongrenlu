@@ -2,8 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    style="@style/activity_mask">
+    android:orientation="vertical" >
     
     <RelativeLayout
         android:layout_width="match_parent"
@@ -26,7 +25,6 @@
             android:text="@string/article_title"
             android:layout_alignTop="@+id/article_cover"
             android:layout_toRightOf="@+id/article_cover"
-            style="@style/text_large"
             />
         <Button
             android:id="@+id/action_download_all"

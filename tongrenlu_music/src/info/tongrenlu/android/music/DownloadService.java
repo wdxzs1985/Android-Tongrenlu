@@ -30,8 +30,7 @@ public class DownloadService extends Service {
 
     public static final String ACTION_ADD = "info.tongrenlu.android.DownloadService.ACTION_ADD";
 
-    public static void downloadTrack(final Context context,
-                                     final TrackBean... trackBean) {
+    public static void downloadTrack(final Context context, final TrackBean... trackBean) {
         if (trackBean != null && trackBean.length > 0) {
             final ArrayList<TrackBean> items = new ArrayList<TrackBean>();
             Collections.addAll(items, trackBean);
@@ -39,8 +38,7 @@ public class DownloadService extends Service {
         }
     }
 
-    public static void downloadTrack(final Context context,
-                                     final ArrayList<TrackBean> items) {
+    public static void downloadTrack(final Context context, final ArrayList<TrackBean> items) {
         if (items != null && !items.isEmpty()) {
             final Intent serviceIntent = new Intent(context,
                                                     DownloadService.class);
@@ -87,9 +85,7 @@ public class DownloadService extends Service {
     }
 
     @Override
-    public int onStartCommand(final Intent intent,
-                              final int flags,
-                              final int startId) {
+    public int onStartCommand(final Intent intent, final int flags, final int startId) {
         final String action = intent.getAction();
         if (DownloadService.ACTION_ADD.equals(action)) {
             final ArrayList<TrackBean> trackBeanList = intent.getParcelableArrayListExtra("trackBeanList");
@@ -173,8 +169,7 @@ public class DownloadService extends Service {
 
         @Override
         protected void onPostExecute(final File result) {
-            if (DownloadService.this.loaded > 0
-                && DownloadService.this.loaded == DownloadService.this.size) {
+            if (DownloadService.this.loaded > 0 && DownloadService.this.loaded == DownloadService.this.size) {
                 final ContentValues contentValues = new ContentValues();
                 contentValues.put("loaded", DownloadService.this.loaded);
                 contentValues.put("size", DownloadService.this.size);
@@ -226,7 +221,8 @@ public class DownloadService extends Service {
     protected void sendNotification() {
         this.mBuilder.setWhen(System.currentTimeMillis());
         // 获取通知栏系统服务对象
-        this.mNotifyManager.notify(this.hashCode(), this.mBuilder.build());
+        this.mNotifyManager.notify(this.hashCode(),
+                                   this.mBuilder.getNotification());
     }
 
     @Override

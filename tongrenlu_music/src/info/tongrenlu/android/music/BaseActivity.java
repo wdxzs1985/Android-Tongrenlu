@@ -1,12 +1,6 @@
 package info.tongrenlu.android.music;
 
-import java.io.InputStream;
-
-import org.apache.commons.io.IOUtils;
-
 import android.content.Intent;
-import android.graphics.drawable.BitmapDrawable;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.view.Menu;
@@ -18,22 +12,23 @@ public class BaseActivity extends FragmentActivity {
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        InputStream ins = null;
-        try {
-            ins = this.getAssets().open("background.jpg");
-            final BitmapDrawable drawable = new BitmapDrawable(this.getResources(),
-                                                               ins);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                this.findViewById(android.R.id.content).setBackground(drawable);
-            } else {
-                this.findViewById(android.R.id.content)
-                    .setBackgroundDrawable(drawable);
-            }
-        } catch (final Exception e) {
-            e.printStackTrace();
-        } finally {
-            IOUtils.closeQuietly(ins);
-        }
+        // InputStream ins = null;
+        // try {
+        // ins = this.getAssets().open("background.jpg");
+        // final BitmapDrawable drawable = new
+        // BitmapDrawable(this.getResources(),
+        // ins);
+        // if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+        // this.findViewById(android.R.id.content).setBackground(drawable);
+        // } else {
+        // this.findViewById(android.R.id.content)
+        // .setBackgroundDrawable(drawable);
+        // }
+        // } catch (final Exception e) {
+        // e.printStackTrace();
+        // } finally {
+        // IOUtils.closeQuietly(ins);
+        // }
     }
 
     @Override

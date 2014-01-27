@@ -13,8 +13,8 @@
     <GridView android:id="@android:id/list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:numColumns="2"
-        android:horizontalSpacing="16dp"
+        android:numColumns="3"
+        android:horizontalSpacing="0dp"
         android:verticalSpacing="16dp"
         android:visibility="visible"></GridView>
     
@@ -23,7 +23,6 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical|center_horizontal"
             android:orientation="vertical"
-            style="@style/ProgressContainer"
             android:alpha="1">
         <ProgressBar
             android:layout_width="wrap_content"
@@ -36,7 +35,6 @@
             android:layout_gravity="center_vertical|center_horizontal"
             android:text="@string/loading"
             android:layout_marginTop="24dp"
-            style="@style/text_large" 
-            />/>
+            />
     </LinearLayout>
 </FrameLayout>

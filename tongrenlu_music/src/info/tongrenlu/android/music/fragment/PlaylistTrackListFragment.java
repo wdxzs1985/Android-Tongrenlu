@@ -40,10 +40,7 @@ import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 
-import com.viewpagerindicator.sample.TitleFragment;
-
-public class PlaylistTrackListFragment extends TitleFragment implements
-        OnItemClickListener, LoaderCallbacks<Cursor> {
+public class PlaylistTrackListFragment extends TitleFragment implements OnItemClickListener, LoaderCallbacks<Cursor> {
 
     private View mProgress = null;
     private View mEmpty = null;
@@ -72,9 +69,7 @@ public class PlaylistTrackListFragment extends TitleFragment implements
     }
 
     @Override
-    public View onCreateView(final LayoutInflater inflater,
-                             final ViewGroup container,
-                             final Bundle savedInstanceState) {
+    public View onCreateView(final LayoutInflater inflater, final ViewGroup container, final Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.fragment_list_view,
                                            null,
                                            false);
@@ -152,10 +147,7 @@ public class PlaylistTrackListFragment extends TitleFragment implements
     }
 
     @Override
-    public void onItemClick(final AdapterView<?> listView,
-                            final View itemView,
-                            final int position,
-                            final long itemId) {
+    public void onItemClick(final AdapterView<?> listView, final View itemView, final int position, final long itemId) {
         final Cursor c = (Cursor) listView.getItemAtPosition(position);
         final long id = c.getLong(c.getColumnIndex("_id"));
         final String articleId = c.getString(c.getColumnIndex("article_id"));
@@ -174,8 +166,7 @@ public class PlaylistTrackListFragment extends TitleFragment implements
                                       new OnClickListener() {
 
                                           @Override
-                                          public void onClick(final DialogInterface dialog,
-                                                              final int which) {
+                                          public void onClick(final DialogInterface dialog, final int which) {
                                               final TrackBean trackBean = new TrackBean();
                                               trackBean.setArticleId(articleId);
                                               trackBean.setFileId(fileId);
@@ -189,8 +180,7 @@ public class PlaylistTrackListFragment extends TitleFragment implements
                                       new OnClickListener() {
 
                                           @Override
-                                          public void onClick(final DialogInterface dialog,
-                                                              final int which) {
+                                          public void onClick(final DialogInterface dialog, final int which) {
                                               final TrackBean trackBean = new TrackBean();
                                               trackBean.setArticleId(articleId);
                                               trackBean.setFileId(fileId);
@@ -209,8 +199,7 @@ public class PlaylistTrackListFragment extends TitleFragment implements
                                       new OnClickListener() {
 
                                           @Override
-                                          public void onClick(final DialogInterface dialog,
-                                                              final int which) {
+                                          public void onClick(final DialogInterface dialog, final int which) {
                                               final TrackBean trackBean = new TrackBean();
                                               trackBean.setArticleId(articleId);
                                               trackBean.setFileId(fileId);
@@ -224,8 +213,7 @@ public class PlaylistTrackListFragment extends TitleFragment implements
                                       new OnClickListener() {
 
                                           @Override
-                                          public void onClick(final DialogInterface dialog,
-                                                              final int which) {
+                                          public void onClick(final DialogInterface dialog, final int which) {
                                               final TrackBean trackBean = new TrackBean();
                                               trackBean.setArticleId(articleId);
                                               trackBean.setFileId(fileId);
@@ -286,9 +274,7 @@ public class PlaylistTrackListFragment extends TitleFragment implements
     }
 
     @Override
-    public void onCreateContextMenu(final ContextMenu menu,
-                                    final View v,
-                                    final ContextMenuInfo menuInfo) {
+    public void onCreateContextMenu(final ContextMenu menu, final View v, final ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
         final MenuInflater inflater = this.getActivity().getMenuInflater();
         inflater.inflate(R.menu.fragment_playlist_track, menu);

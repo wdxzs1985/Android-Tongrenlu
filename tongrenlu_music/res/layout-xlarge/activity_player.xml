@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical" 
-    style="@style/activity_mask">
+    >
 
     <RelativeLayout
         android:layout_marginLeft="32dp"
@@ -47,7 +47,7 @@
             android:layout_alignLeft="@+id/player_progress"
             android:layout_below="@+id/player_progress"
             android:text="@string/player_time_string"
-            style="@style/text_small" />
+             />
 
         <TextView
             android:id="@+id/player_duration"
@@ -56,7 +56,7 @@
             android:layout_alignRight="@+id/player_progress"
             android:layout_below="@+id/player_progress"
             android:text="@string/player_time_string"
-            style="@style/text_small" />
+            />
 
         <ImageView
             android:id="@+id/article_cover"
@@ -74,7 +74,7 @@
             android:layout_above="@+id/article_cover"
             android:layout_alignLeft="@+id/article_cover"
             android:text="@string/track_artist"
-            style="@style/text_small" />
+            />
 
         <TextView
             android:id="@+id/track_title"
@@ -84,7 +84,7 @@
             android:layout_alignLeft="@+id/article_cover"
             android:singleLine="true"
             android:text="@string/track_title"
-            style="@style/text_large" />
+            />
 
     </RelativeLayout>
 

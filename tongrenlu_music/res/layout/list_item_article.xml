@@ -19,7 +19,6 @@
         android:singleLine="true"
         android:ellipsize="marquee"
         android:text="@string/article_title"
-        style="@style/text_small"
         android:textColor="#ffffff"  />
     
 </LinearLayout>

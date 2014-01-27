@@ -24,10 +24,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.GridView;
 import android.widget.Toast;
 
-import com.viewpagerindicator.sample.TitleFragment;
-
-public class MusicListFragment extends TitleFragment implements
-        OnScrollListener, OnItemClickListener {
+public class MusicListFragment extends TitleFragment implements OnScrollListener, OnItemClickListener {
     private OnArticleSelectedListener mListener;
 
     private View mProgress = null;
@@ -35,7 +32,7 @@ public class MusicListFragment extends TitleFragment implements
     private GridView mListView = null;
     private ArticleListAdapter mAdapter = null;
 
-    private String mQuery = "";
+    private final String mQuery = "";
     private int mPage = 0;
     private boolean mLast = false;
 
@@ -52,8 +49,7 @@ public class MusicListFragment extends TitleFragment implements
         try {
             this.mListener = (OnArticleSelectedListener) activity;
         } catch (final ClassCastException e) {
-            throw new ClassCastException(activity.toString()
-                                         + " must implement OnArticleSelectedListener");
+            throw new ClassCastException(activity.toString() + " must implement OnArticleSelectedListener");
         }
     }
 
@@ -63,9 +59,7 @@ public class MusicListFragment extends TitleFragment implements
     }
 
     @Override
-    public View onCreateView(final LayoutInflater inflater,
-                             final ViewGroup container,
-                             final Bundle savedInstanceState) {
+    public View onCreateView(final LayoutInflater inflater, final ViewGroup container, final Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.fragment_grid_view,
                                            null,
                                            false);
@@ -108,8 +102,7 @@ public class MusicListFragment extends TitleFragment implements
         }
 
         @Override
-        protected void processResponseJSON(final JSONObject responseJSON)
-                throws JSONException {
+        protected void processResponseJSON(final JSONObject responseJSON) throws JSONException {
             if (responseJSON.getBoolean("result")) {
                 final JSONObject pageJSON = responseJSON.getJSONObject("page");
                 final int page = pageJSON.getInt("page");
@@ -171,16 +164,12 @@ public class MusicListFragment extends TitleFragment implements
     }
 
     @Override
-    public void onScroll(final AbsListView view,
-                         final int firstVisibleItem,
-                         final int visibleItemCount,
-                         final int totalItemCount) {
+    public void onScroll(final AbsListView view, final int firstVisibleItem, final int visibleItemCount, final int totalItemCount) {
 
     }
 
     @Override
-    public void onScrollStateChanged(final AbsListView view,
-                                     final int scrollState) {
+    public void onScrollStateChanged(final AbsListView view, final int scrollState) {
         switch (scrollState) {
         case SCROLL_STATE_IDLE:
             this.mAdapter.setScrolling(false);
@@ -209,10 +198,7 @@ public class MusicListFragment extends TitleFragment implements
     }
 
     @Override
-    public void onItemClick(final AdapterView<?> listView,
-                            final View itemView,
-                            final int position,
-                            final long itemId) {
+    public void onItemClick(final AdapterView<?> listView, final View itemView, final int position, final long itemId) {
         final ArticleBean articleBean = (ArticleBean) listView.getItemAtPosition(position);
         this.mListener.onArticleSelected(articleBean);
 

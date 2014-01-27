@@ -12,6 +12,7 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.widget.ImageView;
 
@@ -38,14 +39,12 @@ public class HttpConstants {
         return Uri.parse(host + HttpConstants.MUSIC_LIST_URI);
     }
 
-    public static Uri getMusicInfoUri(final Context context,
-                                      final String articleId) {
+    public static Uri getMusicInfoUri(final Context context, final String articleId) {
         final Uri baseUri = HttpConstants.getMusicListUri(context);
         return Uri.withAppendedPath(baseUri, articleId);
     }
 
-    public static String getCoverUrl(final Context context,
-                                     final String articleId) {
+    public static String getCoverUrl(final Context context, final String articleId) {
         final String host = HttpConstants.getHost(context);
         final String filename = HttpConstants.getCoverFilename(articleId,
                                                                HttpConstants.NORMAL_COVER);
@@ -71,8 +70,7 @@ public class HttpConstants {
         }
     }
 
-    public static void displayLargeCover(final ImageView view,
-                                         final String articleId) {
+    public static void displayLargeCover(final ImageView view, final String articleId) {
         final Context context = view.getContext();
         final File data = HttpConstants.getLargeCover(context, articleId);
         if (!data.isFile()) {
@@ -89,8 +87,7 @@ public class HttpConstants {
         view.setImageBitmap(bm);
     }
 
-    public static String getLargeCoverUrl(final Context context,
-                                          final String articleId) {
+    public static String getLargeCoverUrl(final Context context, final String articleId) {
         final String host = HttpConstants.getHost(context);
         final String filename = HttpConstants.getCoverFilename(articleId,
                                                                HttpConstants.LARGE_COVER);
@@ -98,26 +95,21 @@ public class HttpConstants {
         return url;
     }
 
-    public static File getLargeCover(final Context context,
-                                     final String articleId) {
+    public static File getLargeCover(final Context context, final String articleId) {
         final File dir = getCoverDir(context);
         final String filename = HttpConstants.getCoverFilename(articleId,
                                                                HttpConstants.LARGE_COVER);
         return new File(dir, filename);
     }
 
-    public static String getMp3Url(final Context context,
-                                   final String articleId,
-                                   final String fileId) {
+    public static String getMp3Url(final Context context, final String articleId, final String fileId) {
         final String host = HttpConstants.getHost(context);
         final String filename = HttpConstants.getMp3Filename(articleId, fileId);
         final String url = host + HttpConstants.RESOURCE_URI + filename;
         return url;
     }
 
-    public static File getMp3(final Context context,
-                              final String articleId,
-                              final String fileId) {
+    public static File getMp3(final Context context, final String articleId, final String fileId) {
         final File dir = getMp3Dir(context);
         final String filename = HttpConstants.getMp3Filename(articleId, fileId);
         return new File(dir, filename);
@@ -130,13 +122,11 @@ public class HttpConstants {
         return host;
     }
 
-    private static String getCoverFilename(final String articleId,
-                                           final int size) {
+    private static String getCoverFilename(final String articleId, final int size) {
         return articleId + "/cover_" + size + ".jpg";
     }
 
-    private static String getMp3Filename(final String articleId,
-                                         final String fileId) {
+    private static String getMp3Filename(final String articleId, final String fileId) {
         return articleId + "/" + fileId + ".mp3";
     }
 
@@ -165,8 +155,12 @@ public class HttpConstants {
     }
 
     public static File getMp3Dir(final Context context) {
-        final File dir = context.getExternalFilesDir(null);
-        return new File(dir, "tongrenlu");
+        File publicDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC);
+        final File dir = new File(publicDir, "tongrenlu");
+        if (!dir.mkdirs()) {
+            System.out.println("Directory not created");
+        }
+        return dir;
     }
 
     public static File getCoverDir(final Context context) {
