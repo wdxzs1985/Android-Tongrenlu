@@ -197,7 +197,9 @@ public class DownloadService extends Service {
             this.mLargeIcon = null;
         }
 
-        final File coverFile = HttpConstants.getLargeCover(this, articleId);
+        final File coverFile = HttpConstants.getCover(this,
+                                                      articleId,
+                                                      HttpConstants.S_COVER);
         final BitmapFactory.Options options = new BitmapFactory.Options();
         options.inSampleSize = 4;
         if (coverFile.isFile()) {
@@ -205,7 +207,7 @@ public class DownloadService extends Service {
                                                        options);
         } else {
             this.mLargeIcon = BitmapFactory.decodeResource(this.getResources(),
-                                                           R.drawable.default_180,
+                                                           R.drawable.default_120,
                                                            options);
         }
     }

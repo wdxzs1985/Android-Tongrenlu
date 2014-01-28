@@ -1,7 +1,7 @@
 package info.tongrenlu.android.music.fragment;
 
 import info.tongrenlu.android.music.R;
-import info.tongrenlu.android.music.adapter.ArticleListAdapter;
+import info.tongrenlu.android.music.adapter.MusicListAdapter;
 import info.tongrenlu.android.task.JSONLoadTask;
 import info.tongrenlu.app.HttpConstants;
 import info.tongrenlu.domain.ArticleBean;
@@ -30,7 +30,7 @@ public class MusicListFragment extends TitleFragment implements OnScrollListener
     private View mProgress = null;
     private View mEmpty = null;
     private GridView mListView = null;
-    private ArticleListAdapter mAdapter = null;
+    private MusicListAdapter mAdapter = null;
 
     private final String mQuery = "";
     private int mPage = 0;
@@ -40,7 +40,6 @@ public class MusicListFragment extends TitleFragment implements OnScrollListener
 
     public MusicListFragment() {
         this.setTitle("所有专辑");
-        this.mAdapter = new ArticleListAdapter();
     }
 
     @Override
@@ -56,6 +55,7 @@ public class MusicListFragment extends TitleFragment implements OnScrollListener
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        this.mAdapter = new MusicListAdapter();
     }
 
     @Override

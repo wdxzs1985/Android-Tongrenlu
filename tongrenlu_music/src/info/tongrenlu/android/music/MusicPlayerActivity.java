@@ -1,22 +1,15 @@
 package info.tongrenlu.android.music;
 
-import info.tongrenlu.android.music.MusicService.LocalBinder;
-import info.tongrenlu.app.HttpConstants;
-import info.tongrenlu.domain.TrackBean;
-
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.Menu;
@@ -25,13 +18,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 
-public class MusicPlayerActivity extends BaseActivity implements
-        OnClickListener, OnSeekBarChangeListener {
+public class MusicPlayerActivity extends BaseActivity implements OnClickListener, OnSeekBarChangeListener {
 
     private LocalBroadcastManager mLocalBroadcastManager = null;
     private BroadcastReceiver mMusicReceiver = null;
@@ -40,9 +31,6 @@ public class MusicPlayerActivity extends BaseActivity implements
     private ImageButton mLoopButton = null;
     private ImageButton mRandomButton = null;
     private SeekBar mProgress = null;
-    private MusicService mService = null;
-    private ServiceConnection mConnection = null;
-    private boolean mBound = false;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -50,25 +38,16 @@ public class MusicPlayerActivity extends BaseActivity implements
         this.setContentView(R.layout.activity_player);
         this.initController();
         this.initReceiver();
-        this.initServiceBinder();
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        // Bind to LocalService
-        final Intent intent = new Intent(this, MusicService.class);
-        this.bindService(intent, this.mConnection, Context.BIND_AUTO_CREATE);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        // Unbind from the service
-        if (this.mBound) {
-            this.unbindService(this.mConnection);
-            this.mBound = false;
-        }
     }
 
     @Override
@@ -121,72 +100,43 @@ public class MusicPlayerActivity extends BaseActivity implements
                                                      filter);
     }
 
-    private void initServiceBinder() {
-
-        this.mConnection = new ServiceConnection() {
-
-            @Override
-            public void onServiceConnected(final ComponentName className,
-                                           final IBinder service) {
-                // We've bound to LocalService, cast the IBinder and get
-                // LocalService instance
-                final LocalBinder binder = (LocalBinder) service;
-                MusicPlayerActivity.this.mService = binder.getService();
-                MusicPlayerActivity.this.mBound = true;
-                //
-                MusicPlayerActivity.this.onMusicPlayerStart();
-                MusicPlayerActivity.this.initLoopButtonImage();
-                MusicPlayerActivity.this.initRandomButtonImage();
-            }
-
-            @Override
-            public void onServiceDisconnected(final ComponentName className) {
-                MusicPlayerActivity.this.mBound = false;
-                MusicPlayerActivity.this.mService = null;
-            }
-
-        };
-    }
-
     @Override
     public void onClick(final View v) {
-        if (this.mBound) {
-            switch (v.getId()) {
-            case R.id.player_play:
-                this.mService.actionPlay();
-                this.initPlayButtonImage();
-                break;
-            case R.id.player_prev:
-                this.mService.actionPlayPrev();
-                this.initPlayButtonImage();
-                break;
-            case R.id.player_next:
-                this.mService.actionPlayNext();
-                this.initPlayButtonImage();
-                break;
-            case R.id.player_loop:
-                this.mService.actionLoop();
-                this.initLoopButtonImage();
-                break;
-            case R.id.player_shuffle:
-                this.mService.actionRandom();
-                this.initRandomButtonImage();
-                break;
-            default:
-                break;
-            }
+        switch (v.getId()) {
+        case R.id.player_play:
+            // this.mService.actionPlay();
+            this.initPlayButtonImage();
+            break;
+        case R.id.player_prev:
+            // this.mService.actionPlayPrev();
+            this.initPlayButtonImage();
+            break;
+        case R.id.player_next:
+            // this.mService.actionPlayNext();
+            this.initPlayButtonImage();
+            break;
+        case R.id.player_loop:
+            // this.mService.actionLoop();
+            this.initLoopButtonImage();
+            break;
+        case R.id.player_shuffle:
+            // this.mService.actionRandom();
+            this.initRandomButtonImage();
+            break;
+        default:
+            break;
         }
     }
 
     private void initPlayButtonImage() {
-        switch (this.mService.getPlayflag()) {
-        case MusicService.FLAG_PLAY:
-            this.mPlayButton.setImageResource(R.drawable.player_btn_player_pause);
-            break;
-        case MusicService.FLAG_PAUSE:
-            this.mPlayButton.setImageResource(R.drawable.player_btn_player_play);
-            break;
-        }
+        // switch (this.mService.getPlayflag()) {
+        // case MusicService.FLAG_PLAY:
+        // this.mPlayButton.setImageResource(R.drawable.player_btn_player_pause);
+        // break;
+        // case MusicService.FLAG_PAUSE:
+        // this.mPlayButton.setImageResource(R.drawable.player_btn_player_play);
+        // break;
+        // }
     }
 
     private void initLoopButtonImage() {
@@ -207,7 +157,6 @@ public class MusicPlayerActivity extends BaseActivity implements
             this.mLoopButton.setImageResource(R.drawable.player_btn_player_mode_repeat_one);
             break;
         }
-
     }
 
     private void initRandomButtonImage() {
@@ -228,9 +177,7 @@ public class MusicPlayerActivity extends BaseActivity implements
     }
 
     @Override
-    public void onProgressChanged(final SeekBar seekBar,
-                                  final int progress,
-                                  final boolean fromUser) {
+    public void onProgressChanged(final SeekBar seekBar, final int progress, final boolean fromUser) {
     }
 
     @Override
@@ -240,32 +187,36 @@ public class MusicPlayerActivity extends BaseActivity implements
 
     @Override
     public void onStopTrackingTouch(final SeekBar seekBar) {
-        this.mService.getMediaPlayer().seekTo(seekBar.getProgress());
+        // this.mService.getMediaPlayer().seekTo(seekBar.getProgress());
     }
 
     protected void onMusicPlayerStart() {
-        final TrackBean trackBean = this.mService.getNowDisplay();
-        final String articleId = trackBean.getArticleId();
-        final ImageView coverView = (ImageView) this.findViewById(R.id.article_cover);
-        HttpConstants.displayLargeCover(coverView, articleId);
-
-        final String title = trackBean.getTitle();
-        final TextView titleView = (TextView) this.findViewById(R.id.track_title);
-        titleView.setText(title);
-
-        final String artist = trackBean.getArtist();
-        final TextView artistView = (TextView) this.findViewById(R.id.track_artist);
-        artistView.setText(artist);
-
-        this.mProgress.setMax(0);// 设置进度条
-        this.mProgress.setProgress(0);// 设置进度条
-        this.mProgress.setSecondaryProgress(0);
+        // final TrackBean trackBean = this.mService.getNowDisplay();
+        // final String articleId = trackBean.getArticleId();
+        // final ImageView coverView = (ImageView)
+        // this.findViewById(R.id.article_cover);
+        // HttpConstants.displayCover(coverView, articleId,
+        // HttpConstants.L_COVER);
+        //
+        // final String title = trackBean.getTitle();
+        // final TextView titleView = (TextView)
+        // this.findViewById(R.id.track_title);
+        // titleView.setText(title);
+        //
+        // final String artist = trackBean.getArtist();
+        // final TextView artistView = (TextView)
+        // this.findViewById(R.id.track_artist);
+        // artistView.setText(artist);
+        //
+        // this.mProgress.setMax(0);// 设置进度条
+        // this.mProgress.setProgress(0);// 设置进度条
+        // this.mProgress.setSecondaryProgress(0);
     }
 
     protected void onMusicPlayerUpdate(final Intent intent) {
-        if (this.mBound) {
-            this.initPlayButtonImage();
-        }
+        // if (this.mBound) {
+        // this.initPlayButtonImage();
+        // }
 
         final int duration = intent.getIntExtra("duration", 0);
         final TextView durationView = (TextView) this.findViewById(R.id.player_duration);

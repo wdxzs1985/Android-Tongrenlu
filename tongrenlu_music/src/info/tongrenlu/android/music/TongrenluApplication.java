@@ -13,7 +13,6 @@ import org.apache.http.protocol.HttpContext;
 import android.app.Application;
 import android.app.NotificationManager;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -48,7 +47,7 @@ public class TongrenluApplication extends Application {
             this.clearNotification();
             this.initClient();
             this.initPackageInfo(this);
-            this.startUpdateService(this);
+            // this.startUpdateService(this);
         }
     }
 
@@ -77,9 +76,9 @@ public class TongrenluApplication extends Application {
         }
     }
 
-    private void startUpdateService(final Context context) {
-        final Intent intent = new Intent(context, UpdateService.class);
-        context.startService(intent);
-    }
+    // private void startUpdateService(final Context context) {
+    // final Intent intent = new Intent(context, UpdateService.class);
+    // context.startService(intent);
+    // }
 
 }

@@ -7,8 +7,6 @@ import info.tongrenlu.domain.ArticleBean;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
-
 import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,7 +14,7 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public class ArticleListAdapter extends BaseAdapter {
+public class MusicListAdapter extends BaseAdapter {
 
     private Integer page = 0;
     private Integer size = 0;
@@ -42,9 +40,7 @@ public class ArticleListAdapter extends BaseAdapter {
     }
 
     @Override
-    public View getView(final int position,
-                        final View convertView,
-                        final ViewGroup parent) {
+    public View getView(final int position, final View convertView, final ViewGroup parent) {
         View view = convertView;
         final Context context = parent.getContext();
         if (view == null) {
@@ -53,20 +49,15 @@ public class ArticleListAdapter extends BaseAdapter {
 
         final ArticleBean articleBean = this.getItem(position);
         final String articleId = articleBean.getArticleId();
-        final String tag = (String) view.getTag();
-        if (StringUtils.equals(articleId, tag)) {
-            // no change
-            // return view;
-        }
-        view.setTag(articleId);
         final TextView titleView = (TextView) view.findViewById(R.id.article_title);
         titleView.setText(articleBean.getTitle());
-
         final ImageView coverView = (ImageView) view.findViewById(R.id.article_cover);
         if (this.mScrolling) {
             coverView.setImageResource(R.drawable.default_cover);
         } else {
-            HttpConstants.displayLargeCover(coverView, articleId);
+            HttpConstants.displayCover(coverView,
+                                       articleId,
+                                       HttpConstants.M_COVER);
         }
         //
         return view;

@@ -18,7 +18,7 @@ public class ArticleCoverDownloadTask extends FileDownloadTask {
 
     @Override
     protected void onPreExecute() {
-        this.mView.setTag(this.mArticleId);
+        // this.mView.setTag(this.mArticleId);
     }
 
     @Override

@@ -1,6 +1,6 @@
 package info.tongrenlu.android.music;
 
-import info.tongrenlu.android.music.adapter.ArticleListAdapter;
+import info.tongrenlu.android.music.adapter.MusicListAdapter;
 import info.tongrenlu.android.task.JSONLoadTask;
 import info.tongrenlu.app.CommonConstants;
 import info.tongrenlu.app.HttpConstants;
@@ -27,7 +27,7 @@ public class MusicListActivity extends BaseActivity implements
     private View mProgress = null;
     private View mEmpty = null;
     private AbsListView mListView = null;
-    private ArticleListAdapter mAdapter = null;
+    private MusicListAdapter mAdapter = null;
 
     private MusicListLoadTask runningTask = null;
     private int mPage = 0;
@@ -44,7 +44,7 @@ public class MusicListActivity extends BaseActivity implements
         this.mEmpty = this.findViewById(android.R.id.empty);
         this.mListView = (AbsListView) this.findViewById(android.R.id.list);
         //
-        this.mAdapter = new ArticleListAdapter();
+        this.mAdapter = new MusicListAdapter();
         this.mListView.setAdapter(this.mAdapter);
         this.mListView.setOnScrollListener(this);
         this.mListView.setOnItemClickListener(this);

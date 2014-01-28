@@ -405,7 +405,9 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
             this.mLargeIcon = null;
         }
 
-        final File coverFile = HttpConstants.getLargeCover(this, articleId);
+        final File coverFile = HttpConstants.getCover(this,
+                                                      articleId,
+                                                      HttpConstants.L_COVER);
         final BitmapFactory.Options options = new BitmapFactory.Options();
         options.inSampleSize = 4;
         if (coverFile.isFile()) {

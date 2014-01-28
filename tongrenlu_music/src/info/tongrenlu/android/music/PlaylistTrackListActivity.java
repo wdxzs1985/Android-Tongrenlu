@@ -1,9 +1,5 @@
-package info.tongrenlu.android.music.fragment;
+package info.tongrenlu.android.music;
 
-import info.tongrenlu.android.music.DownloadService;
-import info.tongrenlu.android.music.MusicPlayerActivity;
-import info.tongrenlu.android.music.MusicService;
-import info.tongrenlu.android.music.R;
 import info.tongrenlu.android.music.adapter.PlaylistTrackListAdapter;
 import info.tongrenlu.android.music.provider.DataProvider;
 import info.tongrenlu.app.HttpConstants;
@@ -30,17 +26,15 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
-import android.view.LayoutInflater;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 
-public class PlaylistTrackListFragment extends TitleFragment implements OnItemClickListener, LoaderCallbacks<Cursor> {
+public class PlaylistTrackListActivity extends BaseActivity implements OnItemClickListener, LoaderCallbacks<Cursor> {
 
     private View mProgress = null;
     private View mEmpty = null;
@@ -49,10 +43,6 @@ public class PlaylistTrackListFragment extends TitleFragment implements OnItemCl
 
     private ContentObserver contentObserver = null;
 
-    public PlaylistTrackListFragment() {
-        this.setTitle("所有歌曲");
-    }
-
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,40 +50,29 @@ public class PlaylistTrackListFragment extends TitleFragment implements OnItemCl
             @Override
             public void onChange(final boolean selfChange) {
                 super.onChange(selfChange);
-                PlaylistTrackListFragment.this.getLoaderManager()
+                PlaylistTrackListActivity.this.getLoaderManager()
                                               .getLoader(0)
                                               .forceLoad();
             }
         };
-        this.mAdapter = new PlaylistTrackListAdapter(this.getActivity(), null);
-    }
+        this.mAdapter = new PlaylistTrackListAdapter(this, null);
 
-    @Override
-    public View onCreateView(final LayoutInflater inflater, final ViewGroup container, final Bundle savedInstanceState) {
-        final View view = inflater.inflate(R.layout.fragment_list_view,
-                                           null,
-                                           false);
-        this.mProgress = view.findViewById(android.R.id.progress);
-        this.mEmpty = view.findViewById(android.R.id.empty);
-        this.mListView = (ListView) view.findViewById(android.R.id.list);
+        this.setContentView(R.layout.fragment_list_view);
+        this.mProgress = this.findViewById(android.R.id.progress);
+        this.mEmpty = this.findViewById(android.R.id.empty);
+        this.mListView = (ListView) this.findViewById(android.R.id.list);
         //
         this.mListView.setAdapter(this.mAdapter);
         this.mListView.setOnItemClickListener(this);
 
-        return view;
-    }
-
-    @Override
-    public void onActivityCreated(final Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
         this.registerForContextMenu(this.mListView);
         final Bundle args = new Bundle();
-        this.getLoaderManager().initLoader(0, args, this);
+        this.getSupportLoaderManager().initLoader(0, args, this);
     }
 
     @Override
     public Loader<Cursor> onCreateLoader(final int id, final Bundle args) {
-        final CursorLoader loader = new CursorLoader(this.getActivity());
+        final CursorLoader loader = new CursorLoader(this);
         loader.setUri(DataProvider.URI_TRACK);
         return loader;
     }
@@ -120,30 +99,24 @@ public class PlaylistTrackListFragment extends TitleFragment implements OnItemCl
     @Override
     public void onStart() {
         super.onStart();
-        this.getActivity()
-            .getContentResolver()
+        this.getContentResolver()
             .registerContentObserver(DataProvider.URI_TRACK,
                                      true,
                                      this.contentObserver);
-        PlaylistTrackListFragment.this.getLoaderManager()
-                                      .getLoader(0)
-                                      .forceLoad();
-        // this.mAdapter.notifyDataSetChanged();
-        // this.contentObserver.dispatchChange(true, DataProvider.URI_TRACK);
+        this.getSupportLoaderManager().getLoader(0).forceLoad();
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        this.getActivity()
-            .getContentResolver()
+        this.getContentResolver()
             .unregisterContentObserver(this.contentObserver);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        this.getLoaderManager().destroyLoader(0);
+        this.getSupportLoaderManager().destroyLoader(0);
     }
 
     @Override
@@ -155,7 +128,7 @@ public class PlaylistTrackListFragment extends TitleFragment implements OnItemCl
         final long size = c.getLong(c.getColumnIndex("size"));
         final String title = c.getString(c.getColumnIndex("title"));
         final String artist = c.getString(c.getColumnIndex("artist"));
-        final Context context = this.getActivity();
+        final Context context = this;
 
         final File source = HttpConstants.getMp3(context, articleId, fileId);
         if (!source.exists()) {
@@ -172,7 +145,7 @@ public class PlaylistTrackListFragment extends TitleFragment implements OnItemCl
                                               trackBean.setFileId(fileId);
                                               trackBean.setTitle(title);
                                               trackBean.setArtist(artist);
-                                              PlaylistTrackListFragment.this.onDialogPositiveClick(id,
+                                              PlaylistTrackListActivity.this.onDialogPositiveClick(id,
                                                                                                    trackBean);
                                           }
                                       });
@@ -186,7 +159,7 @@ public class PlaylistTrackListFragment extends TitleFragment implements OnItemCl
                                               trackBean.setFileId(fileId);
                                               trackBean.setTitle(title);
                                               trackBean.setArtist(artist);
-                                              PlaylistTrackListFragment.this.onDialogNegativeClick(id,
+                                              PlaylistTrackListActivity.this.onDialogNegativeClick(id,
                                                                                                    trackBean);
                                           }
                                       });
@@ -205,7 +178,7 @@ public class PlaylistTrackListFragment extends TitleFragment implements OnItemCl
                                               trackBean.setFileId(fileId);
                                               trackBean.setTitle(title);
                                               trackBean.setArtist(artist);
-                                              PlaylistTrackListFragment.this.onDialogPositiveClick(id,
+                                              PlaylistTrackListActivity.this.onDialogPositiveClick(id,
                                                                                                    trackBean);
                                           }
                                       });
@@ -219,7 +192,7 @@ public class PlaylistTrackListFragment extends TitleFragment implements OnItemCl
                                               trackBean.setFileId(fileId);
                                               trackBean.setTitle(title);
                                               trackBean.setArtist(artist);
-                                              PlaylistTrackListFragment.this.onDialogNegativeClick(id,
+                                              PlaylistTrackListActivity.this.onDialogNegativeClick(id,
                                                                                                    trackBean);
                                           }
                                       });
@@ -254,7 +227,7 @@ public class PlaylistTrackListFragment extends TitleFragment implements OnItemCl
     }
 
     public void onDialogPositiveClick(final long id, final TrackBean trackBean) {
-        final Context context = this.getActivity();
+        final Context context = this;
         final Uri deleteUri = ContentUris.withAppendedId(DataProvider.URI_TRACK,
                                                          id);
         context.getContentResolver().delete(deleteUri, null, null);
@@ -263,7 +236,7 @@ public class PlaylistTrackListFragment extends TitleFragment implements OnItemCl
     }
 
     public void onDialogNegativeClick(final long id, final TrackBean trackBean) {
-        final Context context = this.getActivity();
+        final Context context = this;
         final Uri deleteUri = ContentUris.withAppendedId(DataProvider.URI_TRACK,
                                                          id);
         context.getContentResolver().delete(deleteUri, null, null);
@@ -276,7 +249,7 @@ public class PlaylistTrackListFragment extends TitleFragment implements OnItemCl
     @Override
     public void onCreateContextMenu(final ContextMenu menu, final View v, final ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
-        final MenuInflater inflater = this.getActivity().getMenuInflater();
+        final MenuInflater inflater = this.getMenuInflater();
         inflater.inflate(R.menu.fragment_playlist_track, menu);
     }
 

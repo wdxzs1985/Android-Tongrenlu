@@ -24,8 +24,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class MusicInfoActivity extends BaseActivity implements
-        OnItemClickListener, OnClickListener {
+public class MusicInfoActivity extends BaseActivity implements OnItemClickListener, OnClickListener {
 
     private String mArticleId = null;
     // private ContentObserver contentObserver = null;
@@ -66,7 +65,7 @@ public class MusicInfoActivity extends BaseActivity implements
 
     private void initArticleCover(final String articleId) {
         final ImageView coverView = (ImageView) this.findViewById(R.id.article_cover);
-        HttpConstants.displayLargeCover(coverView, articleId);
+        HttpConstants.displayCover(coverView, articleId, HttpConstants.S_COVER);
     }
 
     private void initAritcleTitle(final String title) {
@@ -75,21 +74,18 @@ public class MusicInfoActivity extends BaseActivity implements
     }
 
     @Override
-    public void onItemClick(final AdapterView<?> listView,
-                            final View view,
-                            final int position,
-                            final long id) {
+    public void onItemClick(final AdapterView<?> listView, final View view, final int position, final long id) {
         final TrackBean trackBean = (TrackBean) listView.getItemAtPosition(position);
         this.playTrack(trackBean);
-        DownloadService.downloadTrack(this, trackBean);
+        // DownloadService.downloadTrack(this, trackBean);
     }
 
     @Override
     public void onClick(final View v) {
         if (!this.mAdapter.isEmpty()) {
-            final ArrayList<TrackBean> items = this.mAdapter.getItems();
-            this.playTrack(items);
-            DownloadService.downloadTrack(this, items);
+            // final ArrayList<TrackBean> items = this.mAdapter.getItems();
+            // this.playTrack(items);
+            // DownloadService.downloadTrack(this, items);
         }
     }
 
@@ -103,8 +99,7 @@ public class MusicInfoActivity extends BaseActivity implements
         }
 
         @Override
-        protected void processResponseJSON(final JSONObject responseJSON)
-                throws JSONException {
+        protected void processResponseJSON(final JSONObject responseJSON) throws JSONException {
             final MusicInfoActivity context = MusicInfoActivity.this;
             if (responseJSON.getBoolean("result")) {
                 final JSONArray items = responseJSON.getJSONArray("playlist");

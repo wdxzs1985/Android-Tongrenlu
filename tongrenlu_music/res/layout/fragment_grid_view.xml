@@ -12,11 +12,14 @@
     
     <GridView android:id="@android:id/list"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:numColumns="3"
+        android:layout_height="wrap_content"
+        android:columnWidth="180dp"
+        android:numColumns="auto_fit"
+        android:stretchMode="columnWidth"
         android:horizontalSpacing="0dp"
         android:verticalSpacing="16dp"
-        android:visibility="visible"></GridView>
+        android:visibility="visible"
+        ></GridView>
     
     <LinearLayout android:id="@android:id/progress"
             android:layout_width="wrap_content"

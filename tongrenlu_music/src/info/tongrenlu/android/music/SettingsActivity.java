@@ -31,8 +31,7 @@ import android.preference.PreferenceManager;
 import android.text.format.DateFormat;
 import android.widget.Toast;
 
-public class SettingsActivity extends PreferenceActivity implements
-        OnSharedPreferenceChangeListener {
+public class SettingsActivity extends PreferenceActivity implements OnSharedPreferenceChangeListener {
 
     public static final String PREF_KEY_SHUFFLE_PLAY = "pref_key_shuffle_play";
     public static final String PREF_KEY_LOOP_PLAY = "pref_key_loop_play";
@@ -115,8 +114,7 @@ public class SettingsActivity extends PreferenceActivity implements
                                           new OnClickListener() {
 
                                               @Override
-                                              public void onClick(final DialogInterface dialog,
-                                                                  final int which) {
+                                              public void onClick(final DialogInterface dialog, final int which) {
                                                   SettingsActivity.this.doSaveToSDCard();
                                               }
                                           });
@@ -157,10 +155,9 @@ public class SettingsActivity extends PreferenceActivity implements
                             final File srcFile = HttpConstants.getMp3(context,
                                                                       articleId,
                                                                       fileId);
-                            final String destFileName = HttpConstants.getAvaliableFilename(artist
-                                                                                           + "-"
-                                                                                           + title
-                                                                                           + ".mp3");
+                            final String destFileName = HttpConstants.getAvaliableFilename(artist + "-"
+                                    + title
+                                    + ".mp3");
                             final File destFile = new File(sdcard, destFileName);
                             dialog.setMessage("正在复制：" + destFileName);
                             try {
@@ -187,8 +184,7 @@ public class SettingsActivity extends PreferenceActivity implements
 
     private void initClearCachePref() {
         final Preference preference = this.findPreference(SettingsActivity.PREF_KEY_CLEAR_CACHE);
-        final File dir = HttpConstants.getCoverDir(this);
-        this.refreshSizeOfDirectory(dir, preference);
+        // this.refreshSizeOfDirectory(dir, preference);
         preference.setOnPreferenceClickListener(new OnPreferenceClickListener() {
 
             @Override
@@ -200,11 +196,10 @@ public class SettingsActivity extends PreferenceActivity implements
                                           new OnClickListener() {
 
                                               @Override
-                                              public void onClick(final DialogInterface dialog,
-                                                                  final int which) {
+                                              public void onClick(final DialogInterface dialog, final int which) {
                                                   SettingsActivity.this.doClearCache();
-                                                  SettingsActivity.this.refreshSizeOfDirectory(dir,
-                                                                                               preference);
+                                                  // SettingsActivity.this.refreshSizeOfDirectory(dir,
+                                                  // preference);
                                               }
                                           });
                 builder.setNegativeButton(R.string.action_cancel, null);
@@ -220,8 +215,7 @@ public class SettingsActivity extends PreferenceActivity implements
              .show();
     }
 
-    private void refreshSizeOfDirectory(final File dir,
-                                        final Preference preference) {
+    private void refreshSizeOfDirectory(final File dir, final Preference preference) {
         final long size = dir.exists() ? FileUtils.sizeOfDirectory(dir) : 0;
         final String summary = this.getString(R.string.used_size,
                                               FileUtils.byteCountToDisplaySize(size));
@@ -230,11 +224,11 @@ public class SettingsActivity extends PreferenceActivity implements
 
     private void initClearDataPref() {
         final Preference preference = this.findPreference(SettingsActivity.PREF_KEY_CLEAR_DATA);
-        final File dir = HttpConstants.getMp3Dir(this);
-        final long size = dir.exists() ? FileUtils.sizeOfDirectory(dir) : 0;
-        final String summary = this.getString(R.string.used_size,
-                                              FileUtils.byteCountToDisplaySize(size));
-        preference.setSummary(summary);
+        // final File dir = HttpConstants.getMp3Dir(this);
+        // final long size = dir.exists() ? FileUtils.sizeOfDirectory(dir) : 0;
+        // final String summary = this.getString(R.string.used_size,
+        // FileUtils.byteCountToDisplaySize(size));
+        // preference.setSummary(summary);
         preference.setOnPreferenceClickListener(new OnPreferenceClickListener() {
 
             @Override
@@ -246,11 +240,10 @@ public class SettingsActivity extends PreferenceActivity implements
                                           new OnClickListener() {
 
                                               @Override
-                                              public void onClick(final DialogInterface dialog,
-                                                                  final int which) {
+                                              public void onClick(final DialogInterface dialog, final int which) {
                                                   SettingsActivity.this.doClearData();
-                                                  SettingsActivity.this.refreshSizeOfDirectory(dir,
-                                                                                               preference);
+                                                  // SettingsActivity.this.refreshSizeOfDirectory(dir,
+                                                  // preference);
                                               }
                                           });
                 builder.setNegativeButton(R.string.action_cancel, null);
@@ -310,8 +303,7 @@ public class SettingsActivity extends PreferenceActivity implements
     }
 
     @Override
-    public void onSharedPreferenceChanged(final SharedPreferences sharedPreferences,
-                                          final String key) {
+    public void onSharedPreferenceChanged(final SharedPreferences sharedPreferences, final String key) {
         if (StringUtils.equals(key, SettingsActivity.PREF_KEY_SHUFFLE_PLAY)) {
             this.initShufflePlayPref(sharedPreferences);
         } else if (StringUtils.equals(key, SettingsActivity.PREF_KEY_LOOP_PLAY)) {
