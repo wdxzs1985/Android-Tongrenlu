@@ -162,15 +162,17 @@ public class MusicInfoActivity extends BaseActivity implements OnItemClickListen
     }
 
     protected void playTrack(final TrackBean trackBean) {
+        // TODO
         final Intent serviceIntent = new Intent(this, MusicService.class);
-        serviceIntent.setAction(MusicService.ACTION_ONLINE);
+        serviceIntent.setAction(MusicService.ACTION_ADD);
         serviceIntent.putExtra("trackBean", trackBean);
         this.startService(serviceIntent);
     }
 
     protected void playTrack(final ArrayList<TrackBean> items) {
+        // TODO
         final Intent serviceIntent = new Intent(this, MusicService.class);
-        serviceIntent.setAction(MusicService.ACTION_INIT);
+        serviceIntent.setAction(MusicService.ACTION_PLAY);
         serviceIntent.putParcelableArrayListExtra("trackBeanList", items);
         serviceIntent.putExtra("position", 0);
         this.startService(serviceIntent);

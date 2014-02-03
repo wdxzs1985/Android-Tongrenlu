@@ -1,5 +1,8 @@
 package info.tongrenlu.android.music;
 
+import info.tongrenlu.app.HttpConstants;
+import info.tongrenlu.domain.TrackBean;
+
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -18,6 +21,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
@@ -32,11 +36,17 @@ public class MusicPlayerActivity extends BaseActivity implements OnClickListener
     private ImageButton mRandomButton = null;
     private SeekBar mProgress = null;
 
+    private TrackBean mTrackBean = null;
+
+    private boolean mLockSeekbar = false;
+
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.setContentView(R.layout.activity_player);
         this.initController();
+        this.initLoopButtonImage();
+        this.initShuffleButtonImage();
         this.initReceiver();
     }
 
@@ -77,23 +87,14 @@ public class MusicPlayerActivity extends BaseActivity implements OnClickListener
             @Override
             public void onReceive(final Context context, final Intent intent) {
                 final String action = intent.getAction();
-                if (StringUtils.equals(action, MusicService.EVENT_START)) {
-                    MusicPlayerActivity.this.onMusicPlayerStart();
-                } else if (StringUtils.equals(action, MusicService.EVENT_UPDATE)) {
+                if (StringUtils.equals(action, MusicService.EVENT_UPDATE)) {
                     MusicPlayerActivity.this.onMusicPlayerUpdate(intent);
                 } else if (StringUtils.equals(action, MusicService.EVENT_STOP)) {
                     MusicPlayerActivity.this.finish();
-                } else if (StringUtils.equals(action,
-                                              MusicService.EVENT_BUFFERING_START)) {
-                    MusicPlayerActivity.this.onMusicPlayerBuffering(true);
-                } else if (StringUtils.equals(action,
-                                              MusicService.EVENT_BUFFERING_END)) {
-                    MusicPlayerActivity.this.onMusicPlayerBuffering(false);
                 }
             }
         };
         final IntentFilter filter = new IntentFilter();
-        filter.addAction(MusicService.EVENT_START);
         filter.addAction(MusicService.EVENT_UPDATE);
         filter.addAction(MusicService.EVENT_STOP);
         this.mLocalBroadcastManager.registerReceiver(this.mMusicReceiver,
@@ -104,39 +105,32 @@ public class MusicPlayerActivity extends BaseActivity implements OnClickListener
     public void onClick(final View v) {
         switch (v.getId()) {
         case R.id.player_play:
-            // this.mService.actionPlay();
-            this.initPlayButtonImage();
+            final Intent tooglePlaybackAction = new Intent(this,
+                                                           MusicService.class);
+            tooglePlaybackAction.setAction(MusicService.ACTION_TOGGLE_PLAYBACK);
+            this.startService(tooglePlaybackAction);
             break;
         case R.id.player_prev:
-            // this.mService.actionPlayPrev();
-            this.initPlayButtonImage();
+            final Intent rewindAction = new Intent(this, MusicService.class);
+            rewindAction.setAction(MusicService.ACTION_REWIND);
+            this.startService(rewindAction);
             break;
         case R.id.player_next:
-            // this.mService.actionPlayNext();
-            this.initPlayButtonImage();
+            final Intent skipAction = new Intent(this, MusicService.class);
+            skipAction.setAction(MusicService.ACTION_SKIP);
+            this.startService(skipAction);
             break;
         case R.id.player_loop:
-            // this.mService.actionLoop();
+            this.actionLoop();
             this.initLoopButtonImage();
             break;
         case R.id.player_shuffle:
-            // this.mService.actionRandom();
-            this.initRandomButtonImage();
+            this.actionShuffle();
+            this.initShuffleButtonImage();
             break;
         default:
             break;
         }
-    }
-
-    private void initPlayButtonImage() {
-        // switch (this.mService.getPlayflag()) {
-        // case MusicService.FLAG_PLAY:
-        // this.mPlayButton.setImageResource(R.drawable.player_btn_player_pause);
-        // break;
-        // case MusicService.FLAG_PAUSE:
-        // this.mPlayButton.setImageResource(R.drawable.player_btn_player_play);
-        // break;
-        // }
     }
 
     private void initLoopButtonImage() {
@@ -159,7 +153,21 @@ public class MusicPlayerActivity extends BaseActivity implements OnClickListener
         }
     }
 
-    private void initRandomButtonImage() {
+    public void actionLoop() {
+        final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        final String value = sharedPreferences.getString(SettingsActivity.PREF_KEY_LOOP_PLAY,
+                                                         SettingsActivity.PREF_DEFAULT_LOOP_PLAY);
+        final Resources res = this.getResources();
+        final String[] entryValues = res.getStringArray(R.array.pref_entry_values_loop_play);
+        final int index = ArrayUtils.indexOf(entryValues, value);
+        final int nextIndex = (index + 1) % entryValues.length;
+        sharedPreferences.edit()
+                         .putString(SettingsActivity.PREF_KEY_LOOP_PLAY,
+                                    entryValues[nextIndex])
+                         .commit();
+    }
+
+    private void initShuffleButtonImage() {
         final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         final String value = sharedPreferences.getString(SettingsActivity.PREF_KEY_SHUFFLE_PLAY,
                                                          SettingsActivity.PREF_DEFAULT_SHUFFLE_PLAY);
@@ -176,68 +184,114 @@ public class MusicPlayerActivity extends BaseActivity implements OnClickListener
         }
     }
 
+    public void actionShuffle() {
+        final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        final String value = sharedPreferences.getString(SettingsActivity.PREF_KEY_SHUFFLE_PLAY,
+                                                         SettingsActivity.PREF_DEFAULT_SHUFFLE_PLAY);
+        final Resources res = this.getResources();
+        final String[] entryValues = res.getStringArray(R.array.pref_entry_values_shuffle_play);
+        final int index = ArrayUtils.indexOf(entryValues, value);
+        final int nextIndex = (index + 1) % entryValues.length;
+        sharedPreferences.edit()
+                         .putString(SettingsActivity.PREF_KEY_SHUFFLE_PLAY,
+                                    entryValues[nextIndex])
+                         .commit();
+    }
+
     @Override
     public void onProgressChanged(final SeekBar seekBar, final int progress, final boolean fromUser) {
+        if (fromUser) {
+            this.updateCurrentTime(progress);
+        }
     }
 
     @Override
     public void onStartTrackingTouch(final SeekBar seekBar) {
-
+        this.mLockSeekbar = true;
     }
 
     @Override
     public void onStopTrackingTouch(final SeekBar seekBar) {
-        // this.mService.getMediaPlayer().seekTo(seekBar.getProgress());
-    }
-
-    protected void onMusicPlayerStart() {
-        // final TrackBean trackBean = this.mService.getNowDisplay();
-        // final String articleId = trackBean.getArticleId();
-        // final ImageView coverView = (ImageView)
-        // this.findViewById(R.id.article_cover);
-        // HttpConstants.displayCover(coverView, articleId,
-        // HttpConstants.L_COVER);
-        //
-        // final String title = trackBean.getTitle();
-        // final TextView titleView = (TextView)
-        // this.findViewById(R.id.track_title);
-        // titleView.setText(title);
-        //
-        // final String artist = trackBean.getArtist();
-        // final TextView artistView = (TextView)
-        // this.findViewById(R.id.track_artist);
-        // artistView.setText(artist);
-        //
-        // this.mProgress.setMax(0);// 设置进度条
-        // this.mProgress.setProgress(0);// 设置进度条
-        // this.mProgress.setSecondaryProgress(0);
+        this.mLockSeekbar = false;
+        final Intent seekAction = new Intent(this, MusicService.class);
+        seekAction.setAction(MusicService.ACTION_SEEK);
+        seekAction.putExtra("progress", seekBar.getProgress());
+        this.startService(seekAction);
     }
 
     protected void onMusicPlayerUpdate(final Intent intent) {
-        // if (this.mBound) {
-        // this.initPlayButtonImage();
-        // }
+        TrackBean trackBean = intent.getParcelableExtra("trackBean");
+        if (this.mTrackBean != trackBean) {
+            this.mTrackBean = trackBean;
+            this.updateCover();
+            this.updateTitle();
+            this.updateArtist();
+        }
+
+        int state = intent.getIntExtra("state", MusicService.STATE_STOPPED);
+        this.updatePlayButton(state);
 
         final int duration = intent.getIntExtra("duration", 0);
+        this.updateDuration(duration);
+
+        if (!this.mLockSeekbar) {
+            final int progress = intent.getIntExtra("progress", 0);
+            this.updateCurrentTime(progress);
+            this.updateProgress(progress);
+        }
+
+        if (intent.hasExtra("percent")) {
+            final int percent = intent.getIntExtra("percent", 0);
+            this.updateSecondaryProgress(percent * duration / 100);
+        }
+    }
+
+    private void updateTitle() {
+        final String title = this.mTrackBean.getTitle();
+        final TextView titleView = (TextView) this.findViewById(R.id.track_title);
+        titleView.setText(title);
+    }
+
+    private void updateArtist() {
+        final String artist = this.mTrackBean.getArtist();
+        final TextView artistView = (TextView) this.findViewById(R.id.track_artist);
+        artistView.setText(artist);
+    }
+
+    private void updateCover() {
+        final String articleId = this.mTrackBean.getArticleId();
+        final ImageView coverView = (ImageView) this.findViewById(R.id.article_cover);
+        HttpConstants.displayCover(coverView, articleId, HttpConstants.L_COVER);
+    }
+
+    private void updatePlayButton(int state) {
+        switch (state) {
+        case MusicService.STATE_PLAYING:
+            this.mPlayButton.setImageResource(R.drawable.player_btn_player_pause);
+            break;
+        default:
+            this.mPlayButton.setImageResource(R.drawable.player_btn_player_play);
+            break;
+        }
+    }
+
+    private void updateDuration(int duration) {
         final TextView durationView = (TextView) this.findViewById(R.id.player_duration);
         durationView.setText(MusicService.toTime(duration));
         this.mProgress.setMax(duration);// 设置进度条
-
-        final int progress = intent.getIntExtra("progress", 0);
-        final TextView currentPositionView = (TextView) this.findViewById(R.id.player_current_time);
-        currentPositionView.setText(MusicService.toTime(progress));
-        this.mProgress.setProgress(progress);// 设置进度条
-
-        final int percent = intent.getIntExtra("percent", 0);
-        this.mProgress.setSecondaryProgress(percent * duration / 100);
     }
 
-    protected void onMusicPlayerBuffering(final boolean start) {
-        if (start) {
-            // this.mBuffering.setVisibility(View.VISIBLE);
-        } else {
-            // this.mBuffering.setVisibility(View.GONE);
-        }
+    private void updateCurrentTime(int progress) {
+        final TextView currentPositionView = (TextView) this.findViewById(R.id.player_current_time);
+        currentPositionView.setText(MusicService.toTime(progress));
+    }
+
+    private void updateProgress(int progress) {
+        this.mProgress.setProgress(progress);
+    }
+
+    private void updateSecondaryProgress(int progress) {
+        this.mProgress.setSecondaryProgress(progress);
     }
 
     @Override

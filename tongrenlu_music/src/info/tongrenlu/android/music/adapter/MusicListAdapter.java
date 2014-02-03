@@ -57,7 +57,7 @@ public class MusicListAdapter extends BaseAdapter {
         } else {
             HttpConstants.displayCover(coverView,
                                        articleId,
-                                       HttpConstants.M_COVER);
+                                       HttpConstants.L_COVER);
         }
         //
         return view;

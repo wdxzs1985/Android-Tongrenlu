@@ -212,7 +212,7 @@ public class PlaylistTrackListActivity extends BaseActivity implements OnItemCli
 
                 final Intent serviceIntent = new Intent(context,
                                                         MusicService.class);
-                serviceIntent.setAction(MusicService.ACTION_INIT);
+                serviceIntent.setAction(MusicService.ACTION_PLAY);
                 serviceIntent.putParcelableArrayListExtra("trackBeanList",
                                                           trackBeanList);
                 serviceIntent.putExtra("position", position);
