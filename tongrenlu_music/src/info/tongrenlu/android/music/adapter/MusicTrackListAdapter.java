@@ -39,13 +39,13 @@ public class MusicTrackListAdapter extends BaseAdapter {
     }
 
     @Override
-    public View getView(final int position,
-                        final View convertView,
-                        final ViewGroup parent) {
+    public View getView(final int position, final View convertView, final ViewGroup parent) {
         View view = convertView;
         final Context context = parent.getContext();
         if (view == null) {
-            view = View.inflate(context, R.layout.list_item_track, null);
+            view = View.inflate(context,
+                                R.layout.expandable_list_item_track,
+                                null);
         }
         final TrackBean trackBean = this.getItem(position);
         view.setTag(trackBean);

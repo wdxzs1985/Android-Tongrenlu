@@ -16,22 +16,20 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class MusicInfoActivity extends BaseActivity implements OnItemClickListener, OnClickListener {
+import com.tjerkw.slideexpandable.library.ActionSlideExpandableListView;
+
+public class MusicInfoActivity extends BaseActivity implements ActionSlideExpandableListView.OnActionClickListener, OnClickListener {
 
     private String mArticleId = null;
-    // private ContentObserver contentObserver = null;
 
     private View mProgress = null;
     private View mEmpty = null;
-    private ListView mListView = null;
+    private ActionSlideExpandableListView mListView = null;
     private MusicTrackListAdapter mAdapter = null;
 
     @Override
@@ -50,11 +48,16 @@ public class MusicInfoActivity extends BaseActivity implements OnItemClickListen
 
         this.mProgress = this.findViewById(android.R.id.progress);
         this.mEmpty = this.findViewById(android.R.id.empty);
-        this.mListView = (ListView) this.findViewById(android.R.id.list);
+        this.mListView = (ActionSlideExpandableListView) this.findViewById(android.R.id.list);
         //
         this.mListView.setAdapter(this.mAdapter);
-        this.mListView.setOnItemClickListener(this);
+        this.mListView.setItemActionListener(this,
+                                             R.id.item,
+                                             R.id.action_play,
+                                             R.id.action_download);
 
+        final Button playAllButton = (Button) this.findViewById(R.id.action_play_all);
+        playAllButton.setOnClickListener(this);
         final Button downloadAllButton = (Button) this.findViewById(R.id.action_download_all);
         downloadAllButton.setOnClickListener(this);
 
@@ -65,7 +68,7 @@ public class MusicInfoActivity extends BaseActivity implements OnItemClickListen
 
     private void initArticleCover(final String articleId) {
         final ImageView coverView = (ImageView) this.findViewById(R.id.article_cover);
-        HttpConstants.displayCover(coverView, articleId, HttpConstants.S_COVER);
+        HttpConstants.displayCover(coverView, articleId, HttpConstants.L_COVER);
     }
 
     private void initAritcleTitle(final String title) {
@@ -74,18 +77,37 @@ public class MusicInfoActivity extends BaseActivity implements OnItemClickListen
     }
 
     @Override
-    public void onItemClick(final AdapterView<?> listView, final View view, final int position, final long id) {
-        final TrackBean trackBean = (TrackBean) listView.getItemAtPosition(position);
-        this.playTrack(trackBean);
-        // DownloadService.downloadTrack(this, trackBean);
+    public void onClick(View itemView, View clickedView, int position) {
+        switch (clickedView.getId()) {
+        case R.id.item:
+        case R.id.action_play:
+            final TrackBean trackBean = (TrackBean) this.mListView.getItemAtPosition(position);
+            this.playTrack(trackBean);
+            break;
+        case R.id.action_download:
+            // TODO download
+            System.out.println("TODO download");
+            break;
+        default:
+            break;
+        }
     }
 
     @Override
     public void onClick(final View v) {
         if (!this.mAdapter.isEmpty()) {
-            // final ArrayList<TrackBean> items = this.mAdapter.getItems();
-            // this.playTrack(items);
-            // DownloadService.downloadTrack(this, items);
+            ArrayList<TrackBean> items = this.mAdapter.getItems();
+            switch (v.getId()) {
+            case R.id.action_play_all:
+                this.playTrack(items);
+                break;
+            case R.id.action_download_all:
+                // TODO download
+                System.out.println("TODO download");
+                break;
+            default:
+                break;
+            }
         }
     }
 
@@ -162,7 +184,6 @@ public class MusicInfoActivity extends BaseActivity implements OnItemClickListen
     }
 
     protected void playTrack(final TrackBean trackBean) {
-        // TODO
         final Intent serviceIntent = new Intent(this, MusicService.class);
         serviceIntent.setAction(MusicService.ACTION_ADD);
         serviceIntent.putExtra("trackBean", trackBean);
@@ -170,9 +191,8 @@ public class MusicInfoActivity extends BaseActivity implements OnItemClickListen
     }
 
     protected void playTrack(final ArrayList<TrackBean> items) {
-        // TODO
         final Intent serviceIntent = new Intent(this, MusicService.class);
-        serviceIntent.setAction(MusicService.ACTION_PLAY);
+        serviceIntent.setAction(MusicService.ACTION_ADD);
         serviceIntent.putParcelableArrayListExtra("trackBeanList", items);
         serviceIntent.putExtra("position", 0);
         this.startService(serviceIntent);
@@ -181,4 +201,5 @@ public class MusicInfoActivity extends BaseActivity implements OnItemClickListen
                                                  MusicPlayerActivity.class);
         this.startActivity(activityIntent);
     }
+
 }

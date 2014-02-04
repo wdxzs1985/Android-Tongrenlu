@@ -262,7 +262,7 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
 
     private void initVersionPref() {
         final Preference preference = this.findPreference(SettingsActivity.PREF_KEY_VERSION_NAME);
-        preference.setSummary(TongrenluApplication.getApplicationVersionName());
+        preference.setSummary(TongrenluApplication.VERSION_NAME);
     }
 
     private void initNextUpdateDatePref(final SharedPreferences sharedPreferences) {

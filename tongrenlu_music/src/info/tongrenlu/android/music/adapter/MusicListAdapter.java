@@ -1,7 +1,6 @@
 package info.tongrenlu.android.music.adapter;
 
 import info.tongrenlu.android.music.R;
-import info.tongrenlu.app.HttpConstants;
 import info.tongrenlu.domain.ArticleBean;
 
 import java.util.ArrayList;
@@ -42,25 +41,35 @@ public class MusicListAdapter extends BaseAdapter {
     @Override
     public View getView(final int position, final View convertView, final ViewGroup parent) {
         View view = convertView;
+        ViewHolder holder = null;
         final Context context = parent.getContext();
         if (view == null) {
             view = View.inflate(context, R.layout.list_item_article, null);
-        }
+            holder = new ViewHolder();
+            holder.coverView = (ImageView) view.findViewById(R.id.article_cover);
+            holder.titleView = (TextView) view.findViewById(R.id.article_title);
 
-        final ArticleBean articleBean = this.getItem(position);
-        final String articleId = articleBean.getArticleId();
-        final TextView titleView = (TextView) view.findViewById(R.id.article_title);
-        titleView.setText(articleBean.getTitle());
-        final ImageView coverView = (ImageView) view.findViewById(R.id.article_cover);
-        if (this.mScrolling) {
-            coverView.setImageResource(R.drawable.default_cover);
+            view.setTag(holder);
         } else {
-            HttpConstants.displayCover(coverView,
-                                       articleId,
-                                       HttpConstants.L_COVER);
+            holder = (ViewHolder) view.getTag();
         }
-        //
+        ArticleBean articleBean = this.getItem(position);
+        this.updateItem(holder, articleBean);
         return view;
+    }
+
+    private void updateItem(ViewHolder holder, ArticleBean articleBean) {
+        if (!articleBean.equals(holder.articleBean)) {
+            holder.articleBean = articleBean;
+            holder.titleView.setText(articleBean.getTitle());
+            holder.coverView.setImageDrawable(null);
+        }
+    }
+
+    public class ViewHolder {
+        public ImageView coverView;
+        public TextView titleView;
+        public ArticleBean articleBean;
     }
 
     public void addData(final ArticleBean musicBean) {

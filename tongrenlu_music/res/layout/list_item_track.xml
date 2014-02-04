@@ -20,4 +20,19 @@
         android:text="@string/track_artist"
     />
     
+    <ImageButton android:id="@+id/action_play" 
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_toLeftOf="@+id/action_download"
+        android:src="@android:drawable/ic_media_play"
+        android:contentDescription="@string/action_play"/>
+    
+    <ImageButton android:id="@+id/action_download" 
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:src="@android:drawable/ic_menu_save"
+        android:contentDescription="@string/action_download"/>
 </RelativeLayout>

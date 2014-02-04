@@ -59,8 +59,7 @@ public class UpdateService extends IntentService {
     private class ApplicationVersionLoadTask extends JSONLoadTask {
 
         @Override
-        protected void processResponseJSON(final JSONObject responseJSON)
-                throws JSONException {
+        protected void processResponseJSON(final JSONObject responseJSON) throws JSONException {
             final UpdateService context = UpdateService.this;
             final int versionCode = responseJSON.getInt("versionCode");
             final String versionName = responseJSON.getString("versionName");
@@ -70,7 +69,7 @@ public class UpdateService extends IntentService {
                                              versionCode));
             System.out.println(whatsnew);
 
-            if (TongrenluApplication.getApplicationVersionCode() < versionCode) {
+            if (TongrenluApplication.VERSION_CODE < versionCode) {
                 context.showUpdateAlertDialog(versionName, whatsnew);
             } else {
                 Toast.makeText(context, R.string.it_is_new, Toast.LENGTH_LONG)
@@ -97,8 +96,7 @@ public class UpdateService extends IntentService {
 
     }
 
-    protected void showUpdateAlertDialog(final String versionName,
-                                         final String whatsnew) {
+    protected void showUpdateAlertDialog(final String versionName, final String whatsnew) {
         final Intent intent = new Intent(NEW_VERSION_AVAILABLE);
         intent.putExtra("versionName", versionName);
         intent.putExtra("whatsnew", whatsnew);
@@ -126,8 +124,7 @@ public class UpdateService extends IntentService {
                                       new OnClickListener() {
 
                                           @Override
-                                          public void onClick(final DialogInterface dialog,
-                                                              final int which) {
+                                          public void onClick(final DialogInterface dialog, final int which) {
                                               UpdateReceiver.this.doUpdate(context);
                                           }
                                       });
@@ -141,8 +138,7 @@ public class UpdateService extends IntentService {
             new APKDownloadTask(context).execute(url, file);
         }
 
-        private class APKDownloadTask extends FileDownloadTask implements
-                OnCancelListener {
+        private class APKDownloadTask extends FileDownloadTask implements OnCancelListener {
 
             private final Context mContext;
             private final ProgressDialog mProgress;

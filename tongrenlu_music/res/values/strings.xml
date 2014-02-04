@@ -3,6 +3,8 @@
 
     <string name="app_name">东方同人录</string>
     <string name="menu_settings">设置</string>
+    
+    <string name="label_more">More</string>
 
     <string name="loading">少女祈祷中。。。</string>
     <string name="no_data">神马都没有找到QAQ</string>
@@ -36,10 +38,12 @@
     <string name="download_size">0 KB</string>
     <string name="used_size">已使用： %s</string>
     
-    <string name="action_delete">删除</string>
-    <string name="action_cancel">取消</string>
+    <string name="action_play">播放</string>
+    <string name="action_play_all">全部播放</string>
     <string name="action_download">下载</string>
     <string name="action_download_all">全部下载</string>
+    <string name="action_delete">删除</string>
+    <string name="action_cancel">取消</string>
     <string name="action_update_now">马上更新</string>
     <string name="action_update_later">以后再说</string>
     <string name="action_update_never">永不更新</string>

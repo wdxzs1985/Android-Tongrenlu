@@ -461,7 +461,6 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
     private void dispatchStartEvent(final TrackBean trackBean) {
         // this.mNowDisplay = trackBean;
         final String articleId = trackBean.getArticleId();
-        final String title = trackBean.getTitle();
         this.decodeLargeIcon(articleId);
         this.sendNotification();
 

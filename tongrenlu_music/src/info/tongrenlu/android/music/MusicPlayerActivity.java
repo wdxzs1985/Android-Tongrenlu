@@ -51,16 +51,6 @@ public class MusicPlayerActivity extends BaseActivity implements OnClickListener
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-    }
-
-    @Override
     protected void onDestroy() {
         super.onDestroy();
         this.mLocalBroadcastManager.unregisterReceiver(this.mMusicReceiver);

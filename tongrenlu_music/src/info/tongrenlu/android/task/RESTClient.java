@@ -60,8 +60,8 @@ public class RESTClient {
         }
     }
 
-    private HTTPVerb mVerb;
-    private Uri mAction;
+    private final HTTPVerb mVerb;
+    private final Uri mAction;
     private Bundle mParams;
 
     public RESTClient(final HTTPVerb verb, final Uri action) {
@@ -150,8 +150,7 @@ public class RESTClient {
                 // things
                 // in LogCat.
                 Log.d(RESTClient.TAG,
-                      "Executing request: "
-                              + RESTClient.verbToString(this.mVerb)
+                      "Executing request: " + RESTClient.verbToString(this.mVerb)
                               + ": "
                               + this.mAction.toString());
 
@@ -162,12 +161,14 @@ public class RESTClient {
 
                 final HttpEntity responseEntity = response.getEntity();
                 final StatusLine responseStatus = response.getStatusLine();
-                final int statusCode = responseStatus != null ? responseStatus.getStatusCode() : 0;
+                final int statusCode = responseStatus != null ? responseStatus.getStatusCode()
+                        : 0;
 
                 // Here we create our response and send it back to the
                 // LoaderCallbacks<RESTResponse> implementation.
                 final RESTResponse restResponse = new RESTResponse(responseEntity != null ? EntityUtils.toString(responseEntity,
-                                                                                                                 RESTClient.ENCODE) : null,
+                                                                                                                 RESTClient.ENCODE)
+                                                                           : null,
                                                                    statusCode);
                 return restResponse;
             }
@@ -177,8 +178,7 @@ public class RESTClient {
             return new RESTResponse();
         } catch (final URISyntaxException e) {
             Log.e(RESTClient.TAG,
-                  "URI syntax was incorrect. "
-                          + RESTClient.verbToString(this.mVerb)
+                  "URI syntax was incorrect. " + RESTClient.verbToString(this.mVerb)
                           + ": "
                           + this.mAction.toString(),
                   e);
@@ -201,9 +201,7 @@ public class RESTClient {
         }
     }
 
-    private static void attachUriWithQuery(final HttpRequestBase request,
-                                           Uri uri,
-                                           final Bundle params) {
+    private static void attachUriWithQuery(final HttpRequestBase request, Uri uri, final Bundle params) {
         try {
             if (params == null) {
                 // No params were given or they have already been
@@ -278,7 +276,7 @@ public class RESTClient {
         userAgent.append(Build.MODEL).append(" ");
         userAgent.append("SDK/").append(Build.VERSION.SDK_INT);
         userAgent.append(")").append(" ");
-        userAgent.append(TongrenluApplication.getApplicationVersionName());
+        userAgent.append(TongrenluApplication.VERSION_NAME);
         return userAgent.toString();
     }
 

@@ -1,6 +1,7 @@
 package info.tongrenlu.android.music.fragment;
 
 import info.tongrenlu.android.music.R;
+import info.tongrenlu.android.music.TongrenluApplication;
 import info.tongrenlu.android.music.adapter.MusicListAdapter;
 import info.tongrenlu.android.task.JSONLoadTask;
 import info.tongrenlu.app.HttpConstants;
@@ -10,10 +11,14 @@ import info.tongrenlu.domain.MusicBean;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.lucasr.smoothie.AsyncGridView;
+import org.lucasr.smoothie.ItemManager;
 
+import uk.co.senab.bitmapcache.BitmapLruCache;
 import android.app.Activity;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,7 +26,6 @@ import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.GridView;
 import android.widget.Toast;
 
 public class MusicListFragment extends TitleFragment implements OnScrollListener, OnItemClickListener {
@@ -29,7 +33,7 @@ public class MusicListFragment extends TitleFragment implements OnScrollListener
 
     private View mProgress = null;
     private View mEmpty = null;
-    private GridView mListView = null;
+    private AsyncGridView mListView = null;
     private MusicListAdapter mAdapter = null;
 
     private final String mQuery = "";
@@ -65,11 +69,22 @@ public class MusicListFragment extends TitleFragment implements OnScrollListener
                                            false);
         this.mProgress = view.findViewById(android.R.id.progress);
         this.mEmpty = view.findViewById(android.R.id.empty);
-        this.mListView = (GridView) view.findViewById(android.R.id.list);
-        //
+        this.mListView = (AsyncGridView) view.findViewById(android.R.id.list);
         this.mListView.setAdapter(this.mAdapter);
         this.mListView.setOnScrollListener(this);
         this.mListView.setOnItemClickListener(this);
+
+        FragmentActivity activity = this.getActivity();
+        TongrenluApplication application = (TongrenluApplication) activity.getApplicationContext();
+        BitmapLruCache cache = application.getBitmapCache();
+        GalleryLoader loader = new GalleryLoader(activity, cache);
+
+        ItemManager.Builder builder = new ItemManager.Builder(loader);
+        builder.setPreloadItemsEnabled(true).setPreloadItemsCount(12);
+        builder.setThreadPoolSize(4);
+
+        this.mListView.setItemManager(builder.build());
+
         return view;
     }
 
@@ -77,6 +92,7 @@ public class MusicListFragment extends TitleFragment implements OnScrollListener
     public void onActivityCreated(final Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         this.loadNextPage();
+
     }
 
     protected void loadNextPage() {

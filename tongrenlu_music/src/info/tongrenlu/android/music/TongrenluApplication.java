@@ -1,5 +1,7 @@
 package info.tongrenlu.android.music;
 
+import java.io.File;
+
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.params.ClientPNames;
@@ -10,6 +12,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
 
+import uk.co.senab.bitmapcache.BitmapLruCache;
 import android.app.Application;
 import android.app.NotificationManager;
 import android.content.Context;
@@ -26,28 +29,20 @@ public class TongrenluApplication extends Application {
         return client;
     }
 
-    public static String getApplicationVersionName() {
-        return versionName;
-    }
+    public static int VERSION_CODE = 0;
+    public static String VERSION_NAME = "unknown";
 
-    public static int getApplicationVersionCode() {
-        return versionCode;
-    }
-
-    private static String versionName = null;
-
-    private static int versionCode = 0;
-
-    private static boolean init = false;
+    private boolean init = false;
+    private BitmapLruCache mBitmapCache = null;
 
     @Override
     public void onCreate() {
-        if (!init) {
-            init = true;
+        if (!this.init) {
+            this.init = true;
             this.clearNotification();
             this.initClient();
             this.initPackageInfo(this);
-            // this.startUpdateService(this);
+            this.initBitmapCache(this);
         }
     }
 
@@ -69,16 +64,26 @@ public class TongrenluApplication extends Application {
             final PackageManager pm = context.getPackageManager();
             final PackageInfo pInfo = pm.getPackageInfo(packageName,
                                                         PackageManager.GET_META_DATA);
-            versionCode = pInfo.versionCode;
-            versionName = pInfo.versionName;
+            VERSION_CODE = pInfo.versionCode;
+            VERSION_NAME = pInfo.versionName;
         } catch (final NameNotFoundException e) {
             e.printStackTrace();
         }
     }
 
-    // private void startUpdateService(final Context context) {
-    // final Intent intent = new Intent(context, UpdateService.class);
-    // context.startService(intent);
-    // }
+    private void initBitmapCache(Context context) {
+        File cacheDir = context.getCacheDir();
+        BitmapLruCache.Builder builder = new BitmapLruCache.Builder(context);
+        builder.setMemoryCacheEnabled(true)
+               .setMemoryCacheMaxSizeUsingHeapSize()
+               .setDiskCacheEnabled(true)
+               .setDiskCacheLocation(cacheDir);
+
+        this.mBitmapCache = builder.build();
+    }
+
+    public BitmapLruCache getBitmapCache() {
+        return this.mBitmapCache;
+    }
 
 }
