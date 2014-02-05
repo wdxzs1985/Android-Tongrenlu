@@ -313,15 +313,15 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
         }
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        this.registerReceiver(UpdateService.RECEIVER, UpdateService.FILTER);
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        this.unregisterReceiver(UpdateService.RECEIVER);
-    }
+    // @Override
+    // protected void onStart() {
+    // super.onStart();
+    // this.registerReceiver(UpdateService.RECEIVER, UpdateService.FILTER);
+    // }
+    //
+    // @Override
+    // protected void onStop() {
+    // super.onStop();
+    // this.unregisterReceiver(UpdateService.RECEIVER);
+    // }
 }

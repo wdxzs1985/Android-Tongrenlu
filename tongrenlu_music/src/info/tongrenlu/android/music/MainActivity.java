@@ -1,8 +1,8 @@
 package info.tongrenlu.android.music;
 
+import info.tongrenlu.android.fragment.TitleFragmentAdapter;
 import info.tongrenlu.android.music.fragment.MusicListFragment;
 import info.tongrenlu.android.music.fragment.PlaylistFragment;
-import info.tongrenlu.android.music.fragment.TitleFragmentAdapter;
 import info.tongrenlu.app.CommonConstants;
 import info.tongrenlu.domain.ArticleBean;
 import android.content.Intent;

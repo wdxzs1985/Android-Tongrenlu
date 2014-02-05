@@ -26,7 +26,7 @@ import android.support.v4.app.ServiceCompat;
 
 public class DownloadService extends Service {
 
-    public static final int NOTIFICATION_ID = 1;
+    public static final int NOTIFICATION_ID = 2;
 
     public static final String ACTION_ADD = "info.tongrenlu.android.DownloadService.ACTION_ADD";
 

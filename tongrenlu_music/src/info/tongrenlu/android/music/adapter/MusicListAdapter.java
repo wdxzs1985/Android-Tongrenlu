@@ -15,11 +15,7 @@ import android.widget.TextView;
 
 public class MusicListAdapter extends BaseAdapter {
 
-    private Integer page = 0;
-    private Integer size = 0;
-    private Integer itemCount = 0;
     private List<ArticleBean> items = new ArrayList<ArticleBean>();
-    private int pagenum = 0;
 
     private boolean mScrolling = false;
 
@@ -76,44 +72,12 @@ public class MusicListAdapter extends BaseAdapter {
         this.items.add(musicBean);
     }
 
-    public Integer getPage() {
-        return this.page;
-    }
-
-    public void setPage(final Integer page) {
-        this.page = page;
-    }
-
-    public Integer getSize() {
-        return this.size;
-    }
-
-    public void setSize(final Integer size) {
-        this.size = size;
-    }
-
-    public Integer getItemCount() {
-        return this.itemCount;
-    }
-
-    public void setItemCount(final Integer itemCount) {
-        this.itemCount = itemCount;
-    }
-
     public List<ArticleBean> getItems() {
         return this.items;
     }
 
     public void setItems(final List<ArticleBean> items) {
         this.items = items;
-    }
-
-    public int getPagenum() {
-        return this.pagenum;
-    }
-
-    public void setPagenum(final int pagenum) {
-        this.pagenum = pagenum;
     }
 
     public boolean isScrolling() {

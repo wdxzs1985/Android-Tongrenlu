@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package info.tongrenlu.android.music.musicplayer;
+package info.tongrenlu.android.musicplayer;
 
 /**
  * Represents something that can react to audio focus events. We implement this

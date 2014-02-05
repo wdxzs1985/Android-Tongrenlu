@@ -1,4 +1,4 @@
-package info.tongrenlu.android.music.fragment;
+package info.tongrenlu.android.fragment;
 
 import java.util.ArrayList;
 import java.util.List;

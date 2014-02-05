@@ -1,12 +1,18 @@
 package info.tongrenlu.android.music.fragment;
 
+import info.tongrenlu.android.fragment.TitleFragment;
+import info.tongrenlu.android.loader.JSONLoader;
 import info.tongrenlu.android.music.R;
 import info.tongrenlu.android.music.TongrenluApplication;
+import info.tongrenlu.android.music.adapter.GalleryLoader;
 import info.tongrenlu.android.music.adapter.MusicListAdapter;
-import info.tongrenlu.android.task.JSONLoadTask;
 import info.tongrenlu.app.HttpConstants;
 import info.tongrenlu.domain.ArticleBean;
 import info.tongrenlu.domain.MusicBean;
+import info.tongrenlu.support.PaginateSupport;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -16,9 +22,12 @@ import org.lucasr.smoothie.ItemManager;
 
 import uk.co.senab.bitmapcache.BitmapLruCache;
 import android.app.Activity;
+import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.LoaderManager.LoaderCallbacks;
+import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,9 +35,11 @@ import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.Toast;
 
 public class MusicListFragment extends TitleFragment implements OnScrollListener, OnItemClickListener {
+
+    public static final int ALBUM_LIST_LOADER = 2;
+
     private OnArticleSelectedListener mListener;
 
     private View mProgress = null;
@@ -39,8 +50,6 @@ public class MusicListFragment extends TitleFragment implements OnScrollListener
     private final String mQuery = "";
     private int mPage = 0;
     private boolean mLast = false;
-
-    private MusicListLoadTask runningTask = null;
 
     public MusicListFragment() {
         this.setTitle("所有专辑");
@@ -96,87 +105,22 @@ public class MusicListFragment extends TitleFragment implements OnScrollListener
     }
 
     protected void loadNextPage() {
-        if (this.runningTask == null && !this.mLast) {
-            final Uri uri = HttpConstants.getMusicListUri(this.getActivity());
+        if (!this.mLast) {
+            this.mProgress.setVisibility(View.VISIBLE);
+            this.mListView.setVisibility(View.VISIBLE);
+            this.mEmpty.setVisibility(View.GONE);
+
             final Bundle parameters = new Bundle();
             parameters.putString("q", this.mQuery);
             parameters.putString("p",
                                  String.valueOf(MusicListFragment.this.mPage + 1));
             parameters.putString("s", String.valueOf(HttpConstants.PAGE_SIZE));
-            new MusicListLoadTask().execute(uri, parameters);
+            this.getActivity()
+                .getSupportLoaderManager()
+                .restartLoader(ALBUM_LIST_LOADER,
+                               parameters,
+                               new MusicListLoaderCallback());
         }
-    }
-
-    class MusicListLoadTask extends JSONLoadTask {
-
-        @Override
-        protected void onStart() {
-            MusicListFragment.this.runningTask = this;
-            MusicListFragment.this.mProgress.setVisibility(View.VISIBLE);
-            MusicListFragment.this.mListView.setVisibility(View.VISIBLE);
-            MusicListFragment.this.mEmpty.setVisibility(View.GONE);
-        }
-
-        @Override
-        protected void processResponseJSON(final JSONObject responseJSON) throws JSONException {
-            if (responseJSON.getBoolean("result")) {
-                final JSONObject pageJSON = responseJSON.getJSONObject("page");
-                final int page = pageJSON.getInt("page");
-                MusicListFragment.this.mLast = pageJSON.getBoolean("last");
-                if (MusicListFragment.this.mPage < page) {
-                    MusicListFragment.this.mPage = page;
-
-                    final JSONArray items = pageJSON.getJSONArray("items");
-                    for (int i = 0; i < items.length(); i++) {
-                        final JSONObject musicJsonObject = items.getJSONObject(i);
-                        final MusicBean musicBean = new MusicBean();
-                        if (musicJsonObject.has("articleId")) {
-                            musicBean.setArticleId(musicJsonObject.getString("articleId"));
-                        }
-                        if (musicJsonObject.has("title")) {
-                            musicBean.setTitle(musicJsonObject.getString("title"));
-                        }
-                        // musicBean.setDescription(musicJsonObject.getString("description"));
-                        MusicListFragment.this.mAdapter.addData(musicBean);
-                    }
-                }
-            } else {
-                Toast.makeText(MusicListFragment.this.getActivity(),
-                               responseJSON.getString("error"),
-                               Toast.LENGTH_SHORT).show();
-            }
-        }
-
-        @Override
-        protected void onJSONException(final JSONException e) {
-            super.onJSONException(e);
-            Toast.makeText(MusicListFragment.this.getActivity(),
-                           "数据解析失败",
-                           Toast.LENGTH_SHORT).show();
-        }
-
-        @Override
-        protected void onNetworkError(final int code) {
-            Toast.makeText(MusicListFragment.this.getActivity(),
-                           "网络连接错误",
-                           Toast.LENGTH_SHORT).show();
-        }
-
-        @Override
-        protected void onFinish() {
-            if (MusicListFragment.this.mAdapter.isEmpty()) {
-                MusicListFragment.this.mProgress.setVisibility(View.GONE);
-                MusicListFragment.this.mListView.setVisibility(View.GONE);
-                MusicListFragment.this.mEmpty.setVisibility(View.VISIBLE);
-            } else {
-                MusicListFragment.this.mProgress.setVisibility(View.GONE);
-                MusicListFragment.this.mEmpty.setVisibility(View.GONE);
-                MusicListFragment.this.mListView.setVisibility(View.VISIBLE);
-                MusicListFragment.this.mAdapter.notifyDataSetChanged();
-            }
-            MusicListFragment.this.runningTask = null;
-        }
-
     }
 
     @Override
@@ -222,5 +166,81 @@ public class MusicListFragment extends TitleFragment implements OnScrollListener
 
     public interface OnArticleSelectedListener {
         public void onArticleSelected(ArticleBean articleBean);
+    }
+
+    private class MusicListLoaderCallback implements LoaderCallbacks<PaginateSupport> {
+
+        @Override
+        public Loader<PaginateSupport> onCreateLoader(int loaderId, Bundle args) {
+            Context context = MusicListFragment.this.getActivity();
+            final Uri uri = HttpConstants.getMusicListUri(context);
+            return new MusicListLoader(context, uri, args);
+        }
+
+        @Override
+        public void onLoadFinished(Loader<PaginateSupport> loader, PaginateSupport data) {
+            if (data != null && data.getItemCount() == 0) {
+                MusicListFragment.this.mProgress.setVisibility(View.GONE);
+                MusicListFragment.this.mListView.setVisibility(View.GONE);
+                MusicListFragment.this.mEmpty.setVisibility(View.VISIBLE);
+            } else {
+                MusicListFragment.this.mProgress.setVisibility(View.GONE);
+                MusicListFragment.this.mEmpty.setVisibility(View.GONE);
+                MusicListFragment.this.mListView.setVisibility(View.VISIBLE);
+
+                List<ArticleBean> items = MusicListFragment.this.mAdapter.getItems();
+                for (Object articleBean : data.getItems()) {
+                    items.add((ArticleBean) articleBean);
+                }
+
+                MusicListFragment.this.mAdapter.notifyDataSetChanged();
+
+                MusicListFragment.this.mPage = data.getPage();
+                MusicListFragment.this.mLast = data.isLast();
+            }
+        }
+
+        @Override
+        public void onLoaderReset(Loader<PaginateSupport> loader) {
+            MusicListFragment.this.mAdapter.setItems(new ArrayList<ArticleBean>());
+        }
+    }
+
+    private static class MusicListLoader extends JSONLoader<PaginateSupport> {
+
+        public MusicListLoader(Context ctx, Uri uri, Bundle parameters) {
+            super(ctx, uri, parameters);
+        }
+
+        @Override
+        protected PaginateSupport parseJSON(final JSONObject responseJSON) throws JSONException {
+            PaginateSupport paginate = new PaginateSupport();
+            List<MusicBean> itemList = new ArrayList<MusicBean>();
+            if (responseJSON.getBoolean("result")) {
+                final JSONObject pageJSON = responseJSON.getJSONObject("page");
+                final int itemCount = pageJSON.getInt("itemCount");
+                final int page = pageJSON.getInt("page");
+                final int size = pageJSON.getInt("size");
+                final JSONArray items = pageJSON.getJSONArray("items");
+                for (int i = 0; i < items.length(); i++) {
+                    final JSONObject musicJsonObject = items.getJSONObject(i);
+                    final MusicBean musicBean = new MusicBean();
+                    if (musicJsonObject.has("articleId")) {
+                        musicBean.setArticleId(musicJsonObject.getString("articleId"));
+                    }
+                    if (musicJsonObject.has("title")) {
+                        musicBean.setTitle(musicJsonObject.getString("title"));
+                    }
+                    itemList.add(musicBean);
+                }
+
+                paginate.setItemCount(itemCount);
+                paginate.setPage(page);
+                paginate.setSize(size);
+                paginate.setItems(itemList);
+            }
+            return paginate;
+        }
+
     }
 }

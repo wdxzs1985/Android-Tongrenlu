@@ -1,5 +1,6 @@
 package info.tongrenlu.android.music.fragment;
 
+import info.tongrenlu.android.fragment.TitleFragment;
 import info.tongrenlu.android.music.MusicPlayerActivity;
 import info.tongrenlu.android.music.PlaylistTrackListActivity;
 import info.tongrenlu.android.music.R;

@@ -1,5 +1,6 @@
 package info.tongrenlu.android.music;
 
+import info.tongrenlu.android.loader.AlbumCoverLoader;
 import info.tongrenlu.app.HttpConstants;
 import info.tongrenlu.domain.TrackBean;
 
@@ -12,8 +13,11 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.app.LoaderManager.LoaderCallbacks;
+import android.support.v4.content.Loader;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -26,7 +30,9 @@ import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 
-public class MusicPlayerActivity extends BaseActivity implements OnClickListener, OnSeekBarChangeListener {
+public class MusicPlayerActivity extends BaseActivity implements OnClickListener, OnSeekBarChangeListener, LoaderCallbacks<Drawable> {
+
+    public static final int ALBUM_COVER_LOADER = 0;
 
     private LocalBroadcastManager mLocalBroadcastManager = null;
     private BroadcastReceiver mMusicReceiver = null;
@@ -48,12 +54,22 @@ public class MusicPlayerActivity extends BaseActivity implements OnClickListener
         this.initLoopButtonImage();
         this.initShuffleButtonImage();
         this.initReceiver();
+        this.getSupportLoaderManager().initLoader(ALBUM_COVER_LOADER,
+                                                  new Bundle(),
+                                                  this);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        this.performUpdateUI();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         this.mLocalBroadcastManager.unregisterReceiver(this.mMusicReceiver);
+        this.getSupportLoaderManager().destroyLoader(ALBUM_COVER_LOADER);
     }
 
     private void initController() {
@@ -249,9 +265,14 @@ public class MusicPlayerActivity extends BaseActivity implements OnClickListener
     }
 
     private void updateCover() {
-        final String articleId = this.mTrackBean.getArticleId();
-        final ImageView coverView = (ImageView) this.findViewById(R.id.article_cover);
-        HttpConstants.displayCover(coverView, articleId, HttpConstants.L_COVER);
+        Bundle bundle = new Bundle();
+        if (this.mTrackBean != null) {
+            String articleId = this.mTrackBean.getArticleId();
+            bundle.putString("articleId", articleId);
+        }
+        this.getSupportLoaderManager().restartLoader(ALBUM_COVER_LOADER,
+                                                     bundle,
+                                                     this);
     }
 
     private void updatePlayButton(int state) {
@@ -304,4 +325,33 @@ public class MusicPlayerActivity extends BaseActivity implements OnClickListener
         }
     }
 
+    protected void performUpdateUI() {
+        final Intent updateUIAction = new Intent(this, MusicService.class);
+        updateUIAction.setAction(MusicService.ACTION_STATE);
+        this.startService(updateUIAction);
+    }
+
+    @Override
+    public Loader<Drawable> onCreateLoader(int loaderId, Bundle args) {
+        switch (loaderId) {
+        case ALBUM_COVER_LOADER:
+            String articleId = args.getString("articleId");
+            return new AlbumCoverLoader(this, articleId, HttpConstants.L_COVER);
+        default:
+            break;
+        }
+        return null;
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Drawable> loader, Drawable data) {
+        final ImageView coverView = (ImageView) this.findViewById(R.id.article_cover);
+        coverView.setImageDrawable(data);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Drawable> loader) {
+        final ImageView coverView = (ImageView) this.findViewById(R.id.article_cover);
+        coverView.setImageDrawable(null);
+    }
 }

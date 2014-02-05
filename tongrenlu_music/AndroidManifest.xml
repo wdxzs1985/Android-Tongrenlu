@@ -26,10 +26,13 @@
             android:screenOrientation="portrait"></activity>
         <activity android:name="MusicPlayerActivity" 
             android:screenOrientation="portrait" 
+            android:taskAffinity=""
+            android:excludeFromRecents="true"
             android:launchMode="singleInstance"></activity>
         <activity android:name="SettingsActivity" ></activity>
         <service android:name="MusicService" android:exported="false">
             <intent-filter>
+                <action android:name="info.tongrenlu.android.MusicService.action.STATE" />
 	            <action android:name="info.tongrenlu.android.MusicService.action.TOGGLE_PLAYBACK" />
                 <action android:name="info.tongrenlu.android.MusicService.action.TOGGLE_LOOP" />
                 <action android:name="info.tongrenlu.android.MusicService.action.TOGGLE_SHUFFLE" />

@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package info.tongrenlu.android.music.fragment;
+package info.tongrenlu.android.music.adapter;
 
-import info.tongrenlu.android.music.adapter.MusicListAdapter;
 import info.tongrenlu.app.HttpConstants;
 import info.tongrenlu.domain.ArticleBean;
 import info.tongrenlu.support.HttpHelper;
@@ -25,8 +24,8 @@ import org.lucasr.smoothie.SimpleItemLoader;
 import uk.co.senab.bitmapcache.BitmapLruCache;
 import uk.co.senab.bitmapcache.CacheableBitmapDrawable;
 import android.content.Context;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.view.View;
 import android.widget.Adapter;
@@ -75,7 +74,7 @@ public class GalleryLoader extends SimpleItemLoader<String, CacheableBitmapDrawa
         if (fromMemory) {
             holder.coverView.setImageDrawable(result);
         } else {
-            BitmapDrawable emptyDrawable = new BitmapDrawable(itemView.getResources());
+            Drawable emptyDrawable = new ShapeDrawable();
             TransitionDrawable fadeInDrawable = new TransitionDrawable(new Drawable[] { emptyDrawable,
                     result });
 

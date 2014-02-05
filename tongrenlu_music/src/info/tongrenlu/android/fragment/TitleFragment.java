@@ -1,4 +1,4 @@
-package info.tongrenlu.android.music.fragment;
+package info.tongrenlu.android.fragment;
 
 import android.support.v4.app.Fragment;
 

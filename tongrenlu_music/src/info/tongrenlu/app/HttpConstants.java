@@ -1,7 +1,6 @@
 package info.tongrenlu.app;
 
 import info.tongrenlu.android.music.SettingsActivity;
-import info.tongrenlu.android.task.ArticleCoverDownloadTask;
 
 import java.io.File;
 import java.io.IOException;
@@ -62,20 +61,6 @@ public class HttpConstants {
             }
         }
         return new File(dirs[0], filename);
-    }
-
-    public static void displayCover(final ImageView view, final String articleId, int size) {
-        view.setTag(articleId);
-        final Context context = view.getContext();
-        final File data = HttpConstants.getCover(context, articleId, size);
-        if (!data.isFile()) {
-            final String url = HttpConstants.getCoverUrl(context,
-                                                         articleId,
-                                                         size);
-            new ArticleCoverDownloadTask(view, articleId).execute(url, data);
-        } else {
-            HttpConstants.setImage(view, data);
-        }
     }
 
     public static void setImage(final ImageView view, final File data) {
