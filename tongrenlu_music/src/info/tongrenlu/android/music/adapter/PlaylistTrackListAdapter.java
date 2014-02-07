@@ -15,10 +15,10 @@ public class PlaylistTrackListAdapter extends CursorAdapter {
     }
 
     @Override
-    public View newView(final Context context,
-                        final Cursor c,
-                        final ViewGroup viewGroup) {
-        final View view = View.inflate(context, R.layout.list_item_track, null);
+    public View newView(final Context context, final Cursor c, final ViewGroup viewGroup) {
+        final View view = View.inflate(context,
+                                       R.layout.playlist_track_list_item_track,
+                                       null);
         this.bindView(view, context, c);
         return view;
     }

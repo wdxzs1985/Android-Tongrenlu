@@ -3,9 +3,7 @@ package info.tongrenlu.android.music.fragment;
 import info.tongrenlu.android.fragment.TitleFragment;
 import info.tongrenlu.android.loader.JSONLoader;
 import info.tongrenlu.android.music.R;
-import info.tongrenlu.android.music.TongrenluApplication;
-import info.tongrenlu.android.music.adapter.GalleryLoader;
-import info.tongrenlu.android.music.adapter.MusicListAdapter;
+import info.tongrenlu.android.music.adapter.MusicGridAdapter;
 import info.tongrenlu.app.HttpConstants;
 import info.tongrenlu.domain.ArticleBean;
 import info.tongrenlu.domain.MusicBean;
@@ -17,15 +15,11 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.lucasr.smoothie.AsyncGridView;
-import org.lucasr.smoothie.ItemManager;
 
-import uk.co.senab.bitmapcache.BitmapLruCache;
 import android.app.Activity;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
@@ -35,8 +29,9 @@ import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.GridView;
 
-public class MusicListFragment extends TitleFragment implements OnScrollListener, OnItemClickListener {
+public class MusicGridFragment extends TitleFragment implements OnScrollListener, OnItemClickListener {
 
     public static final int ALBUM_LIST_LOADER = 2;
 
@@ -44,14 +39,14 @@ public class MusicListFragment extends TitleFragment implements OnScrollListener
 
     private View mProgress = null;
     private View mEmpty = null;
-    private AsyncGridView mListView = null;
-    private MusicListAdapter mAdapter = null;
+    private GridView mListView = null;
+    private MusicGridAdapter mAdapter = null;
 
     private final String mQuery = "";
     private int mPage = 0;
     private boolean mLast = false;
 
-    public MusicListFragment() {
+    public MusicGridFragment() {
         this.setTitle("所有专辑");
     }
 
@@ -68,7 +63,7 @@ public class MusicListFragment extends TitleFragment implements OnScrollListener
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        this.mAdapter = new MusicListAdapter();
+        this.mAdapter = new MusicGridAdapter();
     }
 
     @Override
@@ -78,22 +73,10 @@ public class MusicListFragment extends TitleFragment implements OnScrollListener
                                            false);
         this.mProgress = view.findViewById(android.R.id.progress);
         this.mEmpty = view.findViewById(android.R.id.empty);
-        this.mListView = (AsyncGridView) view.findViewById(android.R.id.list);
+        this.mListView = (GridView) view.findViewById(android.R.id.list);
         this.mListView.setAdapter(this.mAdapter);
         this.mListView.setOnScrollListener(this);
         this.mListView.setOnItemClickListener(this);
-
-        FragmentActivity activity = this.getActivity();
-        TongrenluApplication application = (TongrenluApplication) activity.getApplicationContext();
-        BitmapLruCache cache = application.getBitmapCache();
-        GalleryLoader loader = new GalleryLoader(activity, cache);
-
-        ItemManager.Builder builder = new ItemManager.Builder(loader);
-        builder.setPreloadItemsEnabled(true).setPreloadItemsCount(12);
-        builder.setThreadPoolSize(4);
-
-        this.mListView.setItemManager(builder.build());
-
         return view;
     }
 
@@ -113,7 +96,7 @@ public class MusicListFragment extends TitleFragment implements OnScrollListener
             final Bundle parameters = new Bundle();
             parameters.putString("q", this.mQuery);
             parameters.putString("p",
-                                 String.valueOf(MusicListFragment.this.mPage + 1));
+                                 String.valueOf(MusicGridFragment.this.mPage + 1));
             parameters.putString("s", String.valueOf(HttpConstants.PAGE_SIZE));
             this.getActivity()
                 .getSupportLoaderManager()
@@ -172,37 +155,37 @@ public class MusicListFragment extends TitleFragment implements OnScrollListener
 
         @Override
         public Loader<PaginateSupport> onCreateLoader(int loaderId, Bundle args) {
-            Context context = MusicListFragment.this.getActivity();
+            Context context = MusicGridFragment.this.getActivity();
             final Uri uri = HttpConstants.getMusicListUri(context);
             return new MusicListLoader(context, uri, args);
         }
 
         @Override
         public void onLoadFinished(Loader<PaginateSupport> loader, PaginateSupport data) {
-            if (data != null && data.getItemCount() == 0) {
-                MusicListFragment.this.mProgress.setVisibility(View.GONE);
-                MusicListFragment.this.mListView.setVisibility(View.GONE);
-                MusicListFragment.this.mEmpty.setVisibility(View.VISIBLE);
+            if (data == null || data.getItemCount() == 0) {
+                MusicGridFragment.this.mProgress.setVisibility(View.GONE);
+                MusicGridFragment.this.mListView.setVisibility(View.GONE);
+                MusicGridFragment.this.mEmpty.setVisibility(View.VISIBLE);
             } else {
-                MusicListFragment.this.mProgress.setVisibility(View.GONE);
-                MusicListFragment.this.mEmpty.setVisibility(View.GONE);
-                MusicListFragment.this.mListView.setVisibility(View.VISIBLE);
+                MusicGridFragment.this.mProgress.setVisibility(View.GONE);
+                MusicGridFragment.this.mEmpty.setVisibility(View.GONE);
+                MusicGridFragment.this.mListView.setVisibility(View.VISIBLE);
 
-                List<ArticleBean> items = MusicListFragment.this.mAdapter.getItems();
+                List<ArticleBean> items = MusicGridFragment.this.mAdapter.getItems();
                 for (Object articleBean : data.getItems()) {
                     items.add((ArticleBean) articleBean);
                 }
 
-                MusicListFragment.this.mAdapter.notifyDataSetChanged();
+                MusicGridFragment.this.mAdapter.notifyDataSetChanged();
 
-                MusicListFragment.this.mPage = data.getPage();
-                MusicListFragment.this.mLast = data.isLast();
+                MusicGridFragment.this.mPage = data.getPage();
+                MusicGridFragment.this.mLast = data.isLast();
             }
         }
 
         @Override
         public void onLoaderReset(Loader<PaginateSupport> loader) {
-            MusicListFragment.this.mAdapter.setItems(new ArrayList<ArticleBean>());
+            MusicGridFragment.this.mAdapter.setItems(new ArrayList<ArticleBean>());
         }
     }
 

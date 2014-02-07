@@ -20,16 +20,21 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="PlaylistTrackListActivity" 
+        
+        <activity android:name="PlaylistInfoActivity" 
             android:screenOrientation="portrait"></activity>
+        
         <activity android:name="MusicInfoActivity" 
             android:screenOrientation="portrait"></activity>
+        
         <activity android:name="MusicPlayerActivity" 
             android:screenOrientation="portrait" 
             android:taskAffinity=""
             android:excludeFromRecents="true"
             android:launchMode="singleInstance"></activity>
+        
         <activity android:name="SettingsActivity" ></activity>
+        
         <service android:name="MusicService" android:exported="false">
             <intent-filter>
                 <action android:name="info.tongrenlu.android.MusicService.action.STATE" />
@@ -44,11 +49,20 @@
                 <action android:name="info.tongrenlu.android.MusicService.action.ADD" />
             </intent-filter>
         </service>
-        <service android:name="DownloadService"></service>
+        
+        <service android:name="DownloadService" android:exported="false">
+            <intent-filter>
+                <action android:name="info.tongrenlu.android.DownloadService.action.STOP" />
+                <action android:name="info.tongrenlu.android.DownloadService.action.ADD" />
+            </intent-filter>
+        </service>
+        
         <service android:name="UpdateService"></service>
-        <provider android:name=".provider.DataProvider"
-            android:authorities="info.tongrenlu.android.music.provider"
-            android:exported="false"></provider>
+        
+        <provider android:name=".provider.TrackContentProvider"
+            android:authorities="info.tongrenlu.android.music.track"
+            android:exported="false">
+        </provider>
     </application>
 
 </manifest>

@@ -1,7 +1,7 @@
 package info.tongrenlu.android.music;
 
 import info.tongrenlu.android.fragment.TitleFragmentAdapter;
-import info.tongrenlu.android.music.fragment.MusicListFragment;
+import info.tongrenlu.android.music.fragment.MusicGridFragment;
 import info.tongrenlu.android.music.fragment.PlaylistFragment;
 import info.tongrenlu.app.CommonConstants;
 import info.tongrenlu.domain.ArticleBean;
@@ -14,7 +14,7 @@ import android.widget.Toast;
 
 import com.viewpagerindicator.PageIndicator;
 
-public class MainActivity extends BaseActivity implements MusicListFragment.OnArticleSelectedListener {
+public class MainActivity extends BaseActivity implements MusicGridFragment.OnArticleSelectedListener {
 
     private long mExitTime = 0;
     protected FragmentPagerAdapter mAdapter;
@@ -31,7 +31,7 @@ public class MainActivity extends BaseActivity implements MusicListFragment.OnAr
         final FragmentManager fm = this.getSupportFragmentManager();
         final TitleFragmentAdapter adapter = new TitleFragmentAdapter(fm);
         adapter.addItem(new PlaylistFragment());
-        adapter.addItem(new MusicListFragment());
+        adapter.addItem(new MusicGridFragment());
         this.mAdapter = adapter;
 
         this.mPager = (ViewPager) this.findViewById(R.id.pager);

@@ -2,7 +2,7 @@ package info.tongrenlu.android.music.fragment;
 
 import info.tongrenlu.android.fragment.TitleFragment;
 import info.tongrenlu.android.music.MusicPlayerActivity;
-import info.tongrenlu.android.music.PlaylistTrackListActivity;
+import info.tongrenlu.android.music.PlaylistInfoActivity;
 import info.tongrenlu.android.music.R;
 
 import java.util.ArrayList;
@@ -66,7 +66,7 @@ public class PlaylistFragment extends TitleFragment implements OnItemClickListen
             this.startActivity(activityIntent);
         } else if (itemId == 1) {
             final Intent activityIntent = new Intent(this.getActivity(),
-                                                     PlaylistTrackListActivity.class);
+                                                     PlaylistInfoActivity.class);
             this.startActivity(activityIntent);
         }
     }

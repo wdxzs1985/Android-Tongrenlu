@@ -1,10 +1,10 @@
 package info.tongrenlu.android.music;
 
+import info.tongrenlu.android.music.async.LoadImageCacheTask;
 import info.tongrenlu.android.musicplayer.AudioFocusHelper;
 import info.tongrenlu.android.musicplayer.MusicFocusable;
 import info.tongrenlu.app.HttpConstants;
 import info.tongrenlu.domain.TrackBean;
-import info.tongrenlu.support.HttpHelper;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,7 +12,6 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -28,6 +27,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnBufferingUpdateListener;
@@ -78,7 +78,7 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
     public static final String ACTION_STOP = "info.tongrenlu.android.MusicService.action.STOP";
     public static final String ACTION_SKIP = "info.tongrenlu.android.MusicService.action.SKIP";
     public static final String ACTION_REWIND = "info.tongrenlu.android.MusicService.action.REWIND";
-    public static final String ACTION_SEEK = "info.tongrenlu.android.MusicService.action.SEEK";;
+    public static final String ACTION_SEEK = "info.tongrenlu.android.MusicService.action.SEEK";
     public static final String ACTION_ADD = "info.tongrenlu.android.MusicService.action.ADD";
 
     public static final String EVENT_START = "info.tongrenlu.android.MusicService.EVENT_START";
@@ -183,44 +183,42 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
         String action = intent.getAction();
         if (ACTION_TOGGLE_PLAYBACK.equals(action)) {
             this.processTogglePlaybackRequest();
-            this.progressUpdateUIRequest();
+            this.progressStateRequest();
         } else if (ACTION_PLAY.equals(action)) {
             this.processPlayRequest();
-            this.progressUpdateUIRequest();
+            this.progressStateRequest();
         } else if (ACTION_PAUSE.equals(action)) {
             this.processPauseRequest();
-            this.progressUpdateUIRequest();
+            this.progressStateRequest();
         } else if (ACTION_SKIP.equals(action)) {
             this.processSkipRequest();
-            this.progressUpdateUIRequest();
+            this.progressStateRequest();
         } else if (ACTION_STOP.equals(action)) {
             this.processStopRequest();
         } else if (ACTION_REWIND.equals(action)) {
             this.processRewindRequest();
-            this.progressUpdateUIRequest();
+            this.progressStateRequest();
         } else if (ACTION_ADD.equals(action)) {
             this.processAddRequest(intent);
-            this.progressUpdateUIRequest();
+            this.progressStateRequest();
         } else if (ACTION_SEEK.equals(action)) {
             this.actionSeekTo(intent);
         } else if (ACTION_STATE.equals(action)) {
-            this.progressUpdateUIRequest();
+            this.progressStateRequest();
         }
         return START_NOT_STICKY;
     }
 
-    private void progressUpdateUIRequest() {
+    private void progressStateRequest() {
         Intent intent = new Intent(MusicService.EVENT_UPDATE);
-        intent.putExtra("trackBean", this.mNowPlaying);
         intent.putExtra("state", this.mState);
+        this.mDuration = 0;
+        this.mProgress = 0;
         if (this.mState == STATE_PLAYING || this.mState == STATE_PAUSED) {
             this.mDuration = this.mMediaPlayer.getDuration();
             this.mProgress = this.mMediaPlayer.getCurrentPosition();
-        } else {
-            this.mDuration = 0;
-            this.mProgress = 0;
         }
-
+        intent.putExtra("trackBean", this.mNowPlaying);
         intent.putExtra("duration", this.mDuration);
         intent.putExtra("progress", this.mProgress);
         if (this.mIsStreaming) {
@@ -333,10 +331,6 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
         //
         this.mLocalBroadcastManager.sendBroadcast(new Intent(MusicService.EVENT_STOP));
         this.mLocalBroadcastManager = null;
-        //
-        if (this.mLargeIcon != null) {
-            this.mLargeIcon.recycle();
-        }
 
         final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         sharedPreferences.unregisterOnSharedPreferenceChangeListener(this);
@@ -366,13 +360,11 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
     @Override
     public void onBufferingUpdate(final MediaPlayer mp, final int percent) {
         this.mPercent = percent;
-        this.progressUpdateUIRequest();
-        this.sendNotification();
     }
 
     @Override
     public void onSeekComplete(final MediaPlayer mp) {
-        this.progressUpdateUIRequest();
+        this.progressStateRequest();
         this.sendNotification();
     }
 
@@ -470,10 +462,10 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
         this.mNowPlaying = trackBean;
         this.mDuration = 0;
         this.mPercent = 0;
+        this.decodeLargeIcon();
+        this.sendNotification();
 
         final String articleId = trackBean.getArticleId();
-        this.decodeLargeIcon(articleId);
-
         final String fileId = trackBean.getFileId();
         Uri data = null;
         final File source = HttpConstants.getMp3(this, articleId, fileId);
@@ -485,28 +477,26 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
             data = Uri.parse(url);
             this.mIsStreaming = true;
         }
-        this.sendNotification();
         this.playMusic(data);
     }
 
-    private void decodeLargeIcon(final String articleId) {
-        final String url = HttpConstants.getCoverUrl(this,
-                                                     articleId,
-                                                     HttpConstants.S_COVER);
+    private void decodeLargeIcon() {
+        this.mLargeIcon = null;
+        final String articleId = this.mNowPlaying.getArticleId();
         final TongrenluApplication application = (TongrenluApplication) this.getApplication();
         final BitmapLruCache bitmapCache = application.getBitmapCache();
-        final MusicService service = this;
-        new Thread(new Runnable() {
+        final String url = HttpConstants.getCoverUrl(this,
+                                                     articleId,
+                                                     HttpConstants.XS_COVER);
+        new LoadImageCacheTask() {
 
             @Override
-            public void run() {
-                CacheableBitmapDrawable wrapper = bitmapCache.get(url);
-                if (wrapper == null) {
-                    wrapper = bitmapCache.put(url, HttpHelper.loadImage(url));
-                }
-                service.mLargeIcon = wrapper.getBitmap();
+            protected void onPostExecute(Drawable result) {
+                super.onPostExecute(result);
+                MusicService.this.mLargeIcon = ((CacheableBitmapDrawable) result).getBitmap();
             }
-        }).start();
+
+        }.execute(bitmapCache, url);
     }
 
     private void playMusic(final Uri data) {
@@ -596,7 +586,6 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
     protected void sendNotification() {
         final Context context = this.getApplicationContext();
         final Intent intent = new Intent(context, MusicPlayerActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         PendingIntent contentIntent = PendingIntent.getActivity(context,
                                                                 0,
                                                                 intent,
@@ -609,29 +598,11 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
         String contentTitle = "正在播放:" + this.mNowPlaying.getTitle();
         builder.setTicker(contentTitle);
         builder.setContentTitle(contentTitle);
-        if (CollectionUtils.isEmpty(this.mTrackList)) {
-            builder.setContentText(this.mNowPlaying.getArtist());
-        } else {
-            builder.setNumber(this.mTrackList.size());
-            NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
-            inboxStyle.setBigContentTitle(contentTitle);
-            for (TrackBean track : this.mPlayList) {
-                String line = String.format("%s - %s",
-                                            track.getTitle(),
-                                            track.getArtist());
-                inboxStyle.addLine(line);
-            }
-            builder.setStyle(inboxStyle);
-        }
+        builder.setContentText(this.mNowPlaying.getArtist());
+        builder.setNumber(this.mTrackList.size());
         if (this.mLargeIcon != null) {
             builder.setLargeIcon(this.mLargeIcon);
         }
-        if (STATE_PLAYING == this.mState) {
-            builder.setProgress(this.mDuration, this.mProgress, false);
-        } else {
-            builder.setProgress(0, 0, true);
-        }
-
         final Intent skipAction = new Intent(context, MusicService.class);
         skipAction.setAction(MusicService.ACTION_SKIP);
         final PendingIntent skipActionIntent = PendingIntent.getService(context,
@@ -730,11 +701,6 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
         // we can also release the Wifi lock, if we're holding it
         if (this.mWifiLock.isHeld()) {
             this.mWifiLock.release();
-        }
-
-        if (this.mLargeIcon != null) {
-            this.mLargeIcon.recycle();
-            this.mLargeIcon = null;
         }
     }
 

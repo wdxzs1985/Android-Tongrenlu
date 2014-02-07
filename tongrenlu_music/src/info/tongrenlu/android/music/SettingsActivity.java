@@ -1,6 +1,6 @@
 package info.tongrenlu.android.music;
 
-import info.tongrenlu.android.music.provider.DataProvider;
+import info.tongrenlu.android.music.provider.TrackContentProvider;
 import info.tongrenlu.app.HttpConstants;
 
 import java.io.File;
@@ -140,7 +140,7 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
                     dialog.show();
 
                     final ContentResolver cr = context.getContentResolver();
-                    final Cursor c = cr.query(DataProvider.URI_TRACK,
+                    final Cursor c = cr.query(TrackContentProvider.URI,
                                               null,
                                               null,
                                               null,
@@ -255,7 +255,7 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
 
     private void doClearData() {
         HttpConstants.clearMp3File(this);
-        this.getContentResolver().delete(DataProvider.URI_TRACK, null, null);
+        this.getContentResolver().delete(TrackContentProvider.URI, null, null);
         Toast.makeText(this, R.string.clear_complete, Toast.LENGTH_SHORT)
              .show();
     }

@@ -1,8 +1,8 @@
 package info.tongrenlu.android.music;
 
-import info.tongrenlu.android.loader.AlbumCoverLoader;
 import info.tongrenlu.android.loader.JSONLoader;
 import info.tongrenlu.android.music.adapter.MusicTrackListAdapter;
+import info.tongrenlu.android.music.async.LoadImageCacheTask;
 import info.tongrenlu.app.HttpConstants;
 import info.tongrenlu.domain.TrackBean;
 
@@ -13,9 +13,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import uk.co.senab.bitmapcache.BitmapLruCache;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.TransitionDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
@@ -48,6 +51,7 @@ public class MusicInfoActivity extends BaseActivity implements ActionSlideExpand
         final String title = intent.getStringExtra("title");
 
         this.initAritcleTitle(title);
+        this.initArticleCover(articleId);
 
         this.mAdapter = new MusicTrackListAdapter();
 
@@ -69,11 +73,6 @@ public class MusicInfoActivity extends BaseActivity implements ActionSlideExpand
         Bundle bundle = new Bundle();
         bundle.putString("articleId", articleId);
 
-        this.getSupportLoaderManager()
-            .initLoader(ALBUM_COVER_LOADER,
-                        bundle,
-                        new AlbumCoverLoaderCallback());
-
         this.mProgress.setVisibility(View.VISIBLE);
         this.mListView.setVisibility(View.GONE);
         this.mEmpty.setVisibility(View.GONE);
@@ -81,6 +80,28 @@ public class MusicInfoActivity extends BaseActivity implements ActionSlideExpand
             .initLoader(ALBUM_INFO_LOADER,
                         bundle,
                         new TrackListLoaderCallback());
+    }
+
+    private void initArticleCover(String articleId) {
+        final TongrenluApplication application = (TongrenluApplication) this.getApplication();
+        final BitmapLruCache bitmapCache = application.getBitmapCache();
+        final String url = HttpConstants.getCoverUrl(application,
+                                                     articleId,
+                                                     HttpConstants.S_COVER);
+        final ImageView coverView = (ImageView) this.findViewById(R.id.article_cover);
+        new LoadImageCacheTask() {
+
+            @Override
+            protected void onPostExecute(Drawable result) {
+                super.onPostExecute(result);
+                Drawable emptyDrawable = new ShapeDrawable();
+                TransitionDrawable fadeInDrawable = new TransitionDrawable(new Drawable[] { emptyDrawable,
+                        result });
+                coverView.setImageDrawable(result);
+                fadeInDrawable.startTransition(200);
+            }
+
+        }.execute(bitmapCache, url);
     }
 
     @Override
@@ -97,14 +118,14 @@ public class MusicInfoActivity extends BaseActivity implements ActionSlideExpand
 
     @Override
     public void onClick(View itemView, View clickedView, int position) {
+        final TrackBean trackBean = (TrackBean) this.mListView.getItemAtPosition(position);
         switch (clickedView.getId()) {
         case R.id.item:
         case R.id.action_play:
-            final TrackBean trackBean = (TrackBean) this.mListView.getItemAtPosition(position);
             this.playTrack(trackBean);
             break;
         case R.id.action_download:
-            System.out.println("TODO download");
+            this.downloadTrack(trackBean);
             break;
         default:
             break;
@@ -120,8 +141,7 @@ public class MusicInfoActivity extends BaseActivity implements ActionSlideExpand
                 this.playTrack(items);
                 break;
             case R.id.action_download_all:
-                // TODO download
-                System.out.println("TODO download");
+                this.downloadTrack(items);
                 break;
             default:
                 break;
@@ -148,35 +168,18 @@ public class MusicInfoActivity extends BaseActivity implements ActionSlideExpand
         this.startActivity(activityIntent);
     }
 
-    private class AlbumCoverLoaderCallback implements LoaderCallbacks<Drawable> {
+    protected void downloadTrack(final TrackBean trackBean) {
+        final Intent serviceIntent = new Intent(this, DownloadService.class);
+        serviceIntent.setAction(DownloadService.ACTION_ADD);
+        serviceIntent.putExtra("trackBean", trackBean);
+        this.startService(serviceIntent);
+    }
 
-        @Override
-        public Loader<Drawable> onCreateLoader(int loaderId, Bundle args) {
-            switch (loaderId) {
-            case ALBUM_COVER_LOADER:
-                String articleId = args.getString("articleId");
-                return new AlbumCoverLoader(MusicInfoActivity.this,
-                                            articleId,
-                                            HttpConstants.M_COVER);
-            default:
-                break;
-            }
-            return null;
-        }
-
-        @Override
-        public void onLoadFinished(Loader<Drawable> loader, Drawable data) {
-            if (loader instanceof AlbumCoverLoader) {
-                final ImageView coverView = (ImageView) MusicInfoActivity.this.findViewById(R.id.article_cover);
-                coverView.setImageDrawable(data);
-            }
-        }
-
-        @Override
-        public void onLoaderReset(Loader<Drawable> loader) {
-            final ImageView coverView = (ImageView) MusicInfoActivity.this.findViewById(R.id.article_cover);
-            coverView.setImageDrawable(null);
-        }
+    protected void downloadTrack(final ArrayList<TrackBean> items) {
+        final Intent serviceIntent = new Intent(this, DownloadService.class);
+        serviceIntent.setAction(DownloadService.ACTION_ADD);
+        serviceIntent.putParcelableArrayListExtra("trackBeanList", items);
+        this.startService(serviceIntent);
     }
 
     private class TrackListLoaderCallback implements LoaderCallbacks<ArrayList<TrackBean>> {

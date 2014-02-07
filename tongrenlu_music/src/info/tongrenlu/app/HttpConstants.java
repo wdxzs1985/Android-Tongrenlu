@@ -28,6 +28,10 @@ public class HttpConstants {
 
     public static final int PAGE_SIZE = 50;
 
+    public static final int XXS_COVER = 60;
+
+    public static final int XS_COVER = 90;
+
     public static final int S_COVER = 120;
 
     public static final int M_COVER = 180;

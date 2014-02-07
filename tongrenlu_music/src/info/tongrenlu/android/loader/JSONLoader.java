@@ -1,8 +1,6 @@
 package info.tongrenlu.android.loader;
 
-import info.tongrenlu.android.task.RESTClient;
-import info.tongrenlu.android.task.RESTClient.HTTPVerb;
-import info.tongrenlu.android.task.RESTClient.RESTResponse;
+import info.tongrenlu.support.RESTClient;
 
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;

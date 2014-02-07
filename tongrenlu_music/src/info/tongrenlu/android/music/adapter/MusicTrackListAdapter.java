@@ -44,7 +44,7 @@ public class MusicTrackListAdapter extends BaseAdapter {
         final Context context = parent.getContext();
         if (view == null) {
             view = View.inflate(context,
-                                R.layout.expandable_list_item_track,
+                                R.layout.music_track_list_item_track,
                                 null);
         }
         final TrackBean trackBean = this.getItem(position);

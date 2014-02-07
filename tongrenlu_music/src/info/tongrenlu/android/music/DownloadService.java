@@ -1,230 +1,151 @@
 package info.tongrenlu.android.music;
 
-import info.tongrenlu.android.music.provider.DataProvider;
-import info.tongrenlu.android.task.FileDownloadTask;
+import info.tongrenlu.android.downloadmanager.DownloadListener;
+import info.tongrenlu.android.downloadmanager.DownloadManager;
+import info.tongrenlu.android.downloadmanager.DownloadTask;
+import info.tongrenlu.android.downloadmanager.DownloadTaskInfo;
+import info.tongrenlu.android.music.provider.TrackContentProvider;
 import info.tongrenlu.app.HttpConstants;
 import info.tongrenlu.domain.TrackBean;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
+import java.util.List;
 
-import android.app.NotificationManager;
+import org.apache.commons.collections.CollectionUtils;
+
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.ServiceCompat;
+import android.support.v4.content.LocalBroadcastManager;
 
-public class DownloadService extends Service {
+public class DownloadService extends Service implements DownloadListener {
 
     public static final int NOTIFICATION_ID = 2;
 
-    public static final String ACTION_ADD = "info.tongrenlu.android.DownloadService.ACTION_ADD";
+    public static final String ACTION_ADD = "info.tongrenlu.android.music.DownloadService.action.add";
+    public static final String ACTION_REMOVE = "info.tongrenlu.android.music.DownloadService.action.remove";
+    public static final String ACTION_START = "info.tongrenlu.android.music.DownloadService.action.start";
+    public static final String ACTION_STOP = "info.tongrenlu.android.music.DownloadService.action.stop";
 
-    public static void downloadTrack(final Context context, final TrackBean... trackBean) {
-        if (trackBean != null && trackBean.length > 0) {
-            final ArrayList<TrackBean> items = new ArrayList<TrackBean>();
-            Collections.addAll(items, trackBean);
-            downloadTrack(context, items);
-        }
-    }
+    public static final String EVENT_UPDATE = "info.tongrenlu.android.music.DownloadService.event.update";
 
-    public static void downloadTrack(final Context context, final ArrayList<TrackBean> items) {
-        if (items != null && !items.isEmpty()) {
-            final Intent serviceIntent = new Intent(context,
-                                                    DownloadService.class);
-            serviceIntent.setAction(DownloadService.ACTION_ADD);
-            serviceIntent.putParcelableArrayListExtra("trackBeanList", items);
-            context.startService(serviceIntent);
-        }
-    }
-
-    private LinkedList<TrackBean> mDownloadList = null;
-    private TrackBean mDownloading = null;
-    private Bitmap mLargeIcon = null;
-    private Uri newUrl = null;
-    private int size = 0;
-    private int loaded = 0;
-
-    private NotificationManager mNotifyManager = null;
-    private NotificationCompat.Builder mBuilder = null;
+    private LocalBroadcastManager mLocalBroadcastManager;
+    private DownloadManager mDownloadManager;
 
     @Override
     public void onCreate() {
-        super.onCreate();
-        this.mDownloadList = new LinkedList<TrackBean>();
-        this.mNotifyManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
-        this.mBuilder = new NotificationCompat.Builder(this);
-        final Intent intent = new Intent(this, MusicPlayerActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        final PendingIntent contentIntent = PendingIntent.getActivity(this,
-                                                                      0,
-                                                                      intent,
-                                                                      PendingIntent.FLAG_UPDATE_CURRENT);
-        this.mBuilder.setContentIntent(contentIntent);
-        this.mBuilder.setSmallIcon(R.drawable.ic_launcher)
-                     .setAutoCancel(false)
-                     .setOngoing(true);
+        TongrenluApplication app = (TongrenluApplication) this.getApplication();
+        this.mLocalBroadcastManager = LocalBroadcastManager.getInstance(app);
+        this.mDownloadManager = app.getDownloadManager();
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        this.mDownloadList.clear();
-        this.mDownloadList = null;
-        this.mNotifyManager = null;
+        this.stopForeground(true);
+        this.mLocalBroadcastManager = null;
+        this.mDownloadManager.shutdown();
+        this.mDownloadManager = null;
     }
 
     @Override
     public int onStartCommand(final Intent intent, final int flags, final int startId) {
-        final String action = intent.getAction();
-        if (DownloadService.ACTION_ADD.equals(action)) {
-            final ArrayList<TrackBean> trackBeanList = intent.getParcelableArrayListExtra("trackBeanList");
-            for (final TrackBean trackBean : trackBeanList) {
-                this.addToDownloadList(trackBean);
+        String action = intent.getAction();
+        if (ACTION_ADD.equals(action)) {
+            this.processAddRequest(intent);
+        } else if (ACTION_STOP.equals(action)) {
+            this.stopSelf();
+        }
+        return START_NOT_STICKY;
+    }
+
+    private void processAddRequest(Intent intent) {
+        if (intent.hasExtra("trackBean")) {
+            TrackBean trackBean = intent.getParcelableExtra("trackBean");
+            this.addTask(trackBean);
+        } else if (intent.hasExtra("trackBeanList")) {
+            List<TrackBean> trackBeanList = intent.getParcelableArrayListExtra("trackBeanList");
+            for (TrackBean trackBean : trackBeanList) {
+                this.addTask(trackBean);
             }
         }
-        this.execute();
-        return ServiceCompat.START_STICKY;
+        this.mDownloadManager.start();
+        this.performEventUpdate();
     }
 
-    protected void addToDownloadList(final TrackBean trackBean) {
-        final String fileId = trackBean.getFileId();
-        final Cursor c = this.getContentResolver()
-                             .query(DataProvider.URI_TRACK,
-                                    null,
-                                    "file_id = ?",
-                                    new String[] { fileId },
-                                    null);
-        if (!c.moveToFirst()) {
-            this.mDownloadList.addLast(trackBean);
-        }
-        c.close();
+    private void addTask(TrackBean trackBean) {
+        Context context = this.getApplicationContext();
+        String articleId = trackBean.getArticleId();
+        String fileId = trackBean.getFileId();
+
+        String from = HttpConstants.getMp3Url(context, articleId, fileId);
+        String to = HttpConstants.getMp3(context, articleId, fileId)
+                                 .getAbsolutePath();
+
+        MusicDownloadTaskInfo taskinfo = new MusicDownloadTaskInfo();
+        taskinfo.setTrackBean(trackBean);
+        taskinfo.setFrom(from);
+        taskinfo.setTo(to);
+        DownloadTask task = new DownloadTask(taskinfo);
+        task.registerListener(this);
+        this.mDownloadManager.addTask(task);
     }
 
-    private void execute() {
-        if (this.mDownloading == null) {
-            if (!this.mDownloadList.isEmpty()) {
-                this.mDownloading = this.mDownloadList.pollFirst();
-                this.executeDownload();
-            } else {
-                this.mNotifyManager.cancel(this.hashCode());
+    private void performEventUpdate() {
+        Intent intent = new Intent(EVENT_UPDATE);
+        this.mLocalBroadcastManager.sendBroadcast(intent);
+    }
+
+    protected void sendNotification(DownloadTaskInfo taskinfo) {
+        final Context context = this.getApplicationContext();
+        // final Intent intent = new Intent(context, MusicPlayerActivity.class);
+        // intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        // PendingIntent contentIntent = PendingIntent.getActivity(context,
+        // 0,
+        // intent,
+        // PendingIntent.FLAG_UPDATE_CURRENT);
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
+        // builder.setContentIntent(contentIntent);
+        builder.setSmallIcon(R.drawable.ic_launcher);
+        builder.setOngoing(true);
+        builder.setAutoCancel(true);
+        String contentTitle = "正在播放:" + taskinfo.getTo();
+        builder.setTicker(contentTitle);
+        builder.setContentTitle(contentTitle);
+
+        List<DownloadTask> tasks = this.mDownloadManager.getTasks();
+        if (CollectionUtils.isNotEmpty(tasks)) {
+            builder.setNumber(tasks.size());
+            NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
+            inboxStyle.setBigContentTitle(contentTitle);
+            for (DownloadTask iTask : tasks) {
+                String line = String.format("%s - %s",
+                                            iTask.getTaskinfo().getTo(),
+                                            iTask.getStatus().toString());
+                inboxStyle.addLine(line);
             }
+            builder.setStyle(inboxStyle);
         }
-    }
+        builder.setProgress(100, taskinfo.getProgress(), false);
+        builder.setWhen(System.currentTimeMillis());
 
-    protected void executeDownload() {
-        final String articleId = this.mDownloading.getArticleId();
-        final String fileId = this.mDownloading.getFileId();
-        final String spec = HttpConstants.getMp3Url(this, articleId, fileId);
-        final File file = HttpConstants.getMp3(this, articleId, fileId);
+        final Intent stopAction = new Intent(context, DownloadService.class);
+        stopAction.setAction(ACTION_STOP);
+        final PendingIntent stopActionIntent = PendingIntent.getService(context,
+                                                                        0,
+                                                                        stopAction,
+                                                                        PendingIntent.FLAG_UPDATE_CURRENT);
+        builder.addAction(R.drawable.av_stop,
+                          context.getString(R.string.player_stop),
+                          stopActionIntent);
+        builder.setWhen(System.currentTimeMillis());
 
-        final TrackDownloadTask task = new TrackDownloadTask();
-        task.execute(spec, file);
-    }
-
-    class TrackDownloadTask extends FileDownloadTask {
-
-        @Override
-        protected void onPreExecute() {
-            final String articleId = DownloadService.this.mDownloading.getArticleId();
-            DownloadService.this.size = 0;
-            DownloadService.this.loaded = 0;
-
-            final ContentValues values = new ContentValues();
-            values.put("article_id", articleId);
-            values.put("file_id", DownloadService.this.mDownloading.getFileId());
-            values.put("title", DownloadService.this.mDownloading.getTitle());
-            values.put("artist", DownloadService.this.mDownloading.getArtist());
-            values.put("size", DownloadService.this.size);
-            values.put("loaded", DownloadService.this.loaded);
-            DownloadService.this.newUrl = DownloadService.this.getContentResolver()
-                                                              .insert(DataProvider.URI_TRACK,
-                                                                      values);
-
-            final String downloading = "正在下载:";
-            final String title = DownloadService.this.mDownloading.getTitle();
-            DownloadService.this.decodeLargeIcon(articleId);
-            DownloadService.this.mBuilder.setTicker(downloading + title)
-                                         .setContentTitle(downloading)
-                                         .setContentText(title)
-                                         .setLargeIcon(DownloadService.this.mLargeIcon);
-            DownloadService.this.sendNotification();
-        }
-
-        @Override
-        protected void onProgressUpdate(final Long... values) {
-            DownloadService.this.loaded = values[0].intValue();
-            DownloadService.this.size = values[1].intValue();
-        }
-
-        @Override
-        protected void onPostExecute(final File result) {
-            if (DownloadService.this.loaded > 0 && DownloadService.this.loaded == DownloadService.this.size) {
-                final ContentValues contentValues = new ContentValues();
-                contentValues.put("loaded", DownloadService.this.loaded);
-                contentValues.put("size", DownloadService.this.size);
-                DownloadService.this.getContentResolver()
-                                    .update(DownloadService.this.newUrl,
-                                            contentValues,
-                                            null,
-                                            null);
-                DownloadService.this.reset();
-                DownloadService.this.execute();
-            } else {
-                DownloadService.this.getContentResolver()
-                                    .delete(DownloadService.this.newUrl,
-                                            null,
-                                            null);
-                DownloadService.this.reset();
-                DownloadService.this.execute();
-            }
-        }
-    }
-
-    protected void decodeLargeIcon(final String articleId) {
-        if (this.mLargeIcon != null) {
-            this.mLargeIcon.recycle();
-            this.mLargeIcon = null;
-        }
-
-        final File coverFile = HttpConstants.getCover(this,
-                                                      articleId,
-                                                      HttpConstants.S_COVER);
-        final BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inSampleSize = 4;
-        if (coverFile.isFile()) {
-            this.mLargeIcon = BitmapFactory.decodeFile(coverFile.getAbsolutePath(),
-                                                       options);
-        } else {
-            this.mLargeIcon = BitmapFactory.decodeResource(this.getResources(),
-                                                           R.drawable.default_120,
-                                                           options);
-        }
-    }
-
-    protected void reset() {
-        if (this.mLargeIcon != null) {
-            this.mLargeIcon.recycle();
-            this.mLargeIcon = null;
-        }
-        this.mDownloading = null;
-    }
-
-    protected void sendNotification() {
-        this.mBuilder.setWhen(System.currentTimeMillis());
-        // 获取通知栏系统服务对象
-        this.mNotifyManager.notify(this.hashCode(),
-                                   this.mBuilder.getNotification());
+        this.startForeground(NOTIFICATION_ID, builder.build());
     }
 
     @Override
@@ -232,4 +153,73 @@ public class DownloadService extends Service {
         return null;
     }
 
+    @Override
+    public void onDownloadStart(DownloadTaskInfo taskinfo) {
+        MusicDownloadTaskInfo taskinfo2 = (MusicDownloadTaskInfo) taskinfo;
+        TrackBean trackBean = taskinfo2.getTrackBean();
+        final ContentValues values = new ContentValues();
+
+        ContentResolver contentResolver = this.getContentResolver();
+        contentResolver.delete(TrackContentProvider.URI,
+                               "article_id = ? and file_id = ?",
+                               new String[] { trackBean.getArticleId(),
+                                       trackBean.getFileId() });
+
+        values.put("article_id", trackBean.getArticleId());
+        values.put("file_id", trackBean.getFileId());
+        values.put("title", trackBean.getTitle());
+        values.put("artist", trackBean.getArtist());
+        values.put("size", taskinfo2.getTotal());
+        values.put("loaded", taskinfo2.getRead());
+        Uri uri = contentResolver.insert(TrackContentProvider.URI, values);
+        taskinfo2.setUri(uri);
+    }
+
+    @Override
+    public void onDownloadCancel(DownloadTaskInfo taskinfo) {
+        MusicDownloadTaskInfo taskinfo2 = (MusicDownloadTaskInfo) taskinfo;
+        this.getContentResolver().delete(taskinfo2.getUri(), null, null);
+    }
+
+    @Override
+    public void onDownloadFinish(DownloadTaskInfo taskinfo) {
+        MusicDownloadTaskInfo taskinfo2 = (MusicDownloadTaskInfo) taskinfo;
+        final ContentValues values = new ContentValues();
+        values.put("size", taskinfo2.getTotal());
+        values.put("loaded", taskinfo2.getRead());
+        this.getContentResolver()
+            .update(taskinfo2.getUri(), values, null, null);
+    }
+
+    @Override
+    public void onDownloadProgressUpdate(DownloadTaskInfo taskinfo) {
+        MusicDownloadTaskInfo taskinfo2 = (MusicDownloadTaskInfo) taskinfo;
+        TrackBean trackBean = taskinfo2.getTrackBean();
+        System.out.println(String.format("%s is downloading. %d%% (%d / %d)",
+                                         trackBean.getTitle(),
+                                         taskinfo.getProgress(),
+                                         taskinfo.getRead(),
+                                         taskinfo.getTotal()));
+    }
+
+    public static class MusicDownloadTaskInfo extends DownloadTaskInfo {
+        private TrackBean mTrackBean = null;
+        private Uri mUri = null;
+
+        public TrackBean getTrackBean() {
+            return this.mTrackBean;
+        }
+
+        public void setTrackBean(TrackBean trackBean) {
+            this.mTrackBean = trackBean;
+        }
+
+        public Uri getUri() {
+            return this.mUri;
+        }
+
+        public void setUri(Uri uri) {
+            this.mUri = uri;
+        }
+    }
 }

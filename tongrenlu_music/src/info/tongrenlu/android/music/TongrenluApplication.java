@@ -1,16 +1,9 @@
 package info.tongrenlu.android.music;
 
-import java.io.File;
+import info.tongrenlu.android.downloadmanager.DownloadManager;
+import info.tongrenlu.android.downloadmanager.DownloadManagerImpl;
 
-import org.apache.http.client.CookieStore;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.params.ClientPNames;
-import org.apache.http.client.params.CookiePolicy;
-import org.apache.http.client.protocol.ClientContext;
-import org.apache.http.impl.client.BasicCookieStore;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.protocol.BasicHttpContext;
-import org.apache.http.protocol.HttpContext;
+import java.io.File;
 
 import uk.co.senab.bitmapcache.BitmapLruCache;
 import android.app.Application;
@@ -22,40 +15,23 @@ import android.content.pm.PackageManager.NameNotFoundException;
 
 public class TongrenluApplication extends Application {
 
-    public static HttpClient getApplicationClient() {
-        final HttpClient client = new DefaultHttpClient();
-        client.getParams().setParameter(ClientPNames.COOKIE_POLICY,
-                                        CookiePolicy.BROWSER_COMPATIBILITY);
-        return client;
-    }
-
     public static int VERSION_CODE = 0;
     public static String VERSION_NAME = "unknown";
 
-    private boolean init = false;
     private BitmapLruCache mBitmapCache = null;
+    private DownloadManager mDownloadManager = null;
 
     @Override
     public void onCreate() {
-        if (!this.init) {
-            this.init = true;
-            this.clearNotification();
-            this.initClient();
-            this.initPackageInfo(this);
-            this.initBitmapCache(this);
-        }
+        this.clearNotification();
+        this.initPackageInfo(this);
+        this.initBitmapCache(this);
+        this.initDownloadManager(this);
     }
 
     private void clearNotification() {
         final NotificationManager notificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.cancelAll();
-    }
-
-    private void initClient() {
-        final CookieStore cookieStore = new BasicCookieStore();
-        final HttpContext localContext = new BasicHttpContext();
-        // Bind custom cookie store to the local context
-        localContext.setAttribute(ClientContext.COOKIE_STORE, cookieStore);
     }
 
     private void initPackageInfo(final Context context) {
@@ -86,4 +62,11 @@ public class TongrenluApplication extends Application {
         return this.mBitmapCache;
     }
 
+    private void initDownloadManager(Context context) {
+        this.mDownloadManager = new DownloadManagerImpl(1);
+    }
+
+    public DownloadManager getDownloadManager() {
+        return this.mDownloadManager;
+    }
 }
