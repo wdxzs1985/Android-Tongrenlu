@@ -80,6 +80,7 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
     public static final String ACTION_REWIND = "info.tongrenlu.android.MusicService.action.REWIND";
     public static final String ACTION_SEEK = "info.tongrenlu.android.MusicService.action.SEEK";
     public static final String ACTION_ADD = "info.tongrenlu.android.MusicService.action.ADD";
+    public static final String ACTION_APPEND = "info.tongrenlu.android.MusicService.action.APPEND";
 
     public static final String EVENT_START = "info.tongrenlu.android.MusicService.EVENT_START";
     public static final String EVENT_UPDATE = "info.tongrenlu.android.MusicService.EVENT_UPDATE";
@@ -201,6 +202,9 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
         } else if (ACTION_ADD.equals(action)) {
             this.processAddRequest(intent);
             this.progressStateRequest();
+        } else if (ACTION_APPEND.equals(action)) {
+            this.processAppendRequest(intent);
+            this.progressStateRequest();
         } else if (ACTION_SEEK.equals(action)) {
             this.actionSeekTo(intent);
         } else if (ACTION_STATE.equals(action)) {
@@ -291,15 +295,29 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
 
     private void processAddRequest(Intent intent) {
         this.tryToGetAudioFocus();
+        this.mNowPlaying = null;
         if (intent.hasExtra("trackBean")) {
-            TrackBean trackBean = intent.getParcelableExtra("trackBean");
-            this.actionReset(trackBean);
+            this.mNowPlaying = intent.getParcelableExtra("trackBean");
         } else if (intent.hasExtra("trackBeanList")) {
             List<TrackBean> trackBeanList = intent.getParcelableArrayListExtra("trackBeanList");
             this.actionInitTracklist(trackBeanList);
             final int position = intent.getIntExtra("position", 0);
             final int flag = this.getShuffleFlag();
             this.actionInitPlaylist(position, flag);
+            this.mNowPlaying = this.mPlayList.pollFirst();
+        }
+        this.actionReset(this.mNowPlaying);
+    }
+
+    private void processAppendRequest(Intent intent) {
+        this.tryToGetAudioFocus();
+        if (intent.hasExtra("trackBean")) {
+            TrackBean trackBean = intent.getParcelableExtra("trackBean");
+            this.mTrackList.add(trackBean);
+        }
+        final int flag = this.getShuffleFlag();
+        this.actionInitPlaylist(this.mTrackList.size() - 1, flag);
+        if (this.mState != STATE_PLAYING) {
             this.actionReset(this.mPlayList.pollFirst());
         }
     }
@@ -494,6 +512,7 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
             protected void onPostExecute(Drawable result) {
                 super.onPostExecute(result);
                 MusicService.this.mLargeIcon = ((CacheableBitmapDrawable) result).getBitmap();
+                MusicService.this.sendNotification();
             }
 
         }.execute(bitmapCache, url);
@@ -556,7 +575,7 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
         }
         if (this.mPlayList.isEmpty()) {
             final int flag = this.getLoopFlag();
-            if (flag != MusicService.FLAG_LOOP_ALL) {
+            if (flag == MusicService.FLAG_LOOP_ALL) {
                 this.mPlayList.addAll(this.mHistoryList);
                 this.mHistoryList.clear();
             } else {

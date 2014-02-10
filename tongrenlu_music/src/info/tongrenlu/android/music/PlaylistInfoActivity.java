@@ -32,6 +32,8 @@ import com.tjerkw.slideexpandable.library.ActionSlideExpandableListView;
 
 public class PlaylistInfoActivity extends BaseActivity implements ActionSlideExpandableListView.OnActionClickListener, LoaderCallbacks<Cursor> {
 
+    public static final int PLAYLIST_LOADER_ID = 0;
+
     private View mProgress = null;
     private View mEmpty = null;
     private ActionSlideExpandableListView mListView = null;
@@ -42,12 +44,6 @@ public class PlaylistInfoActivity extends BaseActivity implements ActionSlideExp
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        this.contentObserver = new ContentObserver(new Handler()) {
-            @Override
-            public void onChange(final boolean selfChange) {
-                super.onChange(selfChange);
-            }
-        };
         this.mAdapter = new PlaylistTrackListAdapter(this, null);
 
         this.setContentView(R.layout.activity_playlist_info);
@@ -63,14 +59,29 @@ public class PlaylistInfoActivity extends BaseActivity implements ActionSlideExp
 
         this.registerForContextMenu(this.mListView);
         final Bundle args = new Bundle();
-        this.getSupportLoaderManager().initLoader(0, args, this);
+        this.getSupportLoaderManager().initLoader(PLAYLIST_LOADER_ID,
+                                                  args,
+                                                  this);
+
+        this.contentObserver = new ContentObserver(new Handler()) {
+            @Override
+            public void onChange(final boolean selfChange) {
+                super.onChange(selfChange);
+                PlaylistInfoActivity.this.getSupportLoaderManager()
+                                         .getLoader(PLAYLIST_LOADER_ID)
+                                         .onContentChanged();
+            }
+        };
+        this.getContentResolver()
+            .registerContentObserver(TrackContentProvider.URI,
+                                     true,
+                                     this.contentObserver);
     }
 
     @Override
     public Loader<Cursor> onCreateLoader(final int id, final Bundle args) {
         final CursorLoader loader = new CursorLoader(this);
         loader.setUri(TrackContentProvider.URI);
-        loader.onContentChanged();
         return loader;
     }
 
@@ -94,26 +105,11 @@ public class PlaylistInfoActivity extends BaseActivity implements ActionSlideExp
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-        this.getContentResolver()
-            .registerContentObserver(TrackContentProvider.URI,
-                                     true,
-                                     this.contentObserver);
-        this.contentObserver.dispatchChange(true, TrackContentProvider.URI);
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        this.getContentResolver()
-            .unregisterContentObserver(this.contentObserver);
-    }
-
-    @Override
     public void onDestroy() {
         super.onDestroy();
-        this.getSupportLoaderManager().destroyLoader(0);
+        this.getContentResolver()
+            .unregisterContentObserver(this.contentObserver);
+        this.getSupportLoaderManager().destroyLoader(PLAYLIST_LOADER_ID);
     }
 
     public void onDialogPositiveClick(final long id, final TrackBean trackBean) {

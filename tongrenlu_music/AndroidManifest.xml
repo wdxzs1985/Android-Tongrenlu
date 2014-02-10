@@ -47,6 +47,7 @@
 	            <action android:name="info.tongrenlu.android.MusicService.action.REWIND" />
 	            <action android:name="info.tongrenlu.android.MusicService.action.STOP" />
                 <action android:name="info.tongrenlu.android.MusicService.action.ADD" />
+                <action android:name="info.tongrenlu.android.MusicService.action.APPEND" />
             </intent-filter>
         </service>
         
@@ -61,6 +62,14 @@
         
         <provider android:name=".provider.TrackContentProvider"
             android:authorities="info.tongrenlu.android.music.track"
+            android:exported="false">
+        </provider>
+        <provider android:name=".provider.AlbumContentProvider"
+            android:authorities="info.tongrenlu.android.music.album"
+            android:exported="false">
+        </provider>
+        <provider android:name=".provider.PlaylistContentProvider"
+            android:authorities="info.tongrenlu.android.music.playlist"
             android:exported="false">
         </provider>
     </application>

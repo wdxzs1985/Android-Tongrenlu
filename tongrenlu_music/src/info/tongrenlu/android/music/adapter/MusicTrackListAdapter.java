@@ -9,6 +9,7 @@ import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.TextView;
 
 public class MusicTrackListAdapter extends BaseAdapter {
@@ -55,6 +56,12 @@ public class MusicTrackListAdapter extends BaseAdapter {
         final TextView artistView = (TextView) view.findViewById(R.id.track_artist);
         artistView.setText(trackBean.getArtist());
 
+        Button downloadButton = (Button) view.findViewById(R.id.action_download);
+        if (trackBean.isDownloaded()) {
+            downloadButton.setEnabled(false);
+        } else {
+            downloadButton.setEnabled(true);
+        }
         return view;
     }
 

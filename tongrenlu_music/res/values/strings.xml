@@ -19,6 +19,8 @@
     <string name="dial_info_new_version">发现新版本</string>
     <string name="dial_update">自动更新</string>
     <string name="it_is_new">已经是最新版本</string>
+    <string name="dial_create_playlist">New Playlist</string>
+    <string name="dial_select_playlist">select Playlist</string>
     
     <string name="article">专辑</string>
     <string name="article_cover">专辑封面</string>
@@ -43,7 +45,10 @@
     <string name="action_download">下载</string>
     <string name="action_download_all">全部下载</string>
     <string name="action_delete">删除</string>
+    <string name="action_create">create</string>
+    <string name="action_select">select</string>
     <string name="action_cancel">取消</string>
+    <string name="action_refresh">更新</string>
     <string name="action_update_now">马上更新</string>
     <string name="action_update_later">以后再说</string>
     <string name="action_update_never">永不更新</string>

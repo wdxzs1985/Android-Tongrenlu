@@ -2,68 +2,59 @@ package info.tongrenlu.android.music.fragment;
 
 import info.tongrenlu.android.fragment.TitleFragment;
 import info.tongrenlu.android.loader.JSONLoader;
+import info.tongrenlu.android.music.MusicInfoActivity;
 import info.tongrenlu.android.music.R;
 import info.tongrenlu.android.music.adapter.MusicGridAdapter;
+import info.tongrenlu.android.music.provider.AlbumContentProvider;
 import info.tongrenlu.app.HttpConstants;
-import info.tongrenlu.domain.ArticleBean;
-import info.tongrenlu.domain.MusicBean;
 import info.tongrenlu.support.PaginateSupport;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.app.Activity;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.LoaderManager;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
+import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
-import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.GridView;
 
-public class MusicGridFragment extends TitleFragment implements OnScrollListener, OnItemClickListener {
+public class MusicGridFragment extends TitleFragment implements OnItemClickListener, OnClickListener {
 
+    public static final int ALBUM_CURSOR_LOADER = 1;
     public static final int ALBUM_LIST_LOADER = 2;
-
-    private OnArticleSelectedListener mListener;
 
     private View mProgress = null;
     private View mEmpty = null;
     private GridView mListView = null;
     private MusicGridAdapter mAdapter = null;
 
-    private final String mQuery = "";
-    private int mPage = 0;
-    private boolean mLast = false;
-
     public MusicGridFragment() {
         this.setTitle("所有专辑");
     }
 
     @Override
-    public void onAttach(final Activity activity) {
-        super.onAttach(activity);
-        try {
-            this.mListener = (OnArticleSelectedListener) activity;
-        } catch (final ClassCastException e) {
-            throw new ClassCastException(activity.toString() + " must implement OnArticleSelectedListener");
-        }
-    }
-
-    @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        this.mAdapter = new MusicGridAdapter();
+        this.setHasOptionsMenu(true);
+        this.mAdapter = new MusicGridAdapter(this.getActivity(), null);
     }
 
     @Override
@@ -73,9 +64,10 @@ public class MusicGridFragment extends TitleFragment implements OnScrollListener
                                            false);
         this.mProgress = view.findViewById(android.R.id.progress);
         this.mEmpty = view.findViewById(android.R.id.empty);
+        this.mEmpty.setOnClickListener(this);
+
         this.mListView = (GridView) view.findViewById(android.R.id.list);
         this.mListView.setAdapter(this.mAdapter);
-        this.mListView.setOnScrollListener(this);
         this.mListView.setOnItemClickListener(this);
         return view;
     }
@@ -83,58 +75,41 @@ public class MusicGridFragment extends TitleFragment implements OnScrollListener
     @Override
     public void onActivityCreated(final Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        this.loadNextPage();
+        FragmentActivity activity = this.getActivity();
+        activity.getSupportLoaderManager()
+                .initLoader(ALBUM_CURSOR_LOADER,
+                            null,
+                            new AlbumCursorLoaderCallback());
 
+        this.mProgress.setVisibility(View.VISIBLE);
+        this.mListView.setVisibility(View.GONE);
+        this.mEmpty.setVisibility(View.GONE);
     }
 
-    protected void loadNextPage() {
-        if (!this.mLast) {
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        FragmentActivity activity = this.getActivity();
+        LoaderManager loaderManager = activity.getSupportLoaderManager();
+        loaderManager.destroyLoader(ALBUM_CURSOR_LOADER);
+        loaderManager.destroyLoader(ALBUM_LIST_LOADER);
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+        case android.R.id.empty:
+            FragmentActivity activity = this.getActivity();
+            LoaderManager loaderManager = activity.getSupportLoaderManager();
+            loaderManager.initLoader(ALBUM_LIST_LOADER,
+                                     null,
+                                     new MusicListLoaderCallback());
             this.mProgress.setVisibility(View.VISIBLE);
-            this.mListView.setVisibility(View.VISIBLE);
+            this.mListView.setVisibility(View.GONE);
             this.mEmpty.setVisibility(View.GONE);
-
-            final Bundle parameters = new Bundle();
-            parameters.putString("q", this.mQuery);
-            parameters.putString("p",
-                                 String.valueOf(MusicGridFragment.this.mPage + 1));
-            parameters.putString("s", String.valueOf(HttpConstants.PAGE_SIZE));
-            this.getActivity()
-                .getSupportLoaderManager()
-                .restartLoader(ALBUM_LIST_LOADER,
-                               parameters,
-                               new MusicListLoaderCallback());
-        }
-    }
-
-    @Override
-    public void onScroll(final AbsListView view, final int firstVisibleItem, final int visibleItemCount, final int totalItemCount) {
-
-    }
-
-    @Override
-    public void onScrollStateChanged(final AbsListView view, final int scrollState) {
-        switch (scrollState) {
-        case SCROLL_STATE_IDLE:
-            this.mAdapter.setScrolling(false);
-            // ListViewの表示するべきデータ位置を取得
-            final int first = view.getFirstVisiblePosition();
-            final int count = view.getChildCount();
-            final int totalItemCount = view.getCount();
-
-            if (first + count == totalItemCount && !this.mLast) {
-                this.loadNextPage();
-            } else {
-                this.mAdapter.notifyDataSetChanged();
-            }
             break;
-        case SCROLL_STATE_FLING:
-            this.mAdapter.setScrolling(true);
-            break;
-        case SCROLL_STATE_TOUCH_SCROLL:
-            this.mAdapter.setScrolling(true);
-            break;
+
         default:
-
             break;
         }
 
@@ -142,13 +117,72 @@ public class MusicGridFragment extends TitleFragment implements OnScrollListener
 
     @Override
     public void onItemClick(final AdapterView<?> listView, final View itemView, final int position, final long itemId) {
-        final ArticleBean articleBean = (ArticleBean) listView.getItemAtPosition(position);
-        this.mListener.onArticleSelected(articleBean);
+        final Cursor c = (Cursor) listView.getItemAtPosition(position);
+        final String articleId = c.getString(c.getColumnIndex("article_id"));
+        final String title = c.getString(c.getColumnIndex("title"));
 
+        final Intent intent = new Intent();
+        intent.setClass(this.getActivity(), MusicInfoActivity.class);
+        intent.putExtra("articleId", articleId);
+        intent.putExtra("title", title);
+
+        this.startActivity(intent);
     }
 
-    public interface OnArticleSelectedListener {
-        public void onArticleSelected(ArticleBean articleBean);
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.fragment_music_grid, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+        case R.id.action_refresh:
+            FragmentActivity activity = this.getActivity();
+            LoaderManager loaderManager = activity.getSupportLoaderManager();
+            loaderManager.initLoader(ALBUM_LIST_LOADER,
+                                     null,
+                                     new MusicListLoaderCallback());
+            this.mProgress.setVisibility(View.VISIBLE);
+            break;
+        default:
+            break;
+        }
+        return true;
+    }
+
+    private class AlbumCursorLoaderCallback implements LoaderCallbacks<Cursor> {
+
+        @Override
+        public Loader<Cursor> onCreateLoader(int loaderId, Bundle args) {
+            Context context = MusicGridFragment.this.getActivity();
+            return new CursorLoader(context,
+                                    AlbumContentProvider.URI,
+                                    null,
+                                    null,
+                                    null,
+                                    null);
+        }
+
+        @Override
+        public void onLoadFinished(Loader<Cursor> loader, Cursor c) {
+            MusicGridFragment.this.mAdapter.swapCursor(c);
+            if (c.getCount() == 0) {
+                MusicGridFragment.this.mProgress.setVisibility(View.GONE);
+                MusicGridFragment.this.mEmpty.setVisibility(View.VISIBLE);
+                MusicGridFragment.this.mListView.setVisibility(View.GONE);
+            } else {
+                MusicGridFragment.this.mProgress.setVisibility(View.GONE);
+                MusicGridFragment.this.mEmpty.setVisibility(View.GONE);
+                MusicGridFragment.this.mListView.setVisibility(View.VISIBLE);
+            }
+        }
+
+        @Override
+        public void onLoaderReset(Loader<Cursor> loader) {
+            MusicGridFragment.this.mAdapter.swapCursor(null);
+        }
+
     }
 
     private class MusicListLoaderCallback implements LoaderCallbacks<PaginateSupport> {
@@ -157,35 +191,21 @@ public class MusicGridFragment extends TitleFragment implements OnScrollListener
         public Loader<PaginateSupport> onCreateLoader(int loaderId, Bundle args) {
             Context context = MusicGridFragment.this.getActivity();
             final Uri uri = HttpConstants.getMusicListUri(context);
-            return new MusicListLoader(context, uri, args);
+            Bundle bundle = new Bundle();
+            bundle.putInt("s", Integer.MAX_VALUE);
+            return new MusicListLoader(context, uri, bundle);
         }
 
         @Override
         public void onLoadFinished(Loader<PaginateSupport> loader, PaginateSupport data) {
-            if (data == null || data.getItemCount() == 0) {
-                MusicGridFragment.this.mProgress.setVisibility(View.GONE);
-                MusicGridFragment.this.mListView.setVisibility(View.GONE);
-                MusicGridFragment.this.mEmpty.setVisibility(View.VISIBLE);
-            } else {
-                MusicGridFragment.this.mProgress.setVisibility(View.GONE);
-                MusicGridFragment.this.mEmpty.setVisibility(View.GONE);
-                MusicGridFragment.this.mListView.setVisibility(View.VISIBLE);
-
-                List<ArticleBean> items = MusicGridFragment.this.mAdapter.getItems();
-                for (Object articleBean : data.getItems()) {
-                    items.add((ArticleBean) articleBean);
-                }
-
-                MusicGridFragment.this.mAdapter.notifyDataSetChanged();
-
-                MusicGridFragment.this.mPage = data.getPage();
-                MusicGridFragment.this.mLast = data.isLast();
-            }
+            MusicGridFragment.this.getActivity()
+                                  .getSupportLoaderManager()
+                                  .getLoader(ALBUM_CURSOR_LOADER)
+                                  .onContentChanged();
         }
 
         @Override
         public void onLoaderReset(Loader<PaginateSupport> loader) {
-            MusicGridFragment.this.mAdapter.setItems(new ArrayList<ArticleBean>());
         }
     }
 
@@ -198,32 +218,68 @@ public class MusicGridFragment extends TitleFragment implements OnScrollListener
         @Override
         protected PaginateSupport parseJSON(final JSONObject responseJSON) throws JSONException {
             PaginateSupport paginate = new PaginateSupport();
-            List<MusicBean> itemList = new ArrayList<MusicBean>();
             if (responseJSON.getBoolean("result")) {
                 final JSONObject pageJSON = responseJSON.getJSONObject("page");
                 final int itemCount = pageJSON.getInt("itemCount");
                 final int page = pageJSON.getInt("page");
                 final int size = pageJSON.getInt("size");
                 final JSONArray items = pageJSON.getJSONArray("items");
+                ContentResolver contentResolver = this.getContext()
+                                                      .getContentResolver();
                 for (int i = 0; i < items.length(); i++) {
                     final JSONObject musicJsonObject = items.getJSONObject(i);
-                    final MusicBean musicBean = new MusicBean();
-                    if (musicJsonObject.has("articleId")) {
-                        musicBean.setArticleId(musicJsonObject.getString("articleId"));
+                    String articleId = musicJsonObject.getString("articleId");
+                    String title = musicJsonObject.getString("title");
+                    Cursor c = contentResolver.query(AlbumContentProvider.URI,
+                                                     null,
+                                                     "article_id = ?",
+                                                     new String[] { articleId },
+                                                     null);
+                    ContentValues contentValues = new ContentValues();
+                    contentValues.put("article_id", articleId);
+                    contentValues.put("title", title);
+                    if (c.getCount() > 0) {
+                        contentResolver.update(AlbumContentProvider.URI,
+                                               contentValues,
+                                               "article_id = ?",
+                                               new String[] { articleId });
+                    } else {
+                        contentResolver.insert(AlbumContentProvider.URI,
+                                               contentValues);
                     }
-                    if (musicJsonObject.has("title")) {
-                        musicBean.setTitle(musicJsonObject.getString("title"));
-                    }
-                    itemList.add(musicBean);
+                    c.close();
                 }
 
                 paginate.setItemCount(itemCount);
                 paginate.setPage(page);
                 paginate.setSize(size);
-                paginate.setItems(itemList);
             }
             return paginate;
         }
 
+        @Override
+        protected void onJSONException(final JSONException e) {
+            final Context context = this.getContext();
+            String text = context.getString(R.string.err_network);
+            this.showErrorToast(text);
+        }
+
+        @Override
+        protected void onNetworkError(final int code) {
+            final Context context = this.getContext();
+            String text = context.getString(R.string.err_network);
+            this.showErrorToast(text);
+        }
+
+        private void showErrorToast(final String text) {
+            // final Context context = this.getContext();
+            // new Handler().post(new Runnable() {
+            // @Override
+            // public void run() {
+            // Toast.makeText(context, text, Toast.LENGTH_SHORT).show();
+            // }
+            // });
+        }
     }
+
 }

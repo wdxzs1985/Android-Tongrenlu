@@ -46,10 +46,8 @@ public abstract class JSONLoader<T> extends BaseLoader<T> {
     }
 
     protected void onJSONException(final JSONException e) {
-        e.printStackTrace();
     }
 
     protected void onNetworkError(final int code) {
-        System.err.println("Network status code :" + code);
     }
 }

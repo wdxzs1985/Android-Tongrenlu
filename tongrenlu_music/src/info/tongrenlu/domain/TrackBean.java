@@ -13,6 +13,8 @@ public class TrackBean implements Parcelable {
 
     private String title = null;
 
+    private boolean downloaded = false;
+
     public String getFileId() {
         return this.fileId;
     }
@@ -52,7 +54,18 @@ public class TrackBean implements Parcelable {
 
     @Override
     public void writeToParcel(final Parcel dest, final int flags) {
-        dest.writeStringArray(new String[] { this.articleId, this.fileId, this.title, this.artist });
+        dest.writeStringArray(new String[] { this.articleId,
+                this.fileId,
+                this.title,
+                this.artist });
+    }
+
+    public boolean isDownloaded() {
+        return this.downloaded;
+    }
+
+    public void setDownloaded(boolean downloaded) {
+        this.downloaded = downloaded;
     }
 
     public static final Parcelable.Creator<TrackBean> CREATOR = new Parcelable.Creator<TrackBean>() {

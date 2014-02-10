@@ -6,7 +6,7 @@ import android.database.sqlite.SQLiteDatabase;
 public class TongrenluDBV1 implements DatabaseBuilder {
 
     public static final String DB_NAME = "tongrenlu.db";
-    public static final int DB_VERSION = 1; //
+    public static final int DB_VERSION_1 = 1; //
 
     public static final String CREATE_TB_TRACK = "create table tb_track (" + "_id integer primary key autoincrement,"
             + "article_id text,"
@@ -31,7 +31,7 @@ public class TongrenluDBV1 implements DatabaseBuilder {
 
     @Override
     public int getVersion() {
-        return DB_VERSION;
+        return DB_VERSION_1;
     }
 
     /*** 构造一个数据库，如果没有就创建一个数据库 ***/

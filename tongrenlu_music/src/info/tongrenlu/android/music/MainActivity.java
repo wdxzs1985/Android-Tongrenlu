@@ -4,8 +4,6 @@ import info.tongrenlu.android.fragment.TitleFragmentAdapter;
 import info.tongrenlu.android.music.fragment.MusicGridFragment;
 import info.tongrenlu.android.music.fragment.PlaylistFragment;
 import info.tongrenlu.app.CommonConstants;
-import info.tongrenlu.domain.ArticleBean;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -14,7 +12,7 @@ import android.widget.Toast;
 
 import com.viewpagerindicator.PageIndicator;
 
-public class MainActivity extends BaseActivity implements MusicGridFragment.OnArticleSelectedListener {
+public class MainActivity extends BaseActivity {
 
     private long mExitTime = 0;
     protected FragmentPagerAdapter mAdapter;
@@ -41,19 +39,6 @@ public class MainActivity extends BaseActivity implements MusicGridFragment.OnAr
         this.mIndicator.setViewPager(this.mPager);
         // this.mIndicator.setFooterIndicatorStyle(IndicatorStyle.Underline);
         // this.mIndicator.setOnCenterItemClickListener(this);
-    }
-
-    @Override
-    public void onArticleSelected(final ArticleBean articleBean) {
-        final String articleId = articleBean.getArticleId();
-        final String title = articleBean.getTitle();
-
-        final Intent intent = new Intent();
-        intent.putExtra("articleId", articleId);
-        intent.putExtra("title", title);
-        intent.setClass(this, MusicInfoActivity.class);
-
-        this.startActivity(intent);
     }
 
     @Override
