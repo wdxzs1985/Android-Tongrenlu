@@ -343,7 +343,9 @@ public class AlbumInfoActivity extends BaseActivity implements
                 AlbumInfoActivity.this.showCreatePlaylistDialog(this.mIntent);
                 break;
             default:
-                final long playlistId = which;
+                final AlertDialog alertDialog = (AlertDialog) dialog;
+                final long playlistId = alertDialog.getListView()
+                                                   .getItemIdAtPosition(which);
                 this.mIntent.putExtra("playlistId", playlistId);
                 AlbumInfoActivity.this.startService(this.mIntent);
                 break;
