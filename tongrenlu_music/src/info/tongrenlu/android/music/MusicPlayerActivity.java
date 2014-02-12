@@ -33,7 +33,8 @@ import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 
-public class MusicPlayerActivity extends BaseActivity implements OnClickListener, OnSeekBarChangeListener {
+public class MusicPlayerActivity extends BaseActivity implements
+        OnClickListener, OnSeekBarChangeListener {
 
     private LocalBroadcastManager mLocalBroadcastManager = null;
     private BroadcastReceiver mMusicReceiver = null;
@@ -50,7 +51,7 @@ public class MusicPlayerActivity extends BaseActivity implements OnClickListener
     public final static int UPDATE_UI = 0;
     protected Handler mHandler = new Handler() {
         @Override
-        public void handleMessage(Message msg) {
+        public void handleMessage(final Message msg) {
             super.handleMessage(msg);
             switch (msg.what) {
             case UPDATE_UI:
@@ -73,13 +74,13 @@ public class MusicPlayerActivity extends BaseActivity implements OnClickListener
     @Override
     protected void onStart() {
         super.onStart();
-        this.mHandler.sendEmptyMessage(UPDATE_UI);
+        this.mHandler.sendEmptyMessage(MusicPlayerActivity.UPDATE_UI);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        this.mHandler.removeMessages(UPDATE_UI);
+        this.mHandler.removeMessages(MusicPlayerActivity.UPDATE_UI);
         this.mLocalBroadcastManager.unregisterReceiver(this.mMusicReceiver);
     }
 
@@ -216,7 +217,9 @@ public class MusicPlayerActivity extends BaseActivity implements OnClickListener
     }
 
     @Override
-    public void onProgressChanged(final SeekBar seekBar, final int progress, final boolean fromUser) {
+    public void onProgressChanged(final SeekBar seekBar,
+                                  final int progress,
+                                  final boolean fromUser) {
         if (fromUser) {
             this.updateCurrentTime(progress);
         }
@@ -237,10 +240,11 @@ public class MusicPlayerActivity extends BaseActivity implements OnClickListener
     }
 
     protected void onMusicPlayerUpdate(final Intent intent) {
-        int state = intent.getIntExtra("state", MusicService.STATE_STOPPED);
+        final int state = intent.getIntExtra("state",
+                                             MusicService.STATE_STOPPED);
         this.updatePlayButton(state);
 
-        TrackBean trackBean = intent.getParcelableExtra("trackBean");
+        final TrackBean trackBean = intent.getParcelableExtra("trackBean");
         if (trackBean != null && !trackBean.equals(this.mTrackBean)) {
             this.mTrackBean = trackBean;
             this.updateCover();
@@ -256,8 +260,9 @@ public class MusicPlayerActivity extends BaseActivity implements OnClickListener
             this.updateCurrentTime(progress);
             this.updateProgress(progress);
 
-            int delay = 1000 - (progress % 1000);
-            this.mHandler.sendEmptyMessageDelayed(UPDATE_UI, delay);
+            final int delay = 1000 - progress % 1000;
+            this.mHandler.sendEmptyMessageDelayed(MusicPlayerActivity.UPDATE_UI,
+                                                  delay);
         }
 
         if (intent.hasExtra("percent")) {
@@ -279,7 +284,7 @@ public class MusicPlayerActivity extends BaseActivity implements OnClickListener
     }
 
     private void updateCover() {
-        String articleId = this.mTrackBean.getArticleId();
+        final String articleId = this.mTrackBean.getArticleId();
         final TongrenluApplication application = (TongrenluApplication) this.getApplication();
         final BitmapLruCache bitmapCache = application.getBitmapCache();
         final String url = HttpConstants.getCoverUrl(application,
@@ -289,19 +294,21 @@ public class MusicPlayerActivity extends BaseActivity implements OnClickListener
         new LoadImageCacheTask() {
 
             @Override
-            protected void onPostExecute(Drawable result) {
+            protected void onPostExecute(final Drawable result) {
                 super.onPostExecute(result);
-                Drawable emptyDrawable = new ShapeDrawable();
-                TransitionDrawable fadeInDrawable = new TransitionDrawable(new Drawable[] { emptyDrawable,
-                        result });
-                coverView.setImageDrawable(result);
-                fadeInDrawable.startTransition(200);
+                if (!this.isCancelled() && result != null) {
+                    final Drawable emptyDrawable = new ShapeDrawable();
+                    final TransitionDrawable fadeInDrawable = new TransitionDrawable(new Drawable[] { emptyDrawable,
+                                                                                                     result });
+                    coverView.setImageDrawable(result);
+                    fadeInDrawable.startTransition(200);
+                }
             }
 
         }.execute(bitmapCache, url);
     }
 
-    private void updatePlayButton(int state) {
+    private void updatePlayButton(final int state) {
         switch (state) {
         case MusicService.STATE_PLAYING:
             this.mPlayButton.setImageResource(R.drawable.player_btn_player_pause);
@@ -312,22 +319,22 @@ public class MusicPlayerActivity extends BaseActivity implements OnClickListener
         }
     }
 
-    private void updateDuration(int duration) {
+    private void updateDuration(final int duration) {
         final TextView durationView = (TextView) this.findViewById(R.id.player_duration);
         durationView.setText(MusicService.toTime(duration));
         this.mProgress.setMax(duration);// 设置进度条
     }
 
-    private void updateCurrentTime(int progress) {
+    private void updateCurrentTime(final int progress) {
         final TextView currentPositionView = (TextView) this.findViewById(R.id.player_current_time);
         currentPositionView.setText(MusicService.toTime(progress));
     }
 
-    private void updateProgress(int progress) {
+    private void updateProgress(final int progress) {
         this.mProgress.setProgress(progress);
     }
 
-    private void updateSecondaryProgress(int progress) {
+    private void updateSecondaryProgress(final int progress) {
         this.mProgress.setSecondaryProgress(progress);
     }
 

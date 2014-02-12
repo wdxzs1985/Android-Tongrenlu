@@ -24,9 +24,9 @@ public class TongrenluApplication extends Application {
     @Override
     public void onCreate() {
         this.clearNotification();
-        this.initPackageInfo(this);
-        this.initBitmapCache(this);
-        this.initDownloadManager(this);
+        this.initPackageInfo();
+        this.initBitmapCache();
+        this.initDownloadManager();
     }
 
     private void clearNotification() {
@@ -34,22 +34,22 @@ public class TongrenluApplication extends Application {
         notificationManager.cancelAll();
     }
 
-    private void initPackageInfo(final Context context) {
+    private void initPackageInfo() {
         try {
-            final String packageName = context.getPackageName();
-            final PackageManager pm = context.getPackageManager();
+            final String packageName = this.getPackageName();
+            final PackageManager pm = this.getPackageManager();
             final PackageInfo pInfo = pm.getPackageInfo(packageName,
                                                         PackageManager.GET_META_DATA);
-            VERSION_CODE = pInfo.versionCode;
-            VERSION_NAME = pInfo.versionName;
+            TongrenluApplication.VERSION_CODE = pInfo.versionCode;
+            TongrenluApplication.VERSION_NAME = pInfo.versionName;
         } catch (final NameNotFoundException e) {
             e.printStackTrace();
         }
     }
 
-    private void initBitmapCache(Context context) {
-        File cacheDir = context.getCacheDir();
-        BitmapLruCache.Builder builder = new BitmapLruCache.Builder(context);
+    private void initBitmapCache() {
+        final File cacheDir = this.getCacheDir();
+        final BitmapLruCache.Builder builder = new BitmapLruCache.Builder(this);
         builder.setMemoryCacheEnabled(true)
                .setMemoryCacheMaxSizeUsingHeapSize()
                .setDiskCacheEnabled(true)
@@ -62,8 +62,8 @@ public class TongrenluApplication extends Application {
         return this.mBitmapCache;
     }
 
-    private void initDownloadManager(Context context) {
-        this.mDownloadManager = new DownloadManagerImpl(1);
+    private void initDownloadManager() {
+        this.mDownloadManager = new DownloadManagerImpl();
     }
 
     public DownloadManager getDownloadManager() {

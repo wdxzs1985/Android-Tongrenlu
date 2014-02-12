@@ -31,7 +31,8 @@ import android.preference.PreferenceManager;
 import android.text.format.DateFormat;
 import android.widget.Toast;
 
-public class SettingsActivity extends PreferenceActivity implements OnSharedPreferenceChangeListener {
+public class SettingsActivity extends PreferenceActivity implements
+        OnSharedPreferenceChangeListener {
 
     public static final String PREF_KEY_SHUFFLE_PLAY = "pref_key_shuffle_play";
     public static final String PREF_KEY_LOOP_PLAY = "pref_key_loop_play";
@@ -114,7 +115,8 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
                                           new OnClickListener() {
 
                                               @Override
-                                              public void onClick(final DialogInterface dialog, final int which) {
+                                              public void onClick(final DialogInterface dialog,
+                                                                  final int which) {
                                                   SettingsActivity.this.doSaveToSDCard();
                                               }
                                           });
@@ -156,8 +158,8 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
                                                                       articleId,
                                                                       fileId);
                             final String destFileName = HttpConstants.getAvaliableFilename(artist + "-"
-                                    + title
-                                    + ".mp3");
+                                                                                           + title
+                                                                                           + ".mp3");
                             final File destFile = new File(sdcard, destFileName);
                             dialog.setMessage("正在复制：" + destFileName);
                             try {
@@ -171,7 +173,6 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
                             c.moveToNext();
                         }
                     }
-                    c.close();
                     Toast.makeText(context, "复制完成。", Toast.LENGTH_SHORT).show();
                     dialog.dismiss();
                 }
@@ -196,7 +197,8 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
                                           new OnClickListener() {
 
                                               @Override
-                                              public void onClick(final DialogInterface dialog, final int which) {
+                                              public void onClick(final DialogInterface dialog,
+                                                                  final int which) {
                                                   SettingsActivity.this.doClearCache();
                                                   // SettingsActivity.this.refreshSizeOfDirectory(dir,
                                                   // preference);
@@ -213,13 +215,6 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
         HttpConstants.clearCover(this);
         Toast.makeText(this, R.string.clear_complete, Toast.LENGTH_SHORT)
              .show();
-    }
-
-    private void refreshSizeOfDirectory(final File dir, final Preference preference) {
-        final long size = dir.exists() ? FileUtils.sizeOfDirectory(dir) : 0;
-        final String summary = this.getString(R.string.used_size,
-                                              FileUtils.byteCountToDisplaySize(size));
-        preference.setSummary(summary);
     }
 
     private void initClearDataPref() {
@@ -240,7 +235,8 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
                                           new OnClickListener() {
 
                                               @Override
-                                              public void onClick(final DialogInterface dialog, final int which) {
+                                              public void onClick(final DialogInterface dialog,
+                                                                  final int which) {
                                                   SettingsActivity.this.doClearData();
                                                   // SettingsActivity.this.refreshSizeOfDirectory(dir,
                                                   // preference);
@@ -308,7 +304,8 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
     }
 
     @Override
-    public void onSharedPreferenceChanged(final SharedPreferences sharedPreferences, final String key) {
+    public void onSharedPreferenceChanged(final SharedPreferences sharedPreferences,
+                                          final String key) {
         if (StringUtils.equals(key, SettingsActivity.PREF_KEY_SHUFFLE_PLAY)) {
             this.initShufflePlayPref(sharedPreferences);
         } else if (StringUtils.equals(key, SettingsActivity.PREF_KEY_LOOP_PLAY)) {

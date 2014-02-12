@@ -34,7 +34,7 @@ public class DownloadService extends Service implements DownloadListener {
 
     @Override
     public void onCreate() {
-        TongrenluApplication app = (TongrenluApplication) this.getApplication();
+        final TongrenluApplication app = (TongrenluApplication) this.getApplication();
         this.mDownloadManager = app.getDownloadManager();
     }
 
@@ -46,69 +46,71 @@ public class DownloadService extends Service implements DownloadListener {
     }
 
     @Override
-    public int onStartCommand(final Intent intent, final int flags, final int startId) {
-        String action = intent.getAction();
-        if (ACTION_ADD.equals(action)) {
+    public int onStartCommand(final Intent intent,
+                              final int flags,
+                              final int startId) {
+        final String action = intent.getAction();
+        if (DownloadService.ACTION_ADD.equals(action)) {
             this.processAddRequest(intent);
-        } else if (ACTION_STOP.equals(action)) {
+        } else if (DownloadService.ACTION_STOP.equals(action)) {
             this.stopSelf();
         }
-        return START_NOT_STICKY;
+        return Service.START_NOT_STICKY;
     }
 
-    private void processAddRequest(Intent intent) {
-        long playlistId = intent.getLongExtra("playlistId", 0);
+    private void processAddRequest(final Intent intent) {
+        final long playlistId = intent.getLongExtra("playlistId", -1);
         if (intent.hasExtra("trackBean")) {
-            TrackBean trackBean = intent.getParcelableExtra("trackBean");
+            final TrackBean trackBean = intent.getParcelableExtra("trackBean");
             this.addTask(trackBean, playlistId);
         } else if (intent.hasExtra("trackBeanList")) {
-            List<TrackBean> trackBeanList = intent.getParcelableArrayListExtra("trackBeanList");
-            for (TrackBean trackBean : trackBeanList) {
+            final List<TrackBean> trackBeanList = intent.getParcelableArrayListExtra("trackBeanList");
+            for (final TrackBean trackBean : trackBeanList) {
                 this.addTask(trackBean, playlistId);
             }
         }
         this.mDownloadManager.start();
     }
 
-    private void addTask(TrackBean trackBean, long playlistId) {
-        Context context = this.getApplicationContext();
+    private void addTask(final TrackBean trackBean, final long playlistId) {
+        final Context context = this.getApplicationContext();
 
-        String articleId = trackBean.getArticleId();
-        String fileId = trackBean.getFileId();
-        String from = HttpConstants.getMp3Url(context, articleId, fileId);
-        String to = HttpConstants.getMp3(context, articleId, fileId)
-                                 .getAbsolutePath();
+        final String articleId = trackBean.getArticleId();
+        final String fileId = trackBean.getFileId();
+        final String from = HttpConstants.getMp3Url(context, articleId, fileId);
+        final String to = HttpConstants.getMp3(context, articleId, fileId)
+                                       .getAbsolutePath();
 
-        MusicDownloadTaskInfo taskinfo = new MusicDownloadTaskInfo();
+        final MusicDownloadTaskInfo taskinfo = new MusicDownloadTaskInfo();
         taskinfo.setTrackBean(trackBean);
         taskinfo.setFrom(from);
         taskinfo.setTo(to);
         taskinfo.setPlaylistId(playlistId);
 
-        DownloadTask task = new MusicDownloadTask(taskinfo);
+        final DownloadTask task = new MusicDownloadTask(taskinfo);
         task.registerListener(this);
         this.mDownloadManager.addTask(task);
     }
 
-    protected void sendNotification(DownloadTaskInfo taskinfo) {
-        MusicDownloadTaskInfo taskinfo2 = (MusicDownloadTaskInfo) taskinfo;
-        TrackBean trackBean = taskinfo2.getTrackBean();
+    protected void sendNotification(final DownloadTaskInfo taskinfo) {
+        final MusicDownloadTaskInfo taskinfo2 = (MusicDownloadTaskInfo) taskinfo;
+        final TrackBean trackBean = taskinfo2.getTrackBean();
         final Context context = this.getApplicationContext();
         final Intent intent = new Intent(context, MusicPlayerActivity.class);
-        PendingIntent contentIntent = PendingIntent.getActivity(context,
-                                                                0,
-                                                                intent,
-                                                                PendingIntent.FLAG_UPDATE_CURRENT);
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
+        final PendingIntent contentIntent = PendingIntent.getActivity(context,
+                                                                      0,
+                                                                      intent,
+                                                                      PendingIntent.FLAG_UPDATE_CURRENT);
+        final NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
         builder.setContentIntent(contentIntent);
         builder.setSmallIcon(R.drawable.ic_launcher);
         builder.setOngoing(false);
         builder.setAutoCancel(true);
-        String contentTitle = "download ok:" + trackBean.getTitle();
+        final String contentTitle = "download ok:" + trackBean.getTitle();
         builder.setTicker(contentTitle);
         builder.setContentTitle(contentTitle);
         builder.setWhen(System.currentTimeMillis());
-        this.startForeground(NOTIFICATION_ID, builder.build());
+        this.startForeground(DownloadService.NOTIFICATION_ID, builder.build());
     }
 
     @Override
@@ -117,64 +119,67 @@ public class DownloadService extends Service implements DownloadListener {
     }
 
     @Override
-    public void onDownloadStart(DownloadTaskInfo taskinfo) {
+    public void onDownloadStart(final DownloadTaskInfo taskinfo) {
     }
 
     @Override
-    public void onDownloadCancel(DownloadTaskInfo taskinfo) {
+    public void onDownloadCancel(final DownloadTaskInfo taskinfo) {
     }
 
     @Override
-    public void onDownloadFinish(DownloadTaskInfo taskinfo) {
-        this.sendNotification(taskinfo);
+    public void onDownloadFinish(final DownloadTaskInfo taskinfo) {
+        if (taskinfo != null) {
+            this.sendNotification(taskinfo);
 
-        MusicDownloadTaskInfo taskinfo2 = (MusicDownloadTaskInfo) taskinfo;
-        TrackBean trackBean = taskinfo2.getTrackBean();
-        final ContentValues values = new ContentValues();
-        values.put("playlist_id", taskinfo2.getPlaylistId());
-        values.put("article_id", trackBean.getArticleId());
-        values.put("file_id", trackBean.getFileId());
-        values.put("title", trackBean.getTitle());
-        values.put("artist", trackBean.getArtist());
+            final MusicDownloadTaskInfo taskinfo2 = (MusicDownloadTaskInfo) taskinfo;
+            final TrackBean trackBean = taskinfo2.getTrackBean();
+            final ContentValues values = new ContentValues();
+            values.put("article_id", trackBean.getArticleId());
+            values.put("file_id", trackBean.getFileId());
+            values.put("title", trackBean.getTitle());
+            values.put("artist", trackBean.getArtist());
 
-        ContentResolver contentResolver = this.getContentResolver();
-        contentResolver.insert(TongrenluContentProvider.TRACK_URI, values);
+            final Uri contentUri = Uri.withAppendedPath(TongrenluContentProvider.PLAYLIST_URI,
+                                                        taskinfo2.getPlaylistId() + "/track");
 
-        // play
-        final Intent serviceIntent = new Intent(this, MusicService.class);
-        serviceIntent.setAction(MusicService.ACTION_APPEND);
-        serviceIntent.putExtra("trackBean", trackBean);
-        this.startService(serviceIntent);
+            final ContentResolver contentResolver = this.getContentResolver();
+            contentResolver.insert(contentUri, values);
+
+            // play
+            final Intent serviceIntent = new Intent(this, MusicService.class);
+            serviceIntent.setAction(MusicService.ACTION_APPEND);
+            serviceIntent.putExtra("trackBean", trackBean);
+            this.startService(serviceIntent);
+        }
     }
 
-    private boolean isTrackExists(TrackBean trackBean) {
-        ContentResolver contentResolver = this.getContentResolver();
-        Cursor cursor = contentResolver.query(TongrenluContentProvider.TRACK_URI,
-                                              null,
-                                              "article_id = ? and file_id = ?",
-                                              new String[] { trackBean.getArticleId(),
-                                                      trackBean.getFileId() },
-                                              null);
-        int count = cursor.getCount();
-        cursor.close();
+    private boolean isTrackExists(final TrackBean trackBean) {
+        final ContentResolver contentResolver = this.getContentResolver();
+        final Cursor cursor = contentResolver.query(TongrenluContentProvider.TRACK_URI,
+                                                    null,
+                                                    "article_id = ? and file_id = ?",
+                                                    new String[] { trackBean.getArticleId(),
+                                                                  trackBean.getFileId() },
+                                                    null);
+        final int count = cursor.getCount();
         return count > 0;
     }
 
-    private void insertTrack(TrackBean trackBean) {
+    private void insertTrack(final TrackBean trackBean) {
         final ContentValues values = new ContentValues();
         values.put("article_id", trackBean.getArticleId());
         values.put("file_id", trackBean.getFileId());
         values.put("title", trackBean.getTitle());
         values.put("artist", trackBean.getArtist());
 
-        ContentResolver contentResolver = this.getContentResolver();
+        final ContentResolver contentResolver = this.getContentResolver();
         contentResolver.insert(TongrenluContentProvider.TRACK_URI, values);
     }
 
     @Override
-    public void onDownloadProgressUpdate(DownloadTaskInfo taskinfo) {
-        MusicDownloadTaskInfo taskinfo2 = (MusicDownloadTaskInfo) taskinfo;
-        TrackBean trackBean = taskinfo2.getTrackBean();
+    public void onDownloadProgressUpdate(final DownloadTaskInfo taskinfo) {
+        final MusicDownloadTaskInfo taskinfo2 = (MusicDownloadTaskInfo) taskinfo;
+        final TrackBean trackBean = taskinfo2.getTrackBean();
         System.out.println(String.format("%s is downloading. %d%% (%d / %d)",
                                          trackBean.getTitle(),
                                          taskinfo.getProgress(),
@@ -184,17 +189,20 @@ public class DownloadService extends Service implements DownloadListener {
 
     public class MusicDownloadTask extends DownloadTask {
 
-        public MusicDownloadTask(MusicDownloadTaskInfo taskinfo) {
+        public MusicDownloadTask(final MusicDownloadTaskInfo taskinfo) {
             super(taskinfo);
         }
 
         @Override
-        protected DownloadTaskInfo doInBackground(Object... params) {
-            MusicDownloadTaskInfo taskinfo2 = (MusicDownloadTaskInfo) this.getTaskinfo();
-            TrackBean trackBean = taskinfo2.getTrackBean();
+        protected DownloadTaskInfo doInBackground(final Object... params) {
+            final MusicDownloadTaskInfo taskinfo2 = (MusicDownloadTaskInfo) this.getTaskinfo();
+            final TrackBean trackBean = taskinfo2.getTrackBean();
             if (!DownloadService.this.isTrackExists(trackBean)) {
-                super.doInBackground(params);
-                DownloadService.this.insertTrack(trackBean);
+                if (super.doInBackground(params) != null) {
+                    DownloadService.this.insertTrack(trackBean);
+                } else {
+                    return null;
+                }
             }
             return taskinfo2;
         }
@@ -203,13 +211,13 @@ public class DownloadService extends Service implements DownloadListener {
     public static class MusicDownloadTaskInfo extends DownloadTaskInfo {
         private TrackBean mTrackBean = null;
         private Uri mUri = null;
-        private long playlistId = 0;
+        private long playlistId = -1;
 
         public TrackBean getTrackBean() {
             return this.mTrackBean;
         }
 
-        public void setTrackBean(TrackBean trackBean) {
+        public void setTrackBean(final TrackBean trackBean) {
             this.mTrackBean = trackBean;
         }
 
@@ -217,7 +225,7 @@ public class DownloadService extends Service implements DownloadListener {
             return this.mUri;
         }
 
-        public void setUri(Uri uri) {
+        public void setUri(final Uri uri) {
             this.mUri = uri;
         }
 
@@ -225,7 +233,7 @@ public class DownloadService extends Service implements DownloadListener {
             return this.playlistId;
         }
 
-        public void setPlaylistId(long playlistId) {
+        public void setPlaylistId(final long playlistId) {
             this.playlistId = playlistId;
         }
     }

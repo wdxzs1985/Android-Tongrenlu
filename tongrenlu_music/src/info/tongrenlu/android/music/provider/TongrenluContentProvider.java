@@ -21,12 +21,12 @@ public class TongrenluContentProvider extends ContentProvider {
     private static final int PLAYLIST_TRACK_SINGLE = 33;
 
     public static final String AUTHORITY = "info.tongrenlu.android.music";
-    public static final Uri ALBUM_URI = Uri.parse("content://" + AUTHORITY
-            + "/album");
-    public static final Uri TRACK_URI = Uri.parse("content://" + AUTHORITY
-            + "/track");
-    public static final Uri PLAYLIST_URI = Uri.parse("content://" + AUTHORITY
-            + "/playlist");
+    public static final Uri ALBUM_URI = Uri.parse("content://" + TongrenluContentProvider.AUTHORITY
+                                                  + "/album");
+    public static final Uri TRACK_URI = Uri.parse("content://" + TongrenluContentProvider.AUTHORITY
+                                                  + "/track");
+    public static final Uri PLAYLIST_URI = Uri.parse("content://" + TongrenluContentProvider.AUTHORITY
+                                                     + "/playlist");
 
     private SimpleDbHelper mDbHelper = null;
     private UriMatcher mUriMatcher = null;
@@ -36,19 +36,33 @@ public class TongrenluContentProvider extends ContentProvider {
         this.mDbHelper = new SimpleDbHelper(this.getContext(),
                                             new TongrenluDBV1());
         this.mUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
-        this.mUriMatcher.addURI(AUTHORITY, "/album", ALBUM);
-        this.mUriMatcher.addURI(AUTHORITY, "/track", TRACK);
-        this.mUriMatcher.addURI(AUTHORITY, "/playlist", PLAYLIST);
-        this.mUriMatcher.addURI(AUTHORITY, "/playlist/#", PLAYLIST_SINGLE);
-        this.mUriMatcher.addURI(AUTHORITY, "/playlist/#/track", PLAYLIST_TRACK);
-        this.mUriMatcher.addURI(AUTHORITY,
-                                "/playlist/#/track/#",
-                                PLAYLIST_TRACK_SINGLE);
+        this.mUriMatcher.addURI(TongrenluContentProvider.AUTHORITY,
+                                "album",
+                                TongrenluContentProvider.ALBUM);
+        this.mUriMatcher.addURI(TongrenluContentProvider.AUTHORITY,
+                                "track",
+                                TongrenluContentProvider.TRACK);
+        this.mUriMatcher.addURI(TongrenluContentProvider.AUTHORITY,
+                                "playlist",
+                                TongrenluContentProvider.PLAYLIST);
+        this.mUriMatcher.addURI(TongrenluContentProvider.AUTHORITY,
+                                "playlist/#",
+                                TongrenluContentProvider.PLAYLIST_SINGLE);
+        this.mUriMatcher.addURI(TongrenluContentProvider.AUTHORITY,
+                                "playlist/#/track",
+                                TongrenluContentProvider.PLAYLIST_TRACK);
+        this.mUriMatcher.addURI(TongrenluContentProvider.AUTHORITY,
+                                "playlist/#/track/#",
+                                TongrenluContentProvider.PLAYLIST_TRACK_SINGLE);
         return true;
     }
 
     @Override
-    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+    public Cursor query(final Uri uri,
+                        final String[] projection,
+                        final String selection,
+                        final String[] selectionArgs,
+                        final String sortOrder) {
         switch (this.mUriMatcher.match(uri)) {
         case ALBUM:
             return this.queryAlbums(selection, selectionArgs);
@@ -64,7 +78,8 @@ public class TongrenluContentProvider extends ContentProvider {
         return null;
     }
 
-    private Cursor queryAlbums(String selection, String[] selectionArgs) {
+    private Cursor queryAlbums(final String selection,
+                               final String[] selectionArgs) {
         return this.mDbHelper.query("tb_album",
                                     null,
                                     selection,
@@ -72,7 +87,8 @@ public class TongrenluContentProvider extends ContentProvider {
                                     null);
     }
 
-    private Cursor queryTracks(String selection, String[] selectionArgs) {
+    private Cursor queryTracks(final String selection,
+                               final String[] selectionArgs) {
         return this.mDbHelper.query("tb_track",
                                     null,
                                     selection,
@@ -80,7 +96,8 @@ public class TongrenluContentProvider extends ContentProvider {
                                     null);
     }
 
-    private Cursor queryPlaylists(String selection, String[] selectionArgs) {
+    private Cursor queryPlaylists(final String selection,
+                                  final String[] selectionArgs) {
         return this.mDbHelper.query("tb_playlist",
                                     null,
                                     selection,
@@ -88,9 +105,9 @@ public class TongrenluContentProvider extends ContentProvider {
                                     null);
     }
 
-    private Cursor queryPlaylistTracks(Uri uri) {
-        List<String> segments = uri.getPathSegments();
-        String playlistId = segments.get(1);
+    private Cursor queryPlaylistTracks(final Uri uri) {
+        final List<String> segments = uri.getPathSegments();
+        final String playlistId = segments.get(1);
         return this.mDbHelper.query("tb_playlist_track",
                                     null,
                                     "playlist_id = ?",
@@ -99,7 +116,7 @@ public class TongrenluContentProvider extends ContentProvider {
     }
 
     @Override
-    public Uri insert(Uri uri, ContentValues values) {
+    public Uri insert(final Uri uri, final ContentValues values) {
         switch (this.mUriMatcher.match(uri)) {
         case ALBUM:
             return this.insertAlbum(uri, values);
@@ -113,26 +130,28 @@ public class TongrenluContentProvider extends ContentProvider {
         return null;
     }
 
-    private Uri insertAlbum(Uri uri, ContentValues values) {
+    private Uri insertAlbum(final Uri uri, final ContentValues values) {
         return this.insert(uri, "tb_album", values);
     }
 
-    private Uri insertTrack(Uri uri, ContentValues values) {
+    private Uri insertTrack(final Uri uri, final ContentValues values) {
         return this.insert(uri, "tb_track", values);
     }
 
-    private Uri insertPlaylist(Uri uri, ContentValues values) {
+    private Uri insertPlaylist(final Uri uri, final ContentValues values) {
         return this.insert(uri, "tb_playlist", values);
     }
 
-    private Uri insertPlaylistTrack(Uri uri, ContentValues values) {
-        List<String> segments = uri.getPathSegments();
-        String playlistId = segments.get(1);
+    private Uri insertPlaylistTrack(final Uri uri, final ContentValues values) {
+        final List<String> segments = uri.getPathSegments();
+        final String playlistId = segments.get(1);
         values.put("playlist_id", playlistId);
         return this.insert(uri, "tb_playlist_track", values);
     }
 
-    private Uri insert(Uri uri, String table, ContentValues values) {
+    private Uri insert(final Uri uri,
+                       final String table,
+                       final ContentValues values) {
         final long id = this.mDbHelper.insert(table, values);
         if (id != -1) {
             return ContentUris.withAppendedId(uri, id);
@@ -142,7 +161,10 @@ public class TongrenluContentProvider extends ContentProvider {
     }
 
     @Override
-    public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+    public int update(final Uri uri,
+                      final ContentValues values,
+                      final String selection,
+                      final String[] selectionArgs) {
         switch (this.mUriMatcher.match(uri)) {
         case PLAYLIST_SINGLE:
             return this.updatePlaylist(uri, values);
@@ -150,17 +172,19 @@ public class TongrenluContentProvider extends ContentProvider {
         return 0;
     }
 
-    private int updatePlaylist(Uri uri, ContentValues values) {
-        String _id = uri.getLastPathSegment();
-        int rows = this.mDbHelper.update("tb_playlist",
-                                         values,
-                                         "_id = ?",
-                                         new String[] { _id });
+    private int updatePlaylist(final Uri uri, final ContentValues values) {
+        final String _id = uri.getLastPathSegment();
+        final int rows = this.mDbHelper.update("tb_playlist",
+                                               values,
+                                               "_id = ?",
+                                               new String[] { _id });
         return rows;
     }
 
     @Override
-    public int delete(Uri uri, String selection, String[] selectionArgs) {
+    public int delete(final Uri uri,
+                      final String selection,
+                      final String[] selectionArgs) {
         switch (this.mUriMatcher.match(uri)) {
         case TRACK:
             return this.deleteTrack(selection, selectionArgs);
@@ -172,38 +196,41 @@ public class TongrenluContentProvider extends ContentProvider {
         return 0;
     }
 
-    private int deleteTrack(String selection, String[] selectionArgs) {
-        int rows = this.mDbHelper.delete("tb_track", selection, selectionArgs);
+    private int deleteTrack(final String selection, final String[] selectionArgs) {
+        final int rows = this.mDbHelper.delete("tb_track",
+                                               selection,
+                                               selectionArgs);
         if (rows > 0) {
             this.deletePlaylistTrack(selection, selectionArgs);
         }
         return rows;
     }
 
-    private int deletePlaylist(Uri uri) {
-        String _id = uri.getLastPathSegment();
-        int rows = this.mDbHelper.delete("tb_playlist",
-                                         "_id",
-                                         new String[] { _id });
+    private int deletePlaylist(final Uri uri) {
+        final String _id = uri.getLastPathSegment();
+        final int rows = this.mDbHelper.delete("tb_playlist",
+                                               "_id",
+                                               new String[] { _id });
         if (rows > 0) {
             this.deletePlaylistTrack("playlist_id = ?", new String[] { _id });
         }
         return rows;
     }
 
-    private int deletePlaylistTrack(Uri uri) {
-        String _id = uri.getLastPathSegment();
+    private int deletePlaylistTrack(final Uri uri) {
+        final String _id = uri.getLastPathSegment();
         return this.deletePlaylistTrack("_id = ?", new String[] { _id });
     }
 
-    private int deletePlaylistTrack(String selection, String[] selectionArgs) {
+    private int deletePlaylistTrack(final String selection,
+                                    final String[] selectionArgs) {
         return this.mDbHelper.delete("tb_playlist_track",
                                      selection,
                                      selectionArgs);
     }
 
     @Override
-    public String getType(Uri uri) {
+    public String getType(final Uri uri) {
         return null;
     }
 

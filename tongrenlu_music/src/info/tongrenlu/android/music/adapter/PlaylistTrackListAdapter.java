@@ -27,11 +27,13 @@ public class PlaylistTrackListAdapter extends CursorAdapter {
     }
 
     @Override
-    public View newView(final Context context, final Cursor c, final ViewGroup viewGroup) {
+    public View newView(final Context context,
+                        final Cursor c,
+                        final ViewGroup viewGroup) {
         final View view = View.inflate(context,
                                        R.layout.playlist_track_list_item_track,
                                        null);
-        ViewHolder holder = new ViewHolder();
+        final ViewHolder holder = new ViewHolder();
         holder.coverView = (ImageView) view.findViewById(R.id.article_cover);
         holder.titleView = (TextView) view.findViewById(R.id.track_title);
         holder.artistView = (TextView) view.findViewById(R.id.track_artist);
@@ -41,25 +43,17 @@ public class PlaylistTrackListAdapter extends CursorAdapter {
 
     @Override
     public void bindView(final View view, final Context context, final Cursor c) {
-        ViewHolder holder = (ViewHolder) view.getTag();
-        String articleId = c.getString(c.getColumnIndex("article_id"));
-        String fileId = c.getString(c.getColumnIndex("file_id"));
-        String title = c.getString(c.getColumnIndex("title"));
-        String artist = c.getString(c.getColumnIndex("artist"));
-        TrackBean trackBean = new TrackBean();
+        final ViewHolder holder = (ViewHolder) view.getTag();
+        final String articleId = c.getString(c.getColumnIndex("article_id"));
+        final String fileId = c.getString(c.getColumnIndex("file_id"));
+        final String title = c.getString(c.getColumnIndex("title"));
+        final String artist = c.getString(c.getColumnIndex("artist"));
+        final TrackBean trackBean = new TrackBean();
         trackBean.setArticleId(articleId);
         trackBean.setFileId(fileId);
         trackBean.setTitle(title);
         trackBean.setArtist(artist);
         holder.update(context, trackBean);
-    }
-
-    @Override
-    public Cursor swapCursor(final Cursor newCursor) {
-        if (this.mCursor != null) {
-            this.mCursor.close();
-        }
-        return super.swapCursor(newCursor);
     }
 
     public class ViewHolder {
@@ -87,18 +81,18 @@ public class PlaylistTrackListAdapter extends CursorAdapter {
                 }
 
                 @Override
-                protected void onPostExecute(Drawable result) {
+                protected void onPostExecute(final Drawable result) {
                     super.onPostExecute(result);
-                    if (!this.isCancelled()) {
-                        Drawable emptyDrawable = new ShapeDrawable();
-                        TransitionDrawable fadeInDrawable = new TransitionDrawable(new Drawable[] { emptyDrawable,
-                                result });
+                    if (!this.isCancelled() && result != null) {
+                        final Drawable emptyDrawable = new ShapeDrawable();
+                        final TransitionDrawable fadeInDrawable = new TransitionDrawable(new Drawable[] { emptyDrawable,
+                                                                                                         result });
                         ViewHolder.this.coverView.setImageDrawable(fadeInDrawable);
                         fadeInDrawable.startTransition(500);
                     }
                 }
             };
-            TongrenluApplication app = (TongrenluApplication) context.getApplicationContext();
+            final TongrenluApplication app = (TongrenluApplication) context.getApplicationContext();
             final BitmapLruCache bitmapCache = app.getBitmapCache();
             final String url = HttpConstants.getCoverUrl(app,
                                                          trackBean.getArticleId(),
