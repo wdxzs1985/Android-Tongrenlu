@@ -6,11 +6,11 @@
     
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="@dimen/image_height"
+        android:layout_height="wrap_content"
         android:layout_marginBottom="8dp">
 	    <ImageView android:id="@+id/article_cover"
-	        android:layout_width="@dimen/image_width"
-	        android:layout_height="@dimen/image_height"
+	        android:layout_width="@dimen/image_m"
+	        android:layout_height="@dimen/image_m"
 	        android:layout_marginRight="8dp"
 	        android:src="@drawable/default_cover"
 	        android:contentDescription="@string/article_cover"

@@ -3,8 +3,7 @@ package info.tongrenlu.android.music;
 import info.tongrenlu.android.loader.JSONLoader;
 import info.tongrenlu.android.music.adapter.MusicTrackListAdapter;
 import info.tongrenlu.android.music.async.LoadImageCacheTask;
-import info.tongrenlu.android.music.provider.PlaylistContentProvider;
-import info.tongrenlu.android.music.provider.TrackContentProvider;
+import info.tongrenlu.android.music.provider.TongrenluContentProvider;
 import info.tongrenlu.app.HttpConstants;
 import info.tongrenlu.domain.TrackBean;
 
@@ -18,7 +17,6 @@ import org.json.JSONObject;
 import uk.co.senab.bitmapcache.BitmapLruCache;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -42,7 +40,7 @@ import android.widget.TextView;
 
 import com.tjerkw.slideexpandable.library.ActionSlideExpandableListView;
 
-public class MusicInfoActivity extends BaseActivity implements ActionSlideExpandableListView.OnActionClickListener, OnClickListener {
+public class AlbumInfoActivity extends BaseActivity implements ActionSlideExpandableListView.OnActionClickListener, OnClickListener {
 
     public static final int ALBUM_INFO_LOADER = 1;
 
@@ -137,9 +135,7 @@ public class MusicInfoActivity extends BaseActivity implements ActionSlideExpand
             this.appendTrack(trackBean);
             break;
         case R.id.action_download:
-            ArrayList<TrackBean> items = new ArrayList<TrackBean>();
-            items.add(trackBean);
-            this.downloadTrack(items);
+            this.downloadTrack(trackBean);
             break;
         default:
             break;
@@ -182,28 +178,34 @@ public class MusicInfoActivity extends BaseActivity implements ActionSlideExpand
         this.startActivity(activityIntent);
     }
 
-    protected void downloadTrack(final ArrayList<TrackBean> items) {
+    protected void downloadTrack(TrackBean item) {
         final Intent serviceIntent = new Intent(this, DownloadService.class);
         serviceIntent.setAction(DownloadService.ACTION_ADD);
-        serviceIntent.putParcelableArrayListExtra("trackBeanList", items);
+        serviceIntent.putExtra("trackBean", item);
 
         Cursor cursor = this.getContentResolver()
-                            .query(PlaylistContentProvider.URI,
+                            .query(TongrenluContentProvider.PLAYLIST_URI,
                                    null,
                                    null,
                                    null,
                                    null);
 
         if (cursor.getCount() > 0) {
-            DialogFragment dialog = new SelectPlaylistDialogFragment(cursor,
-                                                                     serviceIntent);
+            DialogFragment dialog = new SelectPlaylistDialogFragment(serviceIntent);
             dialog.show(this.getSupportFragmentManager(),
                         "PlaylistDialogFragment");
         } else {
             this.showCreatePlaylistDialog(serviceIntent);
         }
+        cursor.close();
+    }
 
-        // this.startService(serviceIntent);
+    protected void downloadTrack(final ArrayList<TrackBean> items) {
+        final Intent serviceIntent = new Intent(this, DownloadService.class);
+        serviceIntent.setAction(DownloadService.ACTION_ADD);
+        serviceIntent.putParcelableArrayListExtra("trackBeanList", items);
+
+        this.showCreatePlaylistDialog(serviceIntent);
     }
 
     private class TrackListLoaderCallback implements LoaderCallbacks<ArrayList<TrackBean>> {
@@ -212,9 +214,9 @@ public class MusicInfoActivity extends BaseActivity implements ActionSlideExpand
             switch (loaderId) {
             case ALBUM_INFO_LOADER:
                 String articleId = args.getString("articleId");
-                final Uri uri = HttpConstants.getMusicInfoUri(MusicInfoActivity.this,
+                final Uri uri = HttpConstants.getMusicInfoUri(AlbumInfoActivity.this,
                                                               articleId);
-                return new TrackListLoader(MusicInfoActivity.this, uri);
+                return new TrackListLoader(AlbumInfoActivity.this, uri);
             default:
                 break;
             }
@@ -224,21 +226,21 @@ public class MusicInfoActivity extends BaseActivity implements ActionSlideExpand
         @Override
         public void onLoadFinished(Loader<ArrayList<TrackBean>> loader, ArrayList<TrackBean> data) {
             if (CollectionUtils.isEmpty(data)) {
-                MusicInfoActivity.this.mProgress.setVisibility(View.GONE);
-                MusicInfoActivity.this.mListView.setVisibility(View.GONE);
-                MusicInfoActivity.this.mEmpty.setVisibility(View.VISIBLE);
+                AlbumInfoActivity.this.mProgress.setVisibility(View.GONE);
+                AlbumInfoActivity.this.mListView.setVisibility(View.GONE);
+                AlbumInfoActivity.this.mEmpty.setVisibility(View.VISIBLE);
             } else {
-                MusicInfoActivity.this.mProgress.setVisibility(View.GONE);
-                MusicInfoActivity.this.mEmpty.setVisibility(View.GONE);
-                MusicInfoActivity.this.mListView.setVisibility(View.VISIBLE);
-                MusicInfoActivity.this.mAdapter.setItems(data);
-                MusicInfoActivity.this.mAdapter.notifyDataSetChanged();
+                AlbumInfoActivity.this.mProgress.setVisibility(View.GONE);
+                AlbumInfoActivity.this.mEmpty.setVisibility(View.GONE);
+                AlbumInfoActivity.this.mListView.setVisibility(View.VISIBLE);
+                AlbumInfoActivity.this.mAdapter.setItems(data);
+                AlbumInfoActivity.this.mAdapter.notifyDataSetChanged();
             }
         }
 
         @Override
         public void onLoaderReset(Loader<ArrayList<TrackBean>> loader) {
-            MusicInfoActivity.this.mAdapter.setItems(new ArrayList<TrackBean>());
+            AlbumInfoActivity.this.mAdapter.setItems(new ArrayList<TrackBean>());
         }
     }
 
@@ -251,8 +253,6 @@ public class MusicInfoActivity extends BaseActivity implements ActionSlideExpand
         @Override
         protected ArrayList<TrackBean> parseJSON(final JSONObject jsonData) throws JSONException {
             ArrayList<TrackBean> data = new ArrayList<TrackBean>();
-            ContentResolver contentResolver = this.getContext()
-                                                  .getContentResolver();
             if (jsonData.getBoolean("result")) {
                 final JSONArray items = jsonData.getJSONArray("playlist");
                 for (int i = 0; i < items.length(); i++) {
@@ -264,26 +264,10 @@ public class MusicInfoActivity extends BaseActivity implements ActionSlideExpand
                     if (trackJSON.has("artist")) {
                         trackBean.setArtist(trackJSON.getString("artist"));
                     }
-                    this.isDownloaded(contentResolver, trackBean);
                     data.add(trackBean);
                 }
             }
             return data;
-        }
-
-        private void isDownloaded(ContentResolver contentResolver, TrackBean trackBean) {
-            Cursor c = contentResolver.query(TrackContentProvider.URI,
-                                             null,
-                                             "article_id = ? and file_id = ?",
-                                             new String[] { trackBean.getArticleId(),
-                                                     trackBean.getFileId() },
-                                             null);
-            if (c.moveToFirst()) {
-                trackBean.setDownloaded(true);
-            } else {
-                trackBean.setDownloaded(false);
-            }
-            c.close();
         }
     }
 
@@ -292,25 +276,43 @@ public class MusicInfoActivity extends BaseActivity implements ActionSlideExpand
     }
 
     public void showCreatePlaylistDialog(Intent serviceIntent) {
-        DialogFragment dialog = new CreatePlaylistDialogFragment(serviceIntent);
+        String title = this.mTitle;
+        Cursor cursor = this.getContentResolver()
+                            .query(TongrenluContentProvider.PLAYLIST_URI,
+                                   null,
+                                   "title = ?",
+                                   new String[] { title },
+                                   null);
+
+        if (cursor.getCount() > 0) {
+            title = String.format("%s (%d)", title, cursor.getCount());
+        }
+        DialogFragment dialog = new CreatePlaylistDialogFragment(title,
+                                                                 serviceIntent);
         dialog.show(this.getSupportFragmentManager(), "PlaylistDialogFragment");
+        cursor.close();
     }
 
     public class SelectPlaylistDialogFragment extends DialogFragment implements DialogInterface.OnClickListener {
 
         private Intent mIntent = null;
-        private Cursor mCursor = null;
 
-        public SelectPlaylistDialogFragment(Cursor cursor, Intent serviceIntent) {
+        public SelectPlaylistDialogFragment(Intent serviceIntent) {
             this.mIntent = serviceIntent;
-            this.mCursor = cursor;
         }
 
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
+            Cursor cursor = AlbumInfoActivity.this.getContentResolver()
+                                                  .query(TongrenluContentProvider.PLAYLIST_URI,
+                                                         null,
+                                                         null,
+                                                         null,
+                                                         null);
+
             AlertDialog.Builder builder = new AlertDialog.Builder(this.getActivity());
             builder.setTitle(R.string.dial_select_playlist)
-                   .setCursor(this.mCursor, this, "title")
+                   .setCursor(cursor, this, "title")
                    .setNeutralButton(R.string.action_create, this)
                    .setNegativeButton(R.string.action_cancel, this);
             return builder.create();
@@ -325,12 +327,12 @@ public class MusicInfoActivity extends BaseActivity implements ActionSlideExpand
             case DialogInterface.BUTTON_NEGATIVE:
                 break;
             case DialogInterface.BUTTON_NEUTRAL:
-                MusicInfoActivity.this.showCreatePlaylistDialog(this.mIntent);
+                AlbumInfoActivity.this.showCreatePlaylistDialog(this.mIntent);
                 break;
             default:
                 long playlistId = which;
                 this.mIntent.putExtra("playlistId", playlistId);
-                MusicInfoActivity.this.startService(this.mIntent);
+                AlbumInfoActivity.this.startService(this.mIntent);
                 break;
             }
 
@@ -339,10 +341,12 @@ public class MusicInfoActivity extends BaseActivity implements ActionSlideExpand
 
     public class CreatePlaylistDialogFragment extends DialogFragment implements DialogInterface.OnClickListener {
 
+        private String mTitle = null;
         private Intent mIntent = null;
         private EditText mTitleView = null;
 
-        public CreatePlaylistDialogFragment(Intent serviceIntent) {
+        public CreatePlaylistDialogFragment(String title, Intent serviceIntent) {
+            this.mTitle = title;
             this.mIntent = serviceIntent;
         }
 
@@ -351,7 +355,7 @@ public class MusicInfoActivity extends BaseActivity implements ActionSlideExpand
             LayoutInflater inflater = this.getActivity().getLayoutInflater();
             View view = inflater.inflate(R.layout.dialog_create_playlist, null);
             this.mTitleView = (EditText) view.findViewById(R.id.playlist_title);
-            this.mTitleView.setText(MusicInfoActivity.this.mTitle);
+            this.mTitleView.setText(this.mTitle);
 
             AlertDialog.Builder builder = new AlertDialog.Builder(this.getActivity());
             builder.setTitle(R.string.dial_create_playlist)
@@ -370,10 +374,11 @@ public class MusicInfoActivity extends BaseActivity implements ActionSlideExpand
                 values.put("title", this.mTitleView.getText().toString());
                 Uri uri = this.getActivity()
                               .getContentResolver()
-                              .insert(PlaylistContentProvider.URI, values);
-                long playlistId = Long.valueOf(uri.getLastPathSegment());
+                              .insert(TongrenluContentProvider.PLAYLIST_URI,
+                                      values);
+                String playlistId = uri.getLastPathSegment();
                 this.mIntent.putExtra("playlistId", playlistId);
-                MusicInfoActivity.this.startService(this.mIntent);
+                AlbumInfoActivity.this.startService(this.mIntent);
                 break;
             default:
 

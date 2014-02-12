@@ -3,30 +3,37 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
     
-    <TextView android:id="@android:id/empty"
+    <LinearLayout android:id="@android:id/empty"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical|center_horizontal"
-        android:text="@string/no_data"
-        android:visibility="visible"/>
-    
+        android:orientation="vertical"
+        android:visibility="gone">
+        <TextView android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/no_data"/>
+        <Button android:id="@+id/action_refresh"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/action_refresh"/>
+    </LinearLayout>
     <GridView android:id="@android:id/list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:columnWidth="@dimen/image_width"
+        android:columnWidth="@dimen/image_m"
         android:numColumns="auto_fit"
         android:horizontalSpacing="1dp"
         android:verticalSpacing="1dp"
         android:stretchMode="columnWidth"
         android:visibility="visible"
         />
-    
     <LinearLayout android:id="@android:id/progress"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical|center_horizontal"
             android:orientation="vertical"
-            android:alpha="1">
+            android:alpha="1"
+            android:background="@color/vpi__background_holo_dark">
         <ProgressBar
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

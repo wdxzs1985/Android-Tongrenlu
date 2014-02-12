@@ -1,21 +1,14 @@
 package info.tongrenlu.android.music;
 
 import info.tongrenlu.android.music.adapter.PlaylistTrackListAdapter;
-import info.tongrenlu.android.music.provider.TrackContentProvider;
-import info.tongrenlu.app.HttpConstants;
+import info.tongrenlu.android.music.provider.TongrenluContentProvider;
 import info.tongrenlu.domain.TrackBean;
 
-import java.io.File;
 import java.util.ArrayList;
 
-import org.apache.commons.io.FileUtils;
-
-import android.content.ContentUris;
-import android.content.Context;
 import android.content.Intent;
 import android.database.ContentObserver;
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
@@ -24,15 +17,13 @@ import android.support.v4.content.Loader;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView.AdapterContextMenuInfo;
 
 import com.tjerkw.slideexpandable.library.ActionSlideExpandableListView;
 
-public class PlaylistInfoActivity extends BaseActivity implements ActionSlideExpandableListView.OnActionClickListener, LoaderCallbacks<Cursor> {
+public class TrackActivity extends BaseActivity implements ActionSlideExpandableListView.OnActionClickListener, LoaderCallbacks<Cursor> {
 
-    public static final int PLAYLIST_LOADER_ID = 0;
+    public static final int TRACK_LOADER_ID = 0;
 
     private View mProgress = null;
     private View mEmpty = null;
@@ -58,22 +49,20 @@ public class PlaylistInfoActivity extends BaseActivity implements ActionSlideExp
                                              R.id.action_download);
 
         this.registerForContextMenu(this.mListView);
-        final Bundle args = new Bundle();
-        this.getSupportLoaderManager().initLoader(PLAYLIST_LOADER_ID,
-                                                  args,
-                                                  this);
+
+        this.getSupportLoaderManager().initLoader(TRACK_LOADER_ID, null, this);
 
         this.contentObserver = new ContentObserver(new Handler()) {
             @Override
             public void onChange(final boolean selfChange) {
                 super.onChange(selfChange);
-                PlaylistInfoActivity.this.getSupportLoaderManager()
-                                         .getLoader(PLAYLIST_LOADER_ID)
-                                         .onContentChanged();
+                TrackActivity.this.getSupportLoaderManager()
+                                  .getLoader(TRACK_LOADER_ID)
+                                  .onContentChanged();
             }
         };
         this.getContentResolver()
-            .registerContentObserver(TrackContentProvider.URI,
+            .registerContentObserver(TongrenluContentProvider.TRACK_URI,
                                      true,
                                      this.contentObserver);
     }
@@ -81,7 +70,7 @@ public class PlaylistInfoActivity extends BaseActivity implements ActionSlideExp
     @Override
     public Loader<Cursor> onCreateLoader(final int id, final Bundle args) {
         final CursorLoader loader = new CursorLoader(this);
-        loader.setUri(TrackContentProvider.URI);
+        loader.setUri(TongrenluContentProvider.TRACK_URI);
         return loader;
     }
 
@@ -109,26 +98,7 @@ public class PlaylistInfoActivity extends BaseActivity implements ActionSlideExp
         super.onDestroy();
         this.getContentResolver()
             .unregisterContentObserver(this.contentObserver);
-        this.getSupportLoaderManager().destroyLoader(PLAYLIST_LOADER_ID);
-    }
-
-    public void onDialogPositiveClick(final long id, final TrackBean trackBean) {
-        final Context context = this;
-        final Uri deleteUri = ContentUris.withAppendedId(TrackContentProvider.URI,
-                                                         id);
-        context.getContentResolver().delete(deleteUri, null, null);
-
-    }
-
-    public void onDialogNegativeClick(final long id, final TrackBean trackBean) {
-        final Context context = this;
-        final Uri deleteUri = ContentUris.withAppendedId(TrackContentProvider.URI,
-                                                         id);
-        context.getContentResolver().delete(deleteUri, null, null);
-        final File mp3File = HttpConstants.getMp3(context,
-                                                  trackBean.getArticleId(),
-                                                  trackBean.getFileId());
-        FileUtils.deleteQuietly(mp3File);
+        this.getSupportLoaderManager().destroyLoader(TRACK_LOADER_ID);
     }
 
     @Override
@@ -136,29 +106,6 @@ public class PlaylistInfoActivity extends BaseActivity implements ActionSlideExp
         super.onCreateContextMenu(menu, v, menuInfo);
         final MenuInflater inflater = this.getMenuInflater();
         inflater.inflate(R.menu.fragment_playlist_track, menu);
-    }
-
-    @Override
-    public boolean onContextItemSelected(final MenuItem item) {
-        final AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
-        switch (item.getItemId()) {
-        case R.id.action_delete:
-            final Cursor c = (Cursor) this.mListView.getItemAtPosition(info.position);
-            final String articleId = c.getString(c.getColumnIndex("article_id"));
-            final String fileId = c.getString(c.getColumnIndex("file_id"));
-            final String title = c.getString(c.getColumnIndex("title"));
-            final String artist = c.getString(c.getColumnIndex("artist"));
-            final TrackBean trackBean = new TrackBean();
-            trackBean.setArticleId(articleId);
-            trackBean.setFileId(fileId);
-            trackBean.setTitle(title);
-            trackBean.setArtist(artist);
-
-            this.onDialogNegativeClick(info.id, trackBean);
-            return true;
-        default:
-            return super.onContextItemSelected(item);
-        }
     }
 
     @Override
@@ -170,6 +117,7 @@ public class PlaylistInfoActivity extends BaseActivity implements ActionSlideExp
             this.playTrack(c);
             break;
         case R.id.action_delete:
+            // TODO
             break;
         default:
             break;

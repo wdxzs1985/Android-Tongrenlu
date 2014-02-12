@@ -1,7 +1,7 @@
 package info.tongrenlu.android.music;
 
 import info.tongrenlu.android.fragment.TitleFragmentAdapter;
-import info.tongrenlu.android.music.fragment.MusicGridFragment;
+import info.tongrenlu.android.music.fragment.AlbumFragment;
 import info.tongrenlu.android.music.fragment.PlaylistFragment;
 import info.tongrenlu.app.CommonConstants;
 import android.os.Bundle;
@@ -29,7 +29,7 @@ public class MainActivity extends BaseActivity {
         final FragmentManager fm = this.getSupportFragmentManager();
         final TitleFragmentAdapter adapter = new TitleFragmentAdapter(fm);
         adapter.addItem(new PlaylistFragment());
-        adapter.addItem(new MusicGridFragment());
+        adapter.addItem(new AlbumFragment());
         this.mAdapter = adapter;
 
         this.mPager = (ViewPager) this.findViewById(R.id.pager);

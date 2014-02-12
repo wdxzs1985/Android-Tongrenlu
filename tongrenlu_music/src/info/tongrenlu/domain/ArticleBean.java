@@ -1,7 +1,5 @@
 package info.tongrenlu.domain;
 
-import java.util.Date;
-
 public class ArticleBean {
 
     private String articleId;
@@ -10,19 +8,9 @@ public class ArticleBean {
 
     private String description;
 
-    private String publishFlg;
-
-    private Date publishDate;
-
-    private String type = null;
-
-    private Integer accessCount;
-
     private Integer collectCount;
 
     private Integer commentCount;
-
-    private UserBean userBean;
 
     public String getArticleId() {
         return this.articleId;
@@ -48,30 +36,6 @@ public class ArticleBean {
         this.description = description;
     }
 
-    public String getPublishFlg() {
-        return this.publishFlg;
-    }
-
-    public void setPublishFlg(final String publishFlg) {
-        this.publishFlg = publishFlg;
-    }
-
-    public Date getPublishDate() {
-        return this.publishDate;
-    }
-
-    public void setPublishDate(final Date publishDate) {
-        this.publishDate = publishDate;
-    }
-
-    public Integer getAccessCount() {
-        return this.accessCount;
-    }
-
-    public void setAccessCount(final Integer accessCount) {
-        this.accessCount = accessCount;
-    }
-
     public Integer getCommentCount() {
         return this.commentCount;
     }
@@ -80,28 +44,43 @@ public class ArticleBean {
         this.commentCount = commentCount;
     }
 
-    public UserBean getUserBean() {
-        return this.userBean;
-    }
-
-    public void setUserBean(final UserBean userBean) {
-        this.userBean = userBean;
-    }
-
-    public String getType() {
-        return this.type;
-    }
-
-    public void setType(final String type) {
-        this.type = type;
-    }
-
     public Integer getCollectCount() {
         return this.collectCount;
     }
 
     public void setCollectCount(final Integer collectCount) {
         this.collectCount = collectCount;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result
+                + ((this.articleId == null) ? 0 : this.articleId.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (this.getClass() != obj.getClass()) {
+            return false;
+        }
+        ArticleBean other = (ArticleBean) obj;
+        if (this.articleId == null) {
+            if (other.articleId != null) {
+                return false;
+            }
+        } else if (!this.articleId.equals(other.articleId)) {
+            return false;
+        }
+        return true;
     }
 
 }

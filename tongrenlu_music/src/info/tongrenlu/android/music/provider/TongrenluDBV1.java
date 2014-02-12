@@ -12,17 +12,21 @@ public class TongrenluDBV1 implements DatabaseBuilder {
             + "article_id text,"
             + "file_id text,"
             + "title text,"
-            + "artist text,"
-            + "size integer,"
-            + "loaded integer)";
+            + "artist text"
+            + ")";
     public static final String CREATE_TB_PLAYLIST = "create table tb_playlist (" + "_id integer primary key autoincrement,"
             + "title text)";
     public static final String CREATE_TB_PLAYLIST_TRACK = "create table tb_playlist_track (" + "_id integer primary key autoincrement,"
-            + "playlist_id integer"
-            + "track_id integer)";
-    public static final String DROP_TB_DOWNLOAD = "drop table tb_download";
-    public static final String DROP_TB_PLAYLIST = "drop table tb_playlist";
-    public static final String DROP_TB_TRACK = "drop table tb_track";
+            + "playlist_id integer,"
+            + "article_id text,"
+            + "file_id text,"
+            + "title text,"
+            + "artist text"
+            + ")";
+    public static final String CREATE_TB_ALBUM = "create table tb_album (" + "_id integer primary key autoincrement,"
+            + "article_id text,"
+            + "title text,"
+            + "collect integer)";
 
     @Override
     public String getName() {
@@ -37,6 +41,7 @@ public class TongrenluDBV1 implements DatabaseBuilder {
     /*** 构造一个数据库，如果没有就创建一个数据库 ***/
     @Override
     public void onCreate(final SQLiteDatabase db) {
+        db.execSQL(TongrenluDBV1.CREATE_TB_ALBUM);
         db.execSQL(TongrenluDBV1.CREATE_TB_TRACK);
         db.execSQL(TongrenluDBV1.CREATE_TB_PLAYLIST);
         db.execSQL(TongrenluDBV1.CREATE_TB_PLAYLIST_TRACK);

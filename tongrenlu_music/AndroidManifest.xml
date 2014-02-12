@@ -21,10 +21,13 @@
             </intent-filter>
         </activity>
         
-        <activity android:name="PlaylistInfoActivity" 
+        <activity android:name="TrackActivity" 
             android:screenOrientation="portrait"></activity>
         
-        <activity android:name="MusicInfoActivity" 
+        <activity android:name="PlaylistTrackActivity" 
+            android:screenOrientation="portrait"></activity>
+        
+        <activity android:name="AlbumInfoActivity" 
             android:screenOrientation="portrait"></activity>
         
         <activity android:name="MusicPlayerActivity" 
@@ -60,16 +63,8 @@
         
         <service android:name="UpdateService"></service>
         
-        <provider android:name=".provider.TrackContentProvider"
-            android:authorities="info.tongrenlu.android.music.track"
-            android:exported="false">
-        </provider>
-        <provider android:name=".provider.AlbumContentProvider"
-            android:authorities="info.tongrenlu.android.music.album"
-            android:exported="false">
-        </provider>
-        <provider android:name=".provider.PlaylistContentProvider"
-            android:authorities="info.tongrenlu.android.music.playlist"
+        <provider android:name=".provider.TongrenluContentProvider"
+            android:authorities="info.tongrenlu.android.music"
             android:exported="false">
         </provider>
     </application>

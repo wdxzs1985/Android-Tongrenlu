@@ -16,6 +16,8 @@
 -->
 
 <resources>
-    <dimen name="image_width">150dp</dimen>
-    <dimen name="image_height">150dp</dimen>
+    <dimen name="image_l">400dp</dimen>
+    <dimen name="image_m">180dp</dimen>
+    <dimen name="image_s">90dp</dimen>
+    <dimen name="image_xs">60dp</dimen>
 </resources>

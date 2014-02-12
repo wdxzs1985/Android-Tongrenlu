@@ -2,10 +2,10 @@ package info.tongrenlu.android.music.fragment;
 
 import info.tongrenlu.android.fragment.TitleFragment;
 import info.tongrenlu.android.loader.JSONLoader;
-import info.tongrenlu.android.music.MusicInfoActivity;
+import info.tongrenlu.android.music.AlbumInfoActivity;
 import info.tongrenlu.android.music.R;
-import info.tongrenlu.android.music.adapter.MusicGridAdapter;
-import info.tongrenlu.android.music.provider.AlbumContentProvider;
+import info.tongrenlu.android.music.adapter.AlbumGridAdapter;
+import info.tongrenlu.android.music.provider.TongrenluContentProvider;
 import info.tongrenlu.app.HttpConstants;
 import info.tongrenlu.support.PaginateSupport;
 
@@ -30,13 +30,12 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.GridView;
 
-public class MusicGridFragment extends TitleFragment implements OnItemClickListener, OnClickListener {
+public class AlbumFragment extends TitleFragment implements OnItemClickListener, View.OnClickListener {
 
     public static final int ALBUM_CURSOR_LOADER = 1;
     public static final int ALBUM_LIST_LOADER = 2;
@@ -44,9 +43,9 @@ public class MusicGridFragment extends TitleFragment implements OnItemClickListe
     private View mProgress = null;
     private View mEmpty = null;
     private GridView mListView = null;
-    private MusicGridAdapter mAdapter = null;
+    private AlbumGridAdapter mAdapter = null;
 
-    public MusicGridFragment() {
+    public AlbumFragment() {
         this.setTitle("所有专辑");
     }
 
@@ -54,21 +53,20 @@ public class MusicGridFragment extends TitleFragment implements OnItemClickListe
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.setHasOptionsMenu(true);
-        this.mAdapter = new MusicGridAdapter(this.getActivity(), null);
+        this.mAdapter = new AlbumGridAdapter(this.getActivity(), null);
     }
 
     @Override
     public View onCreateView(final LayoutInflater inflater, final ViewGroup container, final Bundle savedInstanceState) {
-        final View view = inflater.inflate(R.layout.fragment_grid_view,
-                                           null,
-                                           false);
+        final View view = inflater.inflate(R.layout.fragment_album, null, false);
         this.mProgress = view.findViewById(android.R.id.progress);
         this.mEmpty = view.findViewById(android.R.id.empty);
-        this.mEmpty.setOnClickListener(this);
+        this.mEmpty.findViewById(R.id.action_refresh).setOnClickListener(this);
 
         this.mListView = (GridView) view.findViewById(android.R.id.list);
         this.mListView.setAdapter(this.mAdapter);
         this.mListView.setOnItemClickListener(this);
+
         return view;
     }
 
@@ -98,21 +96,24 @@ public class MusicGridFragment extends TitleFragment implements OnItemClickListe
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-        case android.R.id.empty:
-            FragmentActivity activity = this.getActivity();
-            LoaderManager loaderManager = activity.getSupportLoaderManager();
-            loaderManager.initLoader(ALBUM_LIST_LOADER,
-                                     null,
-                                     new MusicListLoaderCallback());
-            this.mProgress.setVisibility(View.VISIBLE);
-            this.mListView.setVisibility(View.GONE);
-            this.mEmpty.setVisibility(View.GONE);
+        case R.id.action_refresh:
+            this.refreshAlbumList();
             break;
-
         default:
             break;
         }
 
+    }
+
+    private void refreshAlbumList() {
+        FragmentActivity activity = this.getActivity();
+        LoaderManager loaderManager = activity.getSupportLoaderManager();
+        loaderManager.initLoader(ALBUM_LIST_LOADER,
+                                 null,
+                                 new MusicListLoaderCallback());
+        this.mProgress.setVisibility(View.VISIBLE);
+        this.mListView.setVisibility(View.VISIBLE);
+        this.mEmpty.setVisibility(View.GONE);
     }
 
     @Override
@@ -122,7 +123,7 @@ public class MusicGridFragment extends TitleFragment implements OnItemClickListe
         final String title = c.getString(c.getColumnIndex("title"));
 
         final Intent intent = new Intent();
-        intent.setClass(this.getActivity(), MusicInfoActivity.class);
+        intent.setClass(this.getActivity(), AlbumInfoActivity.class);
         intent.putExtra("articleId", articleId);
         intent.putExtra("title", title);
 
@@ -138,12 +139,7 @@ public class MusicGridFragment extends TitleFragment implements OnItemClickListe
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
         case R.id.action_refresh:
-            FragmentActivity activity = this.getActivity();
-            LoaderManager loaderManager = activity.getSupportLoaderManager();
-            loaderManager.initLoader(ALBUM_LIST_LOADER,
-                                     null,
-                                     new MusicListLoaderCallback());
-            this.mProgress.setVisibility(View.VISIBLE);
+            this.refreshAlbumList();
             break;
         default:
             break;
@@ -155,9 +151,9 @@ public class MusicGridFragment extends TitleFragment implements OnItemClickListe
 
         @Override
         public Loader<Cursor> onCreateLoader(int loaderId, Bundle args) {
-            Context context = MusicGridFragment.this.getActivity();
+            Context context = AlbumFragment.this.getActivity();
             return new CursorLoader(context,
-                                    AlbumContentProvider.URI,
+                                    TongrenluContentProvider.ALBUM_URI,
                                     null,
                                     null,
                                     null,
@@ -166,21 +162,21 @@ public class MusicGridFragment extends TitleFragment implements OnItemClickListe
 
         @Override
         public void onLoadFinished(Loader<Cursor> loader, Cursor c) {
-            MusicGridFragment.this.mAdapter.swapCursor(c);
+            AlbumFragment.this.mAdapter.swapCursor(c);
             if (c.getCount() == 0) {
-                MusicGridFragment.this.mProgress.setVisibility(View.GONE);
-                MusicGridFragment.this.mEmpty.setVisibility(View.VISIBLE);
-                MusicGridFragment.this.mListView.setVisibility(View.GONE);
+                AlbumFragment.this.mProgress.setVisibility(View.GONE);
+                AlbumFragment.this.mEmpty.setVisibility(View.VISIBLE);
+                AlbumFragment.this.mListView.setVisibility(View.GONE);
             } else {
-                MusicGridFragment.this.mProgress.setVisibility(View.GONE);
-                MusicGridFragment.this.mEmpty.setVisibility(View.GONE);
-                MusicGridFragment.this.mListView.setVisibility(View.VISIBLE);
+                AlbumFragment.this.mProgress.setVisibility(View.GONE);
+                AlbumFragment.this.mEmpty.setVisibility(View.GONE);
+                AlbumFragment.this.mListView.setVisibility(View.VISIBLE);
             }
         }
 
         @Override
         public void onLoaderReset(Loader<Cursor> loader) {
-            MusicGridFragment.this.mAdapter.swapCursor(null);
+            AlbumFragment.this.mAdapter.swapCursor(null);
         }
 
     }
@@ -189,7 +185,7 @@ public class MusicGridFragment extends TitleFragment implements OnItemClickListe
 
         @Override
         public Loader<PaginateSupport> onCreateLoader(int loaderId, Bundle args) {
-            Context context = MusicGridFragment.this.getActivity();
+            Context context = AlbumFragment.this.getActivity();
             final Uri uri = HttpConstants.getMusicListUri(context);
             Bundle bundle = new Bundle();
             bundle.putInt("s", Integer.MAX_VALUE);
@@ -198,10 +194,10 @@ public class MusicGridFragment extends TitleFragment implements OnItemClickListe
 
         @Override
         public void onLoadFinished(Loader<PaginateSupport> loader, PaginateSupport data) {
-            MusicGridFragment.this.getActivity()
-                                  .getSupportLoaderManager()
-                                  .getLoader(ALBUM_CURSOR_LOADER)
-                                  .onContentChanged();
+            AlbumFragment.this.getActivity()
+                              .getSupportLoaderManager()
+                              .getLoader(ALBUM_CURSOR_LOADER)
+                              .onContentChanged();
         }
 
         @Override
@@ -230,7 +226,7 @@ public class MusicGridFragment extends TitleFragment implements OnItemClickListe
                     final JSONObject musicJsonObject = items.getJSONObject(i);
                     String articleId = musicJsonObject.getString("articleId");
                     String title = musicJsonObject.getString("title");
-                    Cursor c = contentResolver.query(AlbumContentProvider.URI,
+                    Cursor c = contentResolver.query(TongrenluContentProvider.ALBUM_URI,
                                                      null,
                                                      "article_id = ?",
                                                      new String[] { articleId },
@@ -238,13 +234,8 @@ public class MusicGridFragment extends TitleFragment implements OnItemClickListe
                     ContentValues contentValues = new ContentValues();
                     contentValues.put("article_id", articleId);
                     contentValues.put("title", title);
-                    if (c.getCount() > 0) {
-                        contentResolver.update(AlbumContentProvider.URI,
-                                               contentValues,
-                                               "article_id = ?",
-                                               new String[] { articleId });
-                    } else {
-                        contentResolver.insert(AlbumContentProvider.URI,
+                    if (c.getCount() == 0) {
+                        contentResolver.insert(TongrenluContentProvider.ALBUM_URI,
                                                contentValues);
                     }
                     c.close();
@@ -281,5 +272,4 @@ public class MusicGridFragment extends TitleFragment implements OnItemClickListe
             // });
         }
     }
-
 }

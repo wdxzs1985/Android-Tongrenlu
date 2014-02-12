@@ -13,8 +13,6 @@ public class TrackBean implements Parcelable {
 
     private String title = null;
 
-    private boolean downloaded = false;
-
     public String getFileId() {
         return this.fileId;
     }
@@ -60,14 +58,6 @@ public class TrackBean implements Parcelable {
                 this.artist });
     }
 
-    public boolean isDownloaded() {
-        return this.downloaded;
-    }
-
-    public void setDownloaded(boolean downloaded) {
-        this.downloaded = downloaded;
-    }
-
     public static final Parcelable.Creator<TrackBean> CREATOR = new Parcelable.Creator<TrackBean>() {
         @Override
         public TrackBean createFromParcel(final Parcel in) {
@@ -87,5 +77,45 @@ public class TrackBean implements Parcelable {
             return new TrackBean[size];
         }
     };
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result
+                + ((this.articleId == null) ? 0 : this.articleId.hashCode());
+        result = prime * result
+                + ((this.fileId == null) ? 0 : this.fileId.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (this.getClass() != obj.getClass()) {
+            return false;
+        }
+        TrackBean other = (TrackBean) obj;
+        if (this.articleId == null) {
+            if (other.articleId != null) {
+                return false;
+            }
+        } else if (!this.articleId.equals(other.articleId)) {
+            return false;
+        }
+        if (this.fileId == null) {
+            if (other.fileId != null) {
+                return false;
+            }
+        } else if (!this.fileId.equals(other.fileId)) {
+            return false;
+        }
+        return true;
+    }
 
 }

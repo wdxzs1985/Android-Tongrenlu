@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
              android:layout_width="match_parent"
-             android:layout_height="@dimen/image_height" >
+             android:layout_height="@dimen/image_m" >
 
     <ImageView android:id="@+id/article_cover"
                 android:contentDescription="@string/article_cover"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/image_height"
+                android:layout_height="@dimen/image_m"
                 android:scaleType="centerCrop" />
 
     <TextView android:id="@+id/article_title"

@@ -20,9 +20,9 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public class MusicGridAdapter extends CursorAdapter {
+public class AlbumGridAdapter extends CursorAdapter {
 
-    public MusicGridAdapter(Context context, Cursor c) {
+    public AlbumGridAdapter(Context context, Cursor c) {
         super(context, c, true);
     }
 
