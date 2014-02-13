@@ -6,6 +6,7 @@ import info.tongrenlu.domain.TrackBean;
 
 import java.util.ArrayList;
 
+import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Intent;
 import android.database.ContentObserver;
@@ -13,17 +14,18 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.view.ContextMenu;
-import android.view.ContextMenu.ContextMenuInfo;
+import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 
 import com.tjerkw.slideexpandable.library.ActionSlideExpandableListView;
 
-public class PlaylistTrackActivity extends BaseActivity implements ActionSlideExpandableListView.OnActionClickListener, LoaderCallbacks<Cursor> {
+public class PlaylistTrackActivity extends FragmentActivity implements ActionSlideExpandableListView.OnActionClickListener, LoaderCallbacks<Cursor> {
 
     public static final int PLAYLIST_LOADER_ID = 0;
 
@@ -32,7 +34,8 @@ public class PlaylistTrackActivity extends BaseActivity implements ActionSlideEx
     private ActionSlideExpandableListView mListView = null;
     private PlaylistTrackListAdapter mAdapter = null;
 
-    private Uri mContentUri = null;
+    private Uri mUri = null;
+    private Uri mTrackUri = null;
     private ContentObserver contentObserver = null;
 
     @Override
@@ -59,8 +62,9 @@ public class PlaylistTrackActivity extends BaseActivity implements ActionSlideEx
             return;
         }
 
-        this.mContentUri = Uri.withAppendedPath(TongrenluContentProvider.PLAYLIST_URI,
-                                                playlistId + "/track");
+        this.mUri = ContentUris.withAppendedId(TongrenluContentProvider.PLAYLIST_URI,
+                                               playlistId);
+        this.mTrackUri = Uri.withAppendedPath(this.mUri, "track");
 
         this.getSupportLoaderManager().initLoader(PLAYLIST_LOADER_ID,
                                                   null,
@@ -75,7 +79,7 @@ public class PlaylistTrackActivity extends BaseActivity implements ActionSlideEx
                                           .onContentChanged();
             }
         };
-        this.getContentResolver().registerContentObserver(this.mContentUri,
+        this.getContentResolver().registerContentObserver(this.mTrackUri,
                                                           true,
                                                           this.contentObserver);
     }
@@ -83,7 +87,7 @@ public class PlaylistTrackActivity extends BaseActivity implements ActionSlideEx
     @Override
     public Loader<Cursor> onCreateLoader(final int id, final Bundle args) {
         final CursorLoader loader = new CursorLoader(this);
-        loader.setUri(this.mContentUri);
+        loader.setUri(this.mTrackUri);
         return loader;
     }
 
@@ -112,13 +116,6 @@ public class PlaylistTrackActivity extends BaseActivity implements ActionSlideEx
         this.getContentResolver()
             .unregisterContentObserver(this.contentObserver);
         this.getSupportLoaderManager().destroyLoader(PLAYLIST_LOADER_ID);
-    }
-
-    @Override
-    public void onCreateContextMenu(final ContextMenu menu, final View v, final ContextMenuInfo menuInfo) {
-        super.onCreateContextMenu(menu, v, menuInfo);
-        final MenuInflater inflater = this.getMenuInflater();
-        inflater.inflate(R.menu.fragment_playlist_track, menu);
     }
 
     @Override
@@ -166,8 +163,36 @@ public class PlaylistTrackActivity extends BaseActivity implements ActionSlideEx
 
     private void deleteTrack(Cursor c) {
         long id = c.getLong(c.getColumnIndex("_id"));
-        Uri uri = ContentUris.withAppendedId(this.mContentUri, id);
-        this.getContentResolver().delete(uri, null, null);
-        this.getContentResolver().notifyChange(this.mContentUri, null);
+        Uri uri = ContentUris.withAppendedId(this.mTrackUri, id);
+        ContentResolver contentResolver = this.getContentResolver();
+        contentResolver.delete(uri, null, null);
+        contentResolver.notifyChange(this.mTrackUri, null);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        final MenuInflater inflater = this.getMenuInflater();
+        inflater.inflate(R.menu.activity_playlist_track, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+        case R.id.action_delete:
+            this.deletePlaylist();
+            break;
+        default:
+            break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void deletePlaylist() {
+        ContentResolver contentResolver = this.getContentResolver();
+        contentResolver.delete(this.mUri, null, null);
+        contentResolver.notifyChange(TongrenluContentProvider.PLAYLIST_URI,
+                                     null);
+        this.finish();
     }
 }

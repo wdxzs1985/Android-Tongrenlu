@@ -6,9 +6,12 @@ import info.tongrenlu.domain.TrackBean;
 
 import java.util.ArrayList;
 
+import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.Intent;
 import android.database.ContentObserver;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
@@ -46,7 +49,7 @@ public class TrackActivity extends BaseActivity implements ActionSlideExpandable
         this.mListView.setItemActionListener(this,
                                              R.id.item,
                                              R.id.action_play,
-                                             R.id.action_download);
+                                             R.id.action_delete);
 
         this.registerForContextMenu(this.mListView);
 
@@ -117,7 +120,7 @@ public class TrackActivity extends BaseActivity implements ActionSlideExpandable
             this.playTrack(c);
             break;
         case R.id.action_delete:
-            // TODO
+            this.deleteTrack(c);
             break;
         default:
             break;
@@ -149,5 +152,14 @@ public class TrackActivity extends BaseActivity implements ActionSlideExpandable
                                                      MusicPlayerActivity.class);
             this.startActivity(activityIntent);
         }
+    }
+
+    private void deleteTrack(Cursor c) {
+        long id = c.getLong(c.getColumnIndex("_id"));
+        Uri uri = ContentUris.withAppendedId(TongrenluContentProvider.TRACK_URI,
+                                             id);
+        ContentResolver contentResolver = this.getContentResolver();
+        contentResolver.delete(uri, null, null);
+        contentResolver.notifyChange(TongrenluContentProvider.TRACK_URI, null);
     }
 }

@@ -40,7 +40,6 @@ public class BaseActivity extends FragmentActivity {
 
     @Override
     public boolean onOptionsItemSelected(final MenuItem item) {
-        // Handle item selection
         switch (item.getItemId()) {
         case R.id.menu_settings:
             this.showSetting();
