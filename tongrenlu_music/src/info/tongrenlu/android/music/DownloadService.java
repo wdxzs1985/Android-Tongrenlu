@@ -24,6 +24,7 @@ import android.support.v4.app.NotificationCompat;
 
 public class DownloadService extends Service implements DownloadListener {
 
+    public static final long BAD_ID = -1l;
     public static final int NOTIFICATION_ID = 2;
 
     public static final String ACTION_ADD = "info.tongrenlu.android.music.DownloadService.action.add";
@@ -63,7 +64,10 @@ public class DownloadService extends Service implements DownloadListener {
     }
 
     private void processAddRequest(final Intent intent) {
-        final long playlistId = intent.getLongExtra("playlistId", -1);
+        final long playlistId = intent.getLongExtra("playlistId", BAD_ID);
+        if (playlistId == BAD_ID) {
+            return;
+        }
         if (intent.hasExtra("trackBean")) {
             final TrackBean trackBean = intent.getParcelableExtra("trackBean");
             this.addTask(trackBean, playlistId);
@@ -108,7 +112,7 @@ public class DownloadService extends Service implements DownloadListener {
         final NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
         builder.setContentIntent(contentIntent);
         builder.setSmallIcon(R.drawable.ic_launcher);
-        final String contentTitle = "download ok:" + trackBean.getTitle();
+        final String contentTitle = "download ok:" + trackBean.getSongTitle();
         builder.setTicker(contentTitle);
         builder.setContentTitle(contentTitle);
         builder.setWhen(System.currentTimeMillis());
@@ -137,15 +141,29 @@ public class DownloadService extends Service implements DownloadListener {
             final MusicDownloadTaskInfo taskinfo2 = (MusicDownloadTaskInfo) taskinfo;
             final TrackBean trackBean = taskinfo2.getTrackBean();
             final ContentValues values = new ContentValues();
-            values.put("article_id", trackBean.getArticleId());
-            values.put("file_id", trackBean.getFileId());
-            values.put("title", trackBean.getTitle());
-            values.put("artist", trackBean.getArtist());
+            values.put("articleId", trackBean.getArticleId());
+            values.put("fileId", trackBean.getFileId());
+            values.put("songTitle", trackBean.getSongTitle());
+            values.put("leadArtist", trackBean.getLeadArtist());
 
             final Uri contentUri = Uri.withAppendedPath(TongrenluContentProvider.PLAYLIST_URI,
                                                         taskinfo2.getPlaylistId() + "/track");
-
             final ContentResolver contentResolver = this.getContentResolver();
+
+            Cursor cursor = null;
+            try {
+                cursor = contentResolver.query(contentUri,
+                                               null,
+                                               null,
+                                               null,
+                                               null);
+                values.put("trackNumber", cursor.getCount() + 1);
+            } finally {
+                if (cursor != null) {
+                    cursor.close();
+                }
+            }
+
             contentResolver.insert(contentUri, values);
             contentResolver.notifyChange(contentUri, null);
 
@@ -163,7 +181,7 @@ public class DownloadService extends Service implements DownloadListener {
         try {
             cursor = contentResolver.query(TongrenluContentProvider.TRACK_URI,
                                            null,
-                                           "article_id = ? and file_id = ?",
+                                           "articleId = ? and fileId = ? and downloadFlg = 1",
                                            new String[] { trackBean.getArticleId(),
                                                    trackBean.getFileId() },
                                            null);
@@ -175,15 +193,16 @@ public class DownloadService extends Service implements DownloadListener {
         }
     }
 
-    private void insertTrack(final TrackBean trackBean) {
+    private void updateTrackState(final TrackBean trackBean) {
         final ContentValues values = new ContentValues();
-        values.put("article_id", trackBean.getArticleId());
-        values.put("file_id", trackBean.getFileId());
-        values.put("title", trackBean.getTitle());
-        values.put("artist", trackBean.getArtist());
+        values.put("downloadFlg", "1");
 
         final ContentResolver contentResolver = this.getContentResolver();
-        contentResolver.insert(TongrenluContentProvider.TRACK_URI, values);
+        contentResolver.update(TongrenluContentProvider.TRACK_URI,
+                               values,
+                               "articleId = ? and fileId = ? and downloadFlg = 0",
+                               new String[] { trackBean.getArticleId(),
+                                       trackBean.getFileId() });
     }
 
     @Override
@@ -191,7 +210,7 @@ public class DownloadService extends Service implements DownloadListener {
         final MusicDownloadTaskInfo taskinfo2 = (MusicDownloadTaskInfo) taskinfo;
         final TrackBean trackBean = taskinfo2.getTrackBean();
         System.out.println(String.format("%s is downloading. %d%% (%d / %d)",
-                                         trackBean.getTitle(),
+                                         trackBean.getSongTitle(),
                                          taskinfo.getProgress(),
                                          taskinfo.getRead(),
                                          taskinfo.getTotal()));
@@ -209,7 +228,7 @@ public class DownloadService extends Service implements DownloadListener {
             final TrackBean trackBean = taskinfo2.getTrackBean();
             if (!DownloadService.this.isTrackExists(trackBean)) {
                 if (super.doInBackground(params) != null) {
-                    DownloadService.this.insertTrack(trackBean);
+                    DownloadService.this.updateTrackState(trackBean);
                 } else {
                     return null;
                 }

@@ -38,6 +38,11 @@ public class HttpConstants {
 
     public static final int L_COVER = 400;
 
+    public static Uri getHostUri(final Context context) {
+        final String host = HttpConstants.getHost(context);
+        return Uri.parse(host);
+    }
+
     public static Uri getMusicListUri(final Context context) {
         final String host = HttpConstants.getHost(context);
         return Uri.parse(host + HttpConstants.MUSIC_LIST_URI);

@@ -1,14 +1,19 @@
 package info.tongrenlu.android.music.fragment;
 
 import info.tongrenlu.android.fragment.TitleFragment;
-import info.tongrenlu.android.loader.JSONLoader;
+import info.tongrenlu.android.loader.BaseLoader;
 import info.tongrenlu.android.music.AlbumInfoActivity;
 import info.tongrenlu.android.music.R;
 import info.tongrenlu.android.music.adapter.AlbumGridAdapter;
 import info.tongrenlu.android.music.provider.TongrenluContentProvider;
 import info.tongrenlu.app.HttpConstants;
-import info.tongrenlu.support.PaginateSupport;
+import info.tongrenlu.support.RESTClient;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -38,7 +43,7 @@ import android.widget.GridView;
 public class AlbumFragment extends TitleFragment implements OnItemClickListener, View.OnClickListener {
 
     public static final int ALBUM_CURSOR_LOADER = 1;
-    public static final int ALBUM_LIST_LOADER = 2;
+    public static final int ALBUM_JSON_LOADER = 2;
 
     private View mProgress = null;
     private View mEmpty = null;
@@ -90,7 +95,7 @@ public class AlbumFragment extends TitleFragment implements OnItemClickListener,
         final FragmentActivity activity = this.getActivity();
         final LoaderManager loaderManager = activity.getSupportLoaderManager();
         loaderManager.destroyLoader(AlbumFragment.ALBUM_CURSOR_LOADER);
-        loaderManager.destroyLoader(AlbumFragment.ALBUM_LIST_LOADER);
+        loaderManager.destroyLoader(AlbumFragment.ALBUM_JSON_LOADER);
     }
 
     @Override
@@ -108,9 +113,9 @@ public class AlbumFragment extends TitleFragment implements OnItemClickListener,
     private void refreshAlbumList() {
         final FragmentActivity activity = this.getActivity();
         final LoaderManager loaderManager = activity.getSupportLoaderManager();
-        loaderManager.initLoader(AlbumFragment.ALBUM_LIST_LOADER,
+        loaderManager.initLoader(AlbumFragment.ALBUM_JSON_LOADER,
                                  null,
-                                 new MusicListLoaderCallback());
+                                 new AlbumJsonLoaderCallback());
         this.mProgress.setVisibility(View.VISIBLE);
         this.mListView.setVisibility(View.VISIBLE);
         this.mEmpty.setVisibility(View.GONE);
@@ -119,7 +124,7 @@ public class AlbumFragment extends TitleFragment implements OnItemClickListener,
     @Override
     public void onItemClick(final AdapterView<?> listView, final View itemView, final int position, final long itemId) {
         final Cursor c = (Cursor) listView.getItemAtPosition(position);
-        final String articleId = c.getString(c.getColumnIndex("article_id"));
+        final String articleId = c.getString(c.getColumnIndex("articleId"));
         final String title = c.getString(c.getColumnIndex("title"));
 
         final Intent intent = new Intent();
@@ -157,7 +162,7 @@ public class AlbumFragment extends TitleFragment implements OnItemClickListener,
                                     null,
                                     null,
                                     null,
-                                    "article_id desc");
+                                    "articleId desc");
         }
 
         @Override
@@ -181,19 +186,16 @@ public class AlbumFragment extends TitleFragment implements OnItemClickListener,
 
     }
 
-    private class MusicListLoaderCallback implements LoaderCallbacks<PaginateSupport> {
+    private class AlbumJsonLoaderCallback implements LoaderCallbacks<Boolean> {
 
         @Override
-        public Loader<PaginateSupport> onCreateLoader(final int loaderId, final Bundle args) {
+        public Loader<Boolean> onCreateLoader(final int loaderId, final Bundle args) {
             final Context context = AlbumFragment.this.getActivity();
-            final Uri uri = HttpConstants.getMusicListUri(context);
-            final Bundle bundle = new Bundle();
-            bundle.putInt("s", Integer.MAX_VALUE);
-            return new MusicListLoader(context, uri, bundle);
+            return new AlbumDataLoader(context);
         }
 
         @Override
-        public void onLoadFinished(final Loader<PaginateSupport> loader, final PaginateSupport data) {
+        public void onLoadFinished(final Loader<Boolean> loader, final Boolean data) {
             AlbumFragment.this.getActivity()
                               .getSupportLoaderManager()
                               .getLoader(AlbumFragment.ALBUM_CURSOR_LOADER)
@@ -201,46 +203,84 @@ public class AlbumFragment extends TitleFragment implements OnItemClickListener,
         }
 
         @Override
-        public void onLoaderReset(final Loader<PaginateSupport> loader) {
+        public void onLoaderReset(final Loader<Boolean> loader) {
         }
     }
 
-    private static class MusicListLoader extends JSONLoader<PaginateSupport> {
+    private static class AlbumDataLoader extends BaseLoader<Boolean> {
 
-        public MusicListLoader(final Context ctx, final Uri uri, final Bundle parameters) {
-            super(ctx, uri, parameters);
+        static final int NO_ERROR = 0;
+        static final int NETWORK_ERROR = -100;
+        static final int PARSE_ERROR = -200;
+
+        private int mErrorCode = NO_ERROR;
+
+        public AlbumDataLoader(Context ctx) {
+            super(ctx);
         }
 
         @Override
-        protected PaginateSupport parseJSON(final JSONObject responseJSON) throws JSONException {
-            final PaginateSupport paginate = new PaginateSupport();
+        public Boolean loadInBackground() {
+            this.refreshAlbumData();
+            return this.isNoError();
+        }
+
+        protected boolean isNoError() {
+            return this.mErrorCode == NO_ERROR;
+        }
+
+        private void refreshAlbumData() {
+            Uri hostUri = HttpConstants.getHostUri(this.getContext());
+            Uri albumUri = Uri.withAppendedPath(hostUri, "fm/music");
+            Bundle param = new Bundle();
+            param.putInt("s", Integer.MAX_VALUE);
+            String json = this.processHttpGet(albumUri, param);
+            if (this.isNoError() && StringUtils.isNotBlank(json)) {
+                try {
+                    JSONObject albumJson = new JSONObject(json);
+                    this.parseAlbumJSON(albumJson);
+                } catch (JSONException e) {
+                    this.mErrorCode = PARSE_ERROR;
+                }
+            }
+        }
+
+        private String processHttpGet(Uri uri, Bundle param) {
+            RESTClient.RESTResponse response = new RESTClient(RESTClient.HTTPVerb.GET,
+                                                              uri,
+                                                              param).load();
+            final int code = response.getCode();
+            final String json = response.getData();
+            if (code != 200) {
+                this.mErrorCode = NETWORK_ERROR;
+            }
+            return json;
+        }
+
+        protected void parseAlbumJSON(final JSONObject responseJSON) throws JSONException {
             if (responseJSON.getBoolean("result")) {
-                final JSONObject pageJSON = responseJSON.getJSONObject("page");
-                final int itemCount = pageJSON.getInt("itemCount");
-                final int page = pageJSON.getInt("page");
-                final int size = pageJSON.getInt("size");
-                final JSONArray items = pageJSON.getJSONArray("items");
+                final JSONObject pageJSON = responseJSON.optJSONObject("page");
+                final JSONArray items = pageJSON.optJSONArray("items");
+                List<ContentValues> contentValuesList = new ArrayList<ContentValues>();
                 final ContentResolver contentResolver = this.getContext()
                                                             .getContentResolver();
                 for (int i = 0; i < items.length(); i++) {
-                    final JSONObject musicJsonObject = items.getJSONObject(i);
-                    final String articleId = musicJsonObject.getString("articleId");
-                    final String title = musicJsonObject.getString("title");
+                    final JSONObject albumObject = items.optJSONObject(i);
+                    final String articleId = albumObject.optString("articleId");
+                    final String title = albumObject.optString("title");
                     Cursor cursor = null;
                     try {
                         cursor = contentResolver.query(TongrenluContentProvider.ALBUM_URI,
                                                        null,
-                                                       "article_id = ?",
+                                                       "articleId = ?",
                                                        new String[] { articleId },
                                                        null);
-                        final ContentValues contentValues = new ContentValues();
-                        contentValues.put("article_id", articleId);
-                        contentValues.put("title", title);
                         if (cursor.getCount() == 0) {
-                            contentResolver.insert(TongrenluContentProvider.ALBUM_URI,
-                                                   contentValues);
-                            contentResolver.notifyChange(TongrenluContentProvider.ALBUM_URI,
-                                                         null);
+                            final ContentValues contentValues = new ContentValues();
+                            contentValues.put("articleId", articleId);
+                            contentValues.put("title", title);
+                            contentValues.put("collectFlg", 0);
+                            contentValuesList.add(contentValues);
                         }
                     } finally {
                         if (cursor != null) {
@@ -248,36 +288,13 @@ public class AlbumFragment extends TitleFragment implements OnItemClickListener,
                         }
                     }
                 }
-
-                paginate.setItemCount(itemCount);
-                paginate.setPage(page);
-                paginate.setSize(size);
+                if (CollectionUtils.isNotEmpty(contentValuesList)) {
+                    contentResolver.bulkInsert(TongrenluContentProvider.ALBUM_URI,
+                                               contentValuesList.toArray(new ContentValues[] {}));
+                    contentResolver.notifyChange(TongrenluContentProvider.ALBUM_URI,
+                                                 null);
+                }
             }
-            return paginate;
-        }
-
-        @Override
-        protected void onJSONException(final JSONException e) {
-            final Context context = this.getContext();
-            final String text = context.getString(R.string.err_network);
-            this.showErrorToast(text);
-        }
-
-        @Override
-        protected void onNetworkError(final int code) {
-            final Context context = this.getContext();
-            final String text = context.getString(R.string.err_network);
-            this.showErrorToast(text);
-        }
-
-        private void showErrorToast(final String text) {
-            // final Context context = this.getContext();
-            // new Handler().post(new Runnable() {
-            // @Override
-            // public void run() {
-            // Toast.makeText(context, text, Toast.LENGTH_SHORT).show();
-            // }
-            // });
         }
     }
 }

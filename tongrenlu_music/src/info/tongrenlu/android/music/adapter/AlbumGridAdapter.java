@@ -27,12 +27,8 @@ public class AlbumGridAdapter extends CursorAdapter {
     }
 
     @Override
-    public View newView(final Context context,
-                        final Cursor c,
-                        final ViewGroup parent) {
-        final View view = View.inflate(context,
-                                       R.layout.list_item_article,
-                                       null);
+    public View newView(final Context context, final Cursor c, final ViewGroup parent) {
+        final View view = View.inflate(context, R.layout.list_item_album, null);
         final ViewHolder holder = new ViewHolder();
         holder.coverView = (ImageView) view.findViewById(R.id.article_cover);
         holder.titleView = (TextView) view.findViewById(R.id.article_title);
@@ -43,7 +39,7 @@ public class AlbumGridAdapter extends CursorAdapter {
     @Override
     public void bindView(final View view, final Context context, final Cursor c) {
         final ViewHolder holder = (ViewHolder) view.getTag();
-        final String articleId = c.getString(c.getColumnIndex("article_id"));
+        final String articleId = c.getString(c.getColumnIndex("articleId"));
         final String title = c.getString(c.getColumnIndex("title"));
         final ArticleBean articleBean = new ArticleBean();
         articleBean.setArticleId(articleId);
@@ -79,7 +75,7 @@ public class AlbumGridAdapter extends CursorAdapter {
                     if (!this.isCancelled() && result != null) {
                         final Drawable emptyDrawable = new ShapeDrawable();
                         final TransitionDrawable fadeInDrawable = new TransitionDrawable(new Drawable[] { emptyDrawable,
-                                                                                                         result });
+                                result });
                         ViewHolder.this.coverView.setImageDrawable(fadeInDrawable);
                         fadeInDrawable.startTransition(500);
                     }

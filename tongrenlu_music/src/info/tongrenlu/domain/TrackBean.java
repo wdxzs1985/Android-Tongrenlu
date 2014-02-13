@@ -9,9 +9,15 @@ public class TrackBean implements Parcelable {
 
     private String fileId = null;
 
-    private String artist = null;
+    private String album = null;
 
-    private String title = null;
+    private String leadArtist = null;
+
+    private String songTitle = null;
+
+    private int trackNumber = 0;
+
+    private int downloadFlg = 0;
 
     public String getFileId() {
         return this.fileId;
@@ -19,22 +25,6 @@ public class TrackBean implements Parcelable {
 
     public void setFileId(final String fileId) {
         this.fileId = fileId;
-    }
-
-    public String getArtist() {
-        return this.artist;
-    }
-
-    public void setArtist(final String artist) {
-        this.artist = artist;
-    }
-
-    public String getTitle() {
-        return this.title;
-    }
-
-    public void setTitle(final String title) {
-        this.title = title;
     }
 
     public String getArticleId() {
@@ -45,38 +35,45 @@ public class TrackBean implements Parcelable {
         this.articleId = articleId;
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
+    public String getAlbum() {
+        return this.album;
     }
 
-    @Override
-    public void writeToParcel(final Parcel dest, final int flags) {
-        dest.writeStringArray(new String[] { this.articleId,
-                this.fileId,
-                this.title,
-                this.artist });
+    public void setAlbum(String album) {
+        this.album = album;
     }
 
-    public static final Parcelable.Creator<TrackBean> CREATOR = new Parcelable.Creator<TrackBean>() {
-        @Override
-        public TrackBean createFromParcel(final Parcel in) {
-            final String[] data = new String[4];
-            in.readStringArray(data);
+    public String getLeadArtist() {
+        return this.leadArtist;
+    }
 
-            final TrackBean trackBean = new TrackBean();
-            trackBean.articleId = data[0];
-            trackBean.fileId = data[1];
-            trackBean.title = data[2];
-            trackBean.artist = data[3];
-            return trackBean;
-        }
+    public void setLeadArtist(String leadArtist) {
+        this.leadArtist = leadArtist;
+    }
 
-        @Override
-        public TrackBean[] newArray(final int size) {
-            return new TrackBean[size];
-        }
-    };
+    public String getSongTitle() {
+        return this.songTitle;
+    }
+
+    public void setSongTitle(String songTitle) {
+        this.songTitle = songTitle;
+    }
+
+    public int getTrackNumber() {
+        return this.trackNumber;
+    }
+
+    public void setTrackNumber(int trackNumber) {
+        this.trackNumber = trackNumber;
+    }
+
+    public int getDownloadFlg() {
+        return this.downloadFlg;
+    }
+
+    public void setDownloadFlg(int downloadFlg) {
+        this.downloadFlg = downloadFlg;
+    }
 
     @Override
     public int hashCode() {
@@ -118,4 +115,42 @@ public class TrackBean implements Parcelable {
         return true;
     }
 
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(final Parcel dest, final int flags) {
+        dest.writeStringArray(new String[] { this.articleId,
+                this.fileId,
+                this.album,
+                this.songTitle,
+                this.leadArtist,
+                String.valueOf(this.trackNumber),
+                String.valueOf(this.downloadFlg) });
+    }
+
+    public static final Parcelable.Creator<TrackBean> CREATOR = new Parcelable.Creator<TrackBean>() {
+        @Override
+        public TrackBean createFromParcel(final Parcel in) {
+            final String[] data = new String[7];
+            in.readStringArray(data);
+
+            final TrackBean trackBean = new TrackBean();
+            trackBean.articleId = data[0];
+            trackBean.fileId = data[1];
+            trackBean.album = data[2];
+            trackBean.songTitle = data[3];
+            trackBean.leadArtist = data[4];
+            trackBean.trackNumber = Integer.valueOf(data[5]);
+            trackBean.downloadFlg = Integer.valueOf(data[6]);
+            return trackBean;
+        }
+
+        @Override
+        public TrackBean[] newArray(final int size) {
+            return new TrackBean[size];
+        }
+    };
 }

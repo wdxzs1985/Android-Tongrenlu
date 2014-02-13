@@ -28,8 +28,8 @@ public class MainActivity extends BaseActivity {
 
         final FragmentManager fm = this.getSupportFragmentManager();
         final TitleFragmentAdapter adapter = new TitleFragmentAdapter(fm);
-        adapter.addItem(new PlaylistFragment());
         adapter.addItem(new AlbumFragment());
+        adapter.addItem(new PlaylistFragment());
         this.mAdapter = adapter;
 
         this.mPager = (ViewPager) this.findViewById(R.id.pager);

@@ -24,8 +24,8 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 public class HttpHelper {
     static private String convertStreamToString(InputStream is) {
@@ -45,9 +45,9 @@ public class HttpHelper {
         return sb.toString();
     }
 
-    static public JSONArray loadJSON(String url) {
+    static public JSONObject loadJSON(String url) {
         HttpURLConnection connection = null;
-        JSONArray json = null;
+        JSONObject json = null;
         InputStream is = null;
 
         try {
@@ -55,7 +55,7 @@ public class HttpHelper {
             connection.setConnectTimeout(5000);
 
             is = new BufferedInputStream(connection.getInputStream());
-            json = new JSONArray(convertStreamToString(is));
+            json = new JSONObject(convertStreamToString(is));
         } catch (IOException ioe) {
             ioe.printStackTrace();
         } catch (JSONException je) {

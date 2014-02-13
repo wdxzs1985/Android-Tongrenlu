@@ -27,11 +27,9 @@ public class PlaylistTrackListAdapter extends CursorAdapter {
     }
 
     @Override
-    public View newView(final Context context,
-                        final Cursor c,
-                        final ViewGroup viewGroup) {
+    public View newView(final Context context, final Cursor c, final ViewGroup viewGroup) {
         final View view = View.inflate(context,
-                                       R.layout.playlist_track_list_item_track,
+                                       R.layout.list_item_playlist_track,
                                        null);
         final ViewHolder holder = new ViewHolder();
         holder.coverView = (ImageView) view.findViewById(R.id.article_cover);
@@ -44,15 +42,15 @@ public class PlaylistTrackListAdapter extends CursorAdapter {
     @Override
     public void bindView(final View view, final Context context, final Cursor c) {
         final ViewHolder holder = (ViewHolder) view.getTag();
-        final String articleId = c.getString(c.getColumnIndex("article_id"));
-        final String fileId = c.getString(c.getColumnIndex("file_id"));
-        final String title = c.getString(c.getColumnIndex("title"));
-        final String artist = c.getString(c.getColumnIndex("artist"));
+        final String articleId = c.getString(c.getColumnIndex("articleId"));
+        final String fileId = c.getString(c.getColumnIndex("fileId"));
+        final String songTitle = c.getString(c.getColumnIndex("songTitle"));
+        final String leadArtist = c.getString(c.getColumnIndex("leadArtist"));
         final TrackBean trackBean = new TrackBean();
         trackBean.setArticleId(articleId);
         trackBean.setFileId(fileId);
-        trackBean.setTitle(title);
-        trackBean.setArtist(artist);
+        trackBean.setSongTitle(songTitle);
+        trackBean.setLeadArtist(leadArtist);
         holder.update(context, trackBean);
     }
 
@@ -71,12 +69,14 @@ public class PlaylistTrackListAdapter extends CursorAdapter {
                 this.task.cancel(true);
             }
             this.trackBean = trackBean;
+
+            this.titleView.setText(trackBean.getSongTitle());
+            this.artistView.setText(trackBean.getLeadArtist());
+
             this.task = new LoadImageCacheTask() {
                 @Override
                 protected void onPreExecute() {
                     super.onPreExecute();
-                    ViewHolder.this.titleView.setText(trackBean.getTitle());
-                    ViewHolder.this.artistView.setText(trackBean.getArtist());
                     ViewHolder.this.coverView.setImageDrawable(null);
                 }
 
@@ -86,7 +86,7 @@ public class PlaylistTrackListAdapter extends CursorAdapter {
                     if (!this.isCancelled() && result != null) {
                         final Drawable emptyDrawable = new ShapeDrawable();
                         final TransitionDrawable fadeInDrawable = new TransitionDrawable(new Drawable[] { emptyDrawable,
-                                                                                                         result });
+                                result });
                         ViewHolder.this.coverView.setImageDrawable(fadeInDrawable);
                         fadeInDrawable.startTransition(500);
                     }
@@ -105,7 +105,6 @@ public class PlaylistTrackListAdapter extends CursorAdapter {
             } else {
                 this.task.execute(bitmapCache, url);
             }
-
         }
     }
 }

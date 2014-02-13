@@ -138,15 +138,14 @@ public class PlaylistTrackActivity extends FragmentActivity implements ActionSli
         int position = c.getPosition();
         if (c.moveToFirst()) {
             final ArrayList<TrackBean> trackBeanList = new ArrayList<TrackBean>();
-            while (!c.isAfterLast()) {
+            do {
                 final TrackBean trackBean = new TrackBean();
-                trackBean.setArticleId(c.getString(c.getColumnIndex("article_id")));
-                trackBean.setFileId(c.getString(c.getColumnIndex("file_id")));
-                trackBean.setTitle(c.getString(c.getColumnIndex("title")));
-                trackBean.setArtist(c.getString(c.getColumnIndex("artist")));
+                trackBean.setArticleId(c.getString(c.getColumnIndex("articleId")));
+                trackBean.setFileId(c.getString(c.getColumnIndex("fileId")));
+                trackBean.setSongTitle(c.getString(c.getColumnIndex("songTitle")));
+                trackBean.setLeadArtist(c.getString(c.getColumnIndex("leadArtist")));
                 trackBeanList.add(trackBean);
-                c.moveToNext();
-            }
+            } while (c.moveToNext());
 
             final Intent serviceIntent = new Intent(this, MusicService.class);
             serviceIntent.setAction(MusicService.ACTION_ADD);

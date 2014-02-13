@@ -8,25 +8,30 @@ public class TongrenluDBV1 implements DatabaseBuilder {
     public static final String DB_NAME = "tongrenlu.db";
     public static final int DB_VERSION_1 = 1; //
 
-    public static final String CREATE_TB_TRACK = "create table tb_track (" + "_id integer primary key autoincrement,"
-            + "article_id text,"
-            + "file_id text,"
+    public static final String CREATE_TB_ALBUM = "create table tb_album (" + "_id integer primary key autoincrement,"
+            + "articleId text,"
             + "title text,"
-            + "artist text"
+            + "collectFlg integer"
+            + ")";
+    public static final String CREATE_TB_TRACK = "create table tb_track (" + "_id integer primary key autoincrement,"
+            + "articleId text,"
+            + "fileId text,"
+            + "album text,"
+            + "songTitle text,"
+            + "leadArtist text,"
+            + "trackNumber integer,"
+            + "downloadFlg integer"
             + ")";
     public static final String CREATE_TB_PLAYLIST = "create table tb_playlist (" + "_id integer primary key autoincrement,"
             + "title text)";
     public static final String CREATE_TB_PLAYLIST_TRACK = "create table tb_playlist_track (" + "_id integer primary key autoincrement,"
-            + "playlist_id integer,"
-            + "article_id text,"
-            + "file_id text,"
-            + "title text,"
-            + "artist text"
+            + "playlistId integer,"
+            + "articleId text,"
+            + "fileId text,"
+            + "songTitle text,"
+            + "leadArtist text,"
+            + "trackNumber integer"
             + ")";
-    public static final String CREATE_TB_ALBUM = "create table tb_album (" + "_id integer primary key autoincrement,"
-            + "article_id text,"
-            + "title text,"
-            + "collect integer)";
 
     @Override
     public String getName() {

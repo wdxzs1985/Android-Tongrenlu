@@ -33,8 +33,7 @@ import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 
-public class MusicPlayerActivity extends BaseActivity implements
-        OnClickListener, OnSeekBarChangeListener {
+public class MusicPlayerActivity extends BaseActivity implements OnClickListener, OnSeekBarChangeListener {
 
     private LocalBroadcastManager mLocalBroadcastManager = null;
     private BroadcastReceiver mMusicReceiver = null;
@@ -217,9 +216,7 @@ public class MusicPlayerActivity extends BaseActivity implements
     }
 
     @Override
-    public void onProgressChanged(final SeekBar seekBar,
-                                  final int progress,
-                                  final boolean fromUser) {
+    public void onProgressChanged(final SeekBar seekBar, final int progress, final boolean fromUser) {
         if (fromUser) {
             this.updateCurrentTime(progress);
         }
@@ -272,13 +269,13 @@ public class MusicPlayerActivity extends BaseActivity implements
     }
 
     private void updateTitle() {
-        final String title = this.mTrackBean.getTitle();
+        final String title = this.mTrackBean.getSongTitle();
         final TextView titleView = (TextView) this.findViewById(R.id.track_title);
         titleView.setText(title);
     }
 
     private void updateArtist() {
-        final String artist = this.mTrackBean.getArtist();
+        final String artist = this.mTrackBean.getLeadArtist();
         final TextView artistView = (TextView) this.findViewById(R.id.track_artist);
         artistView.setText(artist);
     }
@@ -299,7 +296,7 @@ public class MusicPlayerActivity extends BaseActivity implements
                 if (!this.isCancelled() && result != null) {
                     final Drawable emptyDrawable = new ShapeDrawable();
                     final TransitionDrawable fadeInDrawable = new TransitionDrawable(new Drawable[] { emptyDrawable,
-                                                                                                     result });
+                            result });
                     coverView.setImageDrawable(result);
                     fadeInDrawable.startTransition(200);
                 }

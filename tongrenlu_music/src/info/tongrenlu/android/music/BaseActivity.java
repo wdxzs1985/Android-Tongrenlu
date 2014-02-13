@@ -9,6 +9,8 @@ import android.view.MenuItem;
 
 public class BaseActivity extends FragmentActivity {
 
+    public static final long BAD_ID = -1l;
+
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

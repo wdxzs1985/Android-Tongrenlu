@@ -47,10 +47,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.telephony.TelephonyManager;
 import android.widget.Toast;
 
-public class MusicService extends Service implements OnCompletionListener,
-        OnPreparedListener, OnBufferingUpdateListener, OnInfoListener,
-        OnSeekCompleteListener, OnErrorListener,
-        OnSharedPreferenceChangeListener, MusicFocusable {
+public class MusicService extends Service implements OnCompletionListener, OnPreparedListener, OnBufferingUpdateListener, OnInfoListener, OnSeekCompleteListener, OnErrorListener, OnSharedPreferenceChangeListener, MusicFocusable {
 
     public static class IncomingPhoneReceiver extends BroadcastReceiver {
 
@@ -183,9 +180,7 @@ public class MusicService extends Service implements OnCompletionListener,
     }
 
     @Override
-    public int onStartCommand(final Intent intent,
-                              final int flags,
-                              final int startId) {
+    public int onStartCommand(final Intent intent, final int flags, final int startId) {
         final String action = intent.getAction();
         if (MusicService.ACTION_TOGGLE_PLAYBACK.equals(action)) {
             this.processTogglePlaybackRequest();
@@ -450,8 +445,7 @@ public class MusicService extends Service implements OnCompletionListener,
     }
 
     @Override
-    public void onSharedPreferenceChanged(final SharedPreferences sharedPreferences,
-                                          final String key) {
+    public void onSharedPreferenceChanged(final SharedPreferences sharedPreferences, final String key) {
         if (StringUtils.equals(key, SettingsActivity.PREF_KEY_SHUFFLE_PLAY)) {
             this.onShufflePlayChanged(sharedPreferences);
         } else if (StringUtils.equals(key, SettingsActivity.PREF_KEY_LOOP_PLAY)) {
@@ -623,10 +617,10 @@ public class MusicService extends Service implements OnCompletionListener,
         builder.setSmallIcon(R.drawable.ic_launcher);
         builder.setOngoing(true);
         builder.setAutoCancel(false);
-        final String contentTitle = "正在播放:" + this.mNowPlaying.getTitle();
+        final String contentTitle = "正在播放:" + this.mNowPlaying.getSongTitle();
         builder.setTicker(contentTitle);
         builder.setContentTitle(contentTitle);
-        builder.setContentText(this.mNowPlaying.getArtist());
+        builder.setContentText(this.mNowPlaying.getLeadArtist());
         builder.setNumber(this.mTrackList.size());
         if (this.mLargeIcon != null) {
             builder.setLargeIcon(this.mLargeIcon);
@@ -705,14 +699,14 @@ public class MusicService extends Service implements OnCompletionListener,
 
     private void tryToGetAudioFocus() {
         if (this.mAudioFocus != AudioFocus.Focused && this.mAudioFocusHelper != null
-            && this.mAudioFocusHelper.requestFocus()) {
+                && this.mAudioFocusHelper.requestFocus()) {
             this.mAudioFocus = AudioFocus.Focused;
         }
     }
 
     private void giveUpAudioFocus() {
         if (this.mAudioFocus == AudioFocus.Focused && this.mAudioFocusHelper != null
-            && this.mAudioFocusHelper.abandonFocus()) {
+                && this.mAudioFocusHelper.abandonFocus()) {
             this.mAudioFocus = AudioFocus.NoFocusNoDuck;
         }
     }
@@ -752,7 +746,7 @@ public class MusicService extends Service implements OnCompletionListener,
                        Toast.LENGTH_SHORT)
              .show();
         this.mAudioFocus = canDuck ? AudioFocus.NoFocusCanDuck
-                                  : AudioFocus.NoFocusNoDuck;
+                : AudioFocus.NoFocusNoDuck;
 
         // start/restart/pause media player with new focus settings
         if (this.mMediaPlayer != null && this.mMediaPlayer.isPlaying()) {

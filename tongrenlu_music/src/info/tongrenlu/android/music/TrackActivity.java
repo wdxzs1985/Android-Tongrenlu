@@ -74,6 +74,8 @@ public class TrackActivity extends BaseActivity implements ActionSlideExpandable
     public Loader<Cursor> onCreateLoader(final int id, final Bundle args) {
         final CursorLoader loader = new CursorLoader(this);
         loader.setUri(TongrenluContentProvider.TRACK_URI);
+        loader.setSelection("downloadFlg = ?");
+        loader.setSelectionArgs(new String[] { "1" });
         return loader;
     }
 
@@ -113,30 +115,30 @@ public class TrackActivity extends BaseActivity implements ActionSlideExpandable
 
     @Override
     public void onClick(View itemView, View clickedView, int position) {
-        final Cursor c = (Cursor) this.mListView.getItemAtPosition(position);
+
         switch (clickedView.getId()) {
         case R.id.item:
         case R.id.action_play:
-            this.playTrack(c);
+            this.playTrack(position);
             break;
         case R.id.action_delete:
-            this.deleteTrack(c);
+            this.deleteTrack(position);
             break;
         default:
             break;
         }
     }
 
-    protected void playTrack(final Cursor c) {
-        int position = c.getPosition();
+    protected void playTrack(int position) {
+        final Cursor c = (Cursor) this.mListView.getItemAtPosition(position);
         if (c.moveToFirst()) {
             final ArrayList<TrackBean> trackBeanList = new ArrayList<TrackBean>();
             while (!c.isAfterLast()) {
                 final TrackBean trackBean = new TrackBean();
-                trackBean.setArticleId(c.getString(c.getColumnIndex("article_id")));
-                trackBean.setFileId(c.getString(c.getColumnIndex("file_id")));
-                trackBean.setTitle(c.getString(c.getColumnIndex("title")));
-                trackBean.setArtist(c.getString(c.getColumnIndex("artist")));
+                trackBean.setArticleId(c.getString(c.getColumnIndex("articleId")));
+                trackBean.setFileId(c.getString(c.getColumnIndex("fileId")));
+                trackBean.setSongTitle(c.getString(c.getColumnIndex("songTitle")));
+                trackBean.setLeadArtist(c.getString(c.getColumnIndex("leadArtist")));
                 trackBeanList.add(trackBean);
                 c.moveToNext();
             }
@@ -154,7 +156,8 @@ public class TrackActivity extends BaseActivity implements ActionSlideExpandable
         }
     }
 
-    private void deleteTrack(Cursor c) {
+    private void deleteTrack(int position) {
+        final Cursor c = (Cursor) this.mListView.getItemAtPosition(position);
         long id = c.getLong(c.getColumnIndex("_id"));
         Uri uri = ContentUris.withAppendedId(TongrenluContentProvider.TRACK_URI,
                                              id);
