@@ -25,7 +25,9 @@ import android.view.View;
 
 import com.tjerkw.slideexpandable.library.ActionSlideExpandableListView;
 
-public class PlaylistTrackActivity extends FragmentActivity implements ActionSlideExpandableListView.OnActionClickListener, LoaderCallbacks<Cursor> {
+public class PlaylistTrackActivity extends FragmentActivity implements
+        ActionSlideExpandableListView.OnActionClickListener,
+        LoaderCallbacks<Cursor> {
 
     public static final int PLAYLIST_LOADER_ID = 0;
 
@@ -56,7 +58,7 @@ public class PlaylistTrackActivity extends FragmentActivity implements ActionSli
 
         this.registerForContextMenu(this.mListView);
 
-        long playlistId = this.getIntent().getLongExtra("playlistId", -1);
+        final long playlistId = this.getIntent().getLongExtra("playlistId", -1);
         if (playlistId == -1) {
             this.finish();
             return;
@@ -66,16 +68,15 @@ public class PlaylistTrackActivity extends FragmentActivity implements ActionSli
                                                playlistId);
         this.mTrackUri = Uri.withAppendedPath(this.mUri, "track");
 
-        this.getSupportLoaderManager().initLoader(PLAYLIST_LOADER_ID,
-                                                  null,
-                                                  this);
+        this.getSupportLoaderManager()
+            .initLoader(PlaylistTrackActivity.PLAYLIST_LOADER_ID, null, this);
 
         this.contentObserver = new ContentObserver(new Handler()) {
             @Override
             public void onChange(final boolean selfChange) {
                 super.onChange(selfChange);
                 PlaylistTrackActivity.this.getSupportLoaderManager()
-                                          .getLoader(PLAYLIST_LOADER_ID)
+                                          .getLoader(PlaylistTrackActivity.PLAYLIST_LOADER_ID)
                                           .onContentChanged();
             }
         };
@@ -115,27 +116,29 @@ public class PlaylistTrackActivity extends FragmentActivity implements ActionSli
         super.onDestroy();
         this.getContentResolver()
             .unregisterContentObserver(this.contentObserver);
-        this.getSupportLoaderManager().destroyLoader(PLAYLIST_LOADER_ID);
+        this.getSupportLoaderManager()
+            .destroyLoader(PlaylistTrackActivity.PLAYLIST_LOADER_ID);
     }
 
     @Override
-    public void onClick(View itemView, View clickedView, int position) {
-        final Cursor c = (Cursor) this.mListView.getItemAtPosition(position);
+    public void onClick(final View itemView,
+                        final View clickedView,
+                        final int position) {
         switch (clickedView.getId()) {
         case R.id.item:
         case R.id.action_play:
-            this.playTrack(c);
+            this.playTrack(position);
             break;
         case R.id.action_delete:
-            this.deleteTrack(c);
+            this.deleteTrack(position);
             break;
         default:
             break;
         }
     }
 
-    protected void playTrack(final Cursor c) {
-        int position = c.getPosition();
+    protected void playTrack(final int position) {
+        final Cursor c = (Cursor) this.mListView.getItemAtPosition(position);
         if (c.moveToFirst()) {
             final ArrayList<TrackBean> trackBeanList = new ArrayList<TrackBean>();
             do {
@@ -160,23 +163,24 @@ public class PlaylistTrackActivity extends FragmentActivity implements ActionSli
         }
     }
 
-    private void deleteTrack(Cursor c) {
-        long id = c.getLong(c.getColumnIndex("_id"));
-        Uri uri = ContentUris.withAppendedId(this.mTrackUri, id);
-        ContentResolver contentResolver = this.getContentResolver();
+    private void deleteTrack(final int position) {
+        final Cursor c = (Cursor) this.mListView.getItemAtPosition(position);
+        final long id = c.getLong(c.getColumnIndex("_id"));
+        final Uri uri = ContentUris.withAppendedId(this.mTrackUri, id);
+        final ContentResolver contentResolver = this.getContentResolver();
         contentResolver.delete(uri, null, null);
         contentResolver.notifyChange(this.mTrackUri, null);
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(final Menu menu) {
         final MenuInflater inflater = this.getMenuInflater();
         inflater.inflate(R.menu.activity_playlist_track, menu);
         return true;
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(final MenuItem item) {
         switch (item.getItemId()) {
         case R.id.action_delete:
             this.deletePlaylist();
@@ -188,7 +192,7 @@ public class PlaylistTrackActivity extends FragmentActivity implements ActionSli
     }
 
     private void deletePlaylist() {
-        ContentResolver contentResolver = this.getContentResolver();
+        final ContentResolver contentResolver = this.getContentResolver();
         contentResolver.delete(this.mUri, null, null);
         contentResolver.notifyChange(TongrenluContentProvider.PLAYLIST_URI,
                                      null);

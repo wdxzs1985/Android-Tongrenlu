@@ -48,7 +48,8 @@ import android.widget.TextView;
 
 import com.tjerkw.slideexpandable.library.ActionSlideExpandableListView;
 
-public class AlbumInfoActivity extends BaseActivity implements ActionSlideExpandableListView.OnActionClickListener, OnClickListener {
+public class AlbumInfoActivity extends BaseActivity implements
+        ActionSlideExpandableListView.OnActionClickListener, OnClickListener {
 
     public static final int ALBUM_TRACK_CURSOR_LOADER = 1;
     public static final int ALBUM_TRACK_JSON_LOADER = 2;
@@ -127,7 +128,7 @@ public class AlbumInfoActivity extends BaseActivity implements ActionSlideExpand
                 if (!this.isCancelled() && result != null) {
                     final Drawable emptyDrawable = new ShapeDrawable();
                     final TransitionDrawable fadeInDrawable = new TransitionDrawable(new Drawable[] { emptyDrawable,
-                            result });
+                                                                                                     result });
                     coverView.setImageDrawable(result);
                     fadeInDrawable.startTransition(200);
                 }
@@ -151,6 +152,7 @@ public class AlbumInfoActivity extends BaseActivity implements ActionSlideExpand
         public Loader<Cursor> onCreateLoader(final int id, final Bundle args) {
             final CursorLoader loader = new CursorLoader(AlbumInfoActivity.this);
             loader.setUri(AlbumInfoActivity.this.mTrackUri);
+            loader.setSortOrder("trackNumber asc");
             return loader;
         }
 
@@ -182,24 +184,27 @@ public class AlbumInfoActivity extends BaseActivity implements ActionSlideExpand
         this.mEmpty.setVisibility(View.GONE);
     }
 
-    private class AlbumTrackJsonLoaderCallback implements LoaderCallbacks<Boolean> {
+    private class AlbumTrackJsonLoaderCallback implements
+            LoaderCallbacks<Boolean> {
 
         @Override
-        public Loader<Boolean> onCreateLoader(final int loaderId, final Bundle args) {
-            Context context = AlbumInfoActivity.this;
-            Uri hostUri = HttpConstants.getHostUri(context);
-            String part = "fm/music/" + AlbumInfoActivity.this.mArticleId;
+        public Loader<Boolean> onCreateLoader(final int loaderId,
+                                              final Bundle args) {
+            final Context context = AlbumInfoActivity.this;
+            final Uri hostUri = HttpConstants.getHostUri(context);
+            final String part = "fm/music/" + AlbumInfoActivity.this.mArticleId;
 
-            AlbumTrackDataLoader loader = new AlbumTrackDataLoader(context);
+            final AlbumTrackDataLoader loader = new AlbumTrackDataLoader(context);
             loader.mUri = Uri.withAppendedPath(hostUri, part);
 
             return loader;
         }
 
         @Override
-        public void onLoadFinished(final Loader<Boolean> loader, final Boolean data) {
+        public void onLoadFinished(final Loader<Boolean> loader,
+                                   final Boolean data) {
             AlbumInfoActivity.this.getSupportLoaderManager()
-                                  .getLoader(ALBUM_TRACK_CURSOR_LOADER)
+                                  .getLoader(AlbumInfoActivity.ALBUM_TRACK_CURSOR_LOADER)
                                   .onContentChanged();
         }
 
@@ -214,11 +219,11 @@ public class AlbumInfoActivity extends BaseActivity implements ActionSlideExpand
         static final int NETWORK_ERROR = -100;
         static final int PARSE_ERROR = -200;
 
-        private int mErrorCode = NO_ERROR;
+        private int mErrorCode = AlbumTrackDataLoader.NO_ERROR;
 
         private Uri mUri = null;
 
-        public AlbumTrackDataLoader(Context ctx) {
+        public AlbumTrackDataLoader(final Context ctx) {
             super(ctx);
         }
 
@@ -229,42 +234,43 @@ public class AlbumInfoActivity extends BaseActivity implements ActionSlideExpand
         }
 
         protected boolean isNoError() {
-            return this.mErrorCode == NO_ERROR;
+            return this.mErrorCode == AlbumTrackDataLoader.NO_ERROR;
         }
 
         private void refreshTrackData() {
-            Bundle param = new Bundle();
+            final Bundle param = new Bundle();
             param.putInt("s", Integer.MAX_VALUE);
-            String json = this.processHttpGet(this.mUri, param);
+            final String json = this.processHttpGet(this.mUri, param);
             if (this.isNoError() && StringUtils.isNotBlank(json)) {
                 try {
-                    JSONObject trackJson = new JSONObject(json);
+                    final JSONObject trackJson = new JSONObject(json);
                     this.parseTrackJSON(trackJson);
-                } catch (JSONException e) {
-                    this.mErrorCode = PARSE_ERROR;
+                } catch (final JSONException e) {
+                    this.mErrorCode = AlbumTrackDataLoader.PARSE_ERROR;
                 }
             }
         }
 
-        private String processHttpGet(Uri uri, Bundle param) {
-            RESTClient.RESTResponse response = new RESTClient(RESTClient.HTTPVerb.GET,
-                                                              uri,
-                                                              param).load();
+        private String processHttpGet(final Uri uri, final Bundle param) {
+            final RESTClient.RESTResponse response = new RESTClient(RESTClient.HTTPVerb.GET,
+                                                                    uri,
+                                                                    param).load();
             final int code = response.getCode();
             final String json = response.getData();
             if (code != 200) {
-                this.mErrorCode = NETWORK_ERROR;
+                this.mErrorCode = AlbumTrackDataLoader.NETWORK_ERROR;
             }
             return json;
         }
 
-        protected void parseTrackJSON(final JSONObject responseJSON) throws JSONException {
+        protected void parseTrackJSON(final JSONObject responseJSON)
+                throws JSONException {
             if (responseJSON.getBoolean("result")) {
                 final JSONObject articleObject = responseJSON.optJSONObject("articleBean");
-                String album = articleObject.optString("title");
+                final String album = articleObject.optString("title");
 
                 final JSONArray playlist = responseJSON.optJSONArray("playlist");
-                List<ContentValues> contentValuesList = new ArrayList<ContentValues>();
+                final List<ContentValues> contentValuesList = new ArrayList<ContentValues>();
                 final ContentResolver contentResolver = this.getContext()
                                                             .getContentResolver();
                 for (int i = 0; i < playlist.length(); i++) {
@@ -280,7 +286,7 @@ public class AlbumInfoActivity extends BaseActivity implements ActionSlideExpand
                                                        null,
                                                        "articleId = ? and fileId = ?",
                                                        new String[] { articleId,
-                                                               fileId },
+                                                                     fileId },
                                                        null);
                         if (cursor.getCount() == 0) {
                             final ContentValues contentValues = new ContentValues();
@@ -309,12 +315,16 @@ public class AlbumInfoActivity extends BaseActivity implements ActionSlideExpand
     }
 
     @Override
-    public void onClick(final View itemView, final View clickedView, final int position) {
+    public void onClick(final View itemView,
+                        final View clickedView,
+                        final int position) {
         switch (clickedView.getId()) {
         case R.id.item:
         case R.id.action_play:
+            this.playTrack(position);
             break;
         case R.id.action_download:
+            this.downloadTrack(position);
             break;
         default:
             break;
@@ -326,8 +336,10 @@ public class AlbumInfoActivity extends BaseActivity implements ActionSlideExpand
         if (!this.mAdapter.isEmpty()) {
             switch (v.getId()) {
             case R.id.action_play_all:
+                this.playAllTrack();
                 break;
             case R.id.action_download_all:
+                this.downloadAllTrack();
                 break;
             default:
                 break;
@@ -335,11 +347,75 @@ public class AlbumInfoActivity extends BaseActivity implements ActionSlideExpand
         }
     }
 
-    protected void downloadTrack(final ArrayList<TrackBean> items) {
+    private TrackBean getTrackBean(final int position) {
+        final Cursor c = (Cursor) this.mAdapter.getItem(position);
+        final TrackBean trackBean = new TrackBean();
+        trackBean.setArticleId(c.getString(c.getColumnIndex("articleId")));
+        trackBean.setFileId(c.getString(c.getColumnIndex("fileId")));
+        trackBean.setSongTitle(c.getString(c.getColumnIndex("songTitle")));
+        trackBean.setLeadArtist(c.getString(c.getColumnIndex("leadArtist")));
+        return trackBean;
+    }
+
+    private void playTrack(final int position) {
+        final TrackBean trackBean = this.getTrackBean(position);
+        final Intent serviceIntent = new Intent(this, MusicService.class);
+        serviceIntent.setAction(MusicService.ACTION_APPEND);
+        serviceIntent.putExtra("trackBean", trackBean);
+        this.startService(serviceIntent);
+    }
+
+    private void downloadTrack(final int position) {
+        final TrackBean trackBean = this.getTrackBean(position);
+        final ArrayList<TrackBean> trackBeanList = new ArrayList<TrackBean>();
+        trackBeanList.add(trackBean);
+        this.downloadTrack(trackBeanList);
+    }
+
+    private ArrayList<TrackBean> getTrackBeans() {
+        final ArrayList<TrackBean> trackBeanList = new ArrayList<TrackBean>();
+        final Cursor c = this.mAdapter.getCursor();
+        if (c.moveToFirst()) {
+            do {
+                final TrackBean trackBean = new TrackBean();
+                trackBean.setArticleId(c.getString(c.getColumnIndex("articleId")));
+                trackBean.setFileId(c.getString(c.getColumnIndex("fileId")));
+                trackBean.setSongTitle(c.getString(c.getColumnIndex("songTitle")));
+                trackBean.setLeadArtist(c.getString(c.getColumnIndex("leadArtist")));
+                trackBeanList.add(trackBean);
+            } while (c.moveToNext());
+        }
+        return trackBeanList;
+    }
+
+    protected void playAllTrack() {
+        final ArrayList<TrackBean> trackBeanList = this.getTrackBeans();
+        if (CollectionUtils.isNotEmpty(trackBeanList)) {
+            final Intent serviceIntent = new Intent(this, MusicService.class);
+            serviceIntent.setAction(MusicService.ACTION_ADD);
+            serviceIntent.putParcelableArrayListExtra("trackBeanList",
+                                                      trackBeanList);
+            serviceIntent.putExtra("position", 0);
+            this.startService(serviceIntent);
+
+            final Intent activityIntent = new Intent(this,
+                                                     MusicPlayerActivity.class);
+            this.startActivity(activityIntent);
+        }
+    }
+
+    private void downloadAllTrack() {
+        final ArrayList<TrackBean> trackBeanList = this.getTrackBeans();
+        if (CollectionUtils.isNotEmpty(trackBeanList)) {
+            this.downloadTrack(trackBeanList);
+        }
+    }
+
+    protected void downloadTrack(final ArrayList<TrackBean> trackBeanList) {
         final Intent serviceIntent = new Intent(this, DownloadService.class);
         serviceIntent.setAction(DownloadService.ACTION_ADD);
-        serviceIntent.putParcelableArrayListExtra("trackBeanList", items);
-
+        serviceIntent.putParcelableArrayListExtra("trackBeanList",
+                                                  trackBeanList);
         this.showCreatePlaylistDialog(serviceIntent);
     }
 
@@ -367,7 +443,8 @@ public class AlbumInfoActivity extends BaseActivity implements ActionSlideExpand
         dialog.show(this.getSupportFragmentManager(), "PlaylistDialogFragment");
     }
 
-    public class SelectPlaylistDialogFragment extends DialogFragment implements DialogInterface.OnClickListener {
+    public class SelectPlaylistDialogFragment extends DialogFragment implements
+            DialogInterface.OnClickListener {
 
         private Intent mIntent = null;
 
@@ -413,13 +490,15 @@ public class AlbumInfoActivity extends BaseActivity implements ActionSlideExpand
         }
     }
 
-    public class CreatePlaylistDialogFragment extends DialogFragment implements DialogInterface.OnClickListener {
+    public class CreatePlaylistDialogFragment extends DialogFragment implements
+            DialogInterface.OnClickListener {
 
         private String mTitle = null;
         private Intent mIntent = null;
         private EditText mTitleView = null;
 
-        public CreatePlaylistDialogFragment(final String title, final Intent serviceIntent) {
+        public CreatePlaylistDialogFragment(final String title,
+                final Intent serviceIntent) {
             this.mTitle = title;
             this.mIntent = serviceIntent;
         }
