@@ -31,8 +31,7 @@ import android.preference.PreferenceManager;
 import android.text.format.DateFormat;
 import android.widget.Toast;
 
-public class SettingsActivity extends PreferenceActivity implements
-        OnSharedPreferenceChangeListener {
+public class SettingsActivity extends PreferenceActivity implements OnSharedPreferenceChangeListener {
 
     public static final String PREF_KEY_SHUFFLE_PLAY = "pref_key_shuffle_play";
     public static final String PREF_KEY_LOOP_PLAY = "pref_key_loop_play";
@@ -115,8 +114,7 @@ public class SettingsActivity extends PreferenceActivity implements
                                           new OnClickListener() {
 
                                               @Override
-                                              public void onClick(final DialogInterface dialog,
-                                                                  final int which) {
+                                              public void onClick(final DialogInterface dialog, final int which) {
                                                   SettingsActivity.this.doSaveToSDCard();
                                               }
                                           });
@@ -142,35 +140,43 @@ public class SettingsActivity extends PreferenceActivity implements
                     dialog.show();
 
                     final ContentResolver cr = context.getContentResolver();
-                    final Cursor c = cr.query(TongrenluContentProvider.TRACK_URI,
-                                              null,
-                                              null,
-                                              null,
-                                              null);
-                    if (c.moveToFirst()) {
-                        while (!c.isAfterLast()) {
-                            final String articleId = c.getString(c.getColumnIndex("article_id"));
-                            final String fileId = c.getString(c.getColumnIndex("file_id"));
-                            final String title = c.getString(c.getColumnIndex("title"));
-                            final String artist = c.getString(c.getColumnIndex("artist"));
+                    Cursor cursor = null;
+                    try {
+                        cursor = cr.query(TongrenluContentProvider.TRACK_URI,
+                                          null,
+                                          null,
+                                          null,
+                                          null);
+                        if (cursor.moveToFirst()) {
+                            while (!cursor.isAfterLast()) {
+                                final String articleId = cursor.getString(cursor.getColumnIndex("article_id"));
+                                final String fileId = cursor.getString(cursor.getColumnIndex("file_id"));
+                                final String title = cursor.getString(cursor.getColumnIndex("title"));
+                                final String artist = cursor.getString(cursor.getColumnIndex("artist"));
 
-                            final File srcFile = HttpConstants.getMp3(context,
-                                                                      articleId,
-                                                                      fileId);
-                            final String destFileName = HttpConstants.getAvaliableFilename(artist + "-"
-                                                                                           + title
-                                                                                           + ".mp3");
-                            final File destFile = new File(sdcard, destFileName);
-                            dialog.setMessage("正在复制：" + destFileName);
-                            try {
-                                FileUtils.copyFile(srcFile, destFile);
-                            } catch (final IOException e) {
-                                e.printStackTrace();
-                                Toast.makeText(context,
-                                               destFileName + "复制失败。",
-                                               Toast.LENGTH_SHORT).show();
+                                final File srcFile = HttpConstants.getMp3(context,
+                                                                          articleId,
+                                                                          fileId);
+                                final String destFileName = HttpConstants.getAvaliableFilename(artist + "-"
+                                        + title
+                                        + ".mp3");
+                                final File destFile = new File(sdcard,
+                                                               destFileName);
+                                dialog.setMessage("正在复制：" + destFileName);
+                                try {
+                                    FileUtils.copyFile(srcFile, destFile);
+                                } catch (final IOException e) {
+                                    e.printStackTrace();
+                                    Toast.makeText(context,
+                                                   destFileName + "复制失败。",
+                                                   Toast.LENGTH_SHORT).show();
+                                }
+                                cursor.moveToNext();
                             }
-                            c.moveToNext();
+                        }
+                    } finally {
+                        if (cursor != null) {
+                            cursor.close();
                         }
                     }
                     Toast.makeText(context, "复制完成。", Toast.LENGTH_SHORT).show();
@@ -197,8 +203,7 @@ public class SettingsActivity extends PreferenceActivity implements
                                           new OnClickListener() {
 
                                               @Override
-                                              public void onClick(final DialogInterface dialog,
-                                                                  final int which) {
+                                              public void onClick(final DialogInterface dialog, final int which) {
                                                   SettingsActivity.this.doClearCache();
                                                   // SettingsActivity.this.refreshSizeOfDirectory(dir,
                                                   // preference);
@@ -235,8 +240,7 @@ public class SettingsActivity extends PreferenceActivity implements
                                           new OnClickListener() {
 
                                               @Override
-                                              public void onClick(final DialogInterface dialog,
-                                                                  final int which) {
+                                              public void onClick(final DialogInterface dialog, final int which) {
                                                   SettingsActivity.this.doClearData();
                                                   // SettingsActivity.this.refreshSizeOfDirectory(dir,
                                                   // preference);
@@ -304,8 +308,7 @@ public class SettingsActivity extends PreferenceActivity implements
     }
 
     @Override
-    public void onSharedPreferenceChanged(final SharedPreferences sharedPreferences,
-                                          final String key) {
+    public void onSharedPreferenceChanged(final SharedPreferences sharedPreferences, final String key) {
         if (StringUtils.equals(key, SettingsActivity.PREF_KEY_SHUFFLE_PLAY)) {
             this.initShufflePlayPref(sharedPreferences);
         } else if (StringUtils.equals(key, SettingsActivity.PREF_KEY_LOOP_PLAY)) {

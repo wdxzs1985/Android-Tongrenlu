@@ -42,8 +42,7 @@ import android.widget.TextView;
 
 import com.tjerkw.slideexpandable.library.ActionSlideExpandableListView;
 
-public class AlbumInfoActivity extends BaseActivity implements
-        ActionSlideExpandableListView.OnActionClickListener, OnClickListener {
+public class AlbumInfoActivity extends BaseActivity implements ActionSlideExpandableListView.OnActionClickListener, OnClickListener {
 
     public static final int ALBUM_INFO_LOADER = 1;
 
@@ -111,7 +110,7 @@ public class AlbumInfoActivity extends BaseActivity implements
                 if (!this.isCancelled() && result != null) {
                     final Drawable emptyDrawable = new ShapeDrawable();
                     final TransitionDrawable fadeInDrawable = new TransitionDrawable(new Drawable[] { emptyDrawable,
-                                                                                                     result });
+                            result });
                     coverView.setImageDrawable(result);
                     fadeInDrawable.startTransition(200);
                 }
@@ -133,9 +132,7 @@ public class AlbumInfoActivity extends BaseActivity implements
     }
 
     @Override
-    public void onClick(final View itemView,
-                        final View clickedView,
-                        final int position) {
+    public void onClick(final View itemView, final View clickedView, final int position) {
         final TrackBean trackBean = (TrackBean) this.mListView.getItemAtPosition(position);
         switch (clickedView.getId()) {
         case R.id.item:
@@ -174,8 +171,7 @@ public class AlbumInfoActivity extends BaseActivity implements
         this.startService(serviceIntent);
     }
 
-    protected void playTrack(final ArrayList<TrackBean> items,
-                             final int position) {
+    protected void playTrack(final ArrayList<TrackBean> items, final int position) {
         final Intent serviceIntent = new Intent(this, MusicService.class);
         serviceIntent.setAction(MusicService.ACTION_ADD);
         serviceIntent.putParcelableArrayListExtra("trackBeanList", items);
@@ -191,20 +187,26 @@ public class AlbumInfoActivity extends BaseActivity implements
         final Intent serviceIntent = new Intent(this, DownloadService.class);
         serviceIntent.setAction(DownloadService.ACTION_ADD);
         serviceIntent.putExtra("trackBean", item);
+        Cursor cursor = null;
+        try {
+            cursor = this.getContentResolver()
+                         .query(TongrenluContentProvider.PLAYLIST_URI,
+                                null,
+                                null,
+                                null,
+                                null);
 
-        final Cursor cursor = this.getContentResolver()
-                                  .query(TongrenluContentProvider.PLAYLIST_URI,
-                                         null,
-                                         null,
-                                         null,
-                                         null);
-
-        if (cursor.getCount() > 0) {
-            final DialogFragment dialog = new SelectPlaylistDialogFragment(serviceIntent);
-            dialog.show(this.getSupportFragmentManager(),
-                        "PlaylistDialogFragment");
-        } else {
-            this.showCreatePlaylistDialog(serviceIntent);
+            if (cursor.getCount() > 0) {
+                final DialogFragment dialog = new SelectPlaylistDialogFragment(serviceIntent);
+                dialog.show(this.getSupportFragmentManager(),
+                            "PlaylistDialogFragment");
+            } else {
+                this.showCreatePlaylistDialog(serviceIntent);
+            }
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
         }
     }
 
@@ -216,11 +218,9 @@ public class AlbumInfoActivity extends BaseActivity implements
         this.showCreatePlaylistDialog(serviceIntent);
     }
 
-    private class TrackListLoaderCallback implements
-            LoaderCallbacks<ArrayList<TrackBean>> {
+    private class TrackListLoaderCallback implements LoaderCallbacks<ArrayList<TrackBean>> {
         @Override
-        public Loader<ArrayList<TrackBean>> onCreateLoader(final int loaderId,
-                                                           final Bundle args) {
+        public Loader<ArrayList<TrackBean>> onCreateLoader(final int loaderId, final Bundle args) {
             switch (loaderId) {
             case ALBUM_INFO_LOADER:
                 final String articleId = args.getString("articleId");
@@ -234,8 +234,7 @@ public class AlbumInfoActivity extends BaseActivity implements
         }
 
         @Override
-        public void onLoadFinished(final Loader<ArrayList<TrackBean>> loader,
-                                   final ArrayList<TrackBean> data) {
+        public void onLoadFinished(final Loader<ArrayList<TrackBean>> loader, final ArrayList<TrackBean> data) {
             if (CollectionUtils.isEmpty(data)) {
                 AlbumInfoActivity.this.mProgress.setVisibility(View.GONE);
                 AlbumInfoActivity.this.mListView.setVisibility(View.GONE);
@@ -255,16 +254,14 @@ public class AlbumInfoActivity extends BaseActivity implements
         }
     }
 
-    private static class TrackListLoader extends
-            JSONLoader<ArrayList<TrackBean>> {
+    private static class TrackListLoader extends JSONLoader<ArrayList<TrackBean>> {
 
         public TrackListLoader(final Context ctx, final Uri uri) {
             super(ctx, uri, null);
         }
 
         @Override
-        protected ArrayList<TrackBean> parseJSON(final JSONObject jsonData)
-                throws JSONException {
+        protected ArrayList<TrackBean> parseJSON(final JSONObject jsonData) throws JSONException {
             final ArrayList<TrackBean> data = new ArrayList<TrackBean>();
             if (jsonData.getBoolean("result")) {
                 final JSONArray items = jsonData.getJSONArray("playlist");
@@ -290,23 +287,29 @@ public class AlbumInfoActivity extends BaseActivity implements
 
     public void showCreatePlaylistDialog(final Intent serviceIntent) {
         String title = this.mTitle;
-        final Cursor cursor = this.getContentResolver()
-                                  .query(TongrenluContentProvider.PLAYLIST_URI,
-                                         null,
-                                         "title = ?",
-                                         new String[] { title },
-                                         null);
+        Cursor cursor = null;
+        try {
+            cursor = this.getContentResolver()
+                         .query(TongrenluContentProvider.PLAYLIST_URI,
+                                null,
+                                "title = ?",
+                                new String[] { title },
+                                null);
 
-        if (cursor.getCount() > 0) {
-            title = String.format("%s (%d)", title, cursor.getCount());
+            if (cursor.getCount() > 0) {
+                title = String.format("%s (%d)", title, cursor.getCount());
+            }
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
         }
         final DialogFragment dialog = new CreatePlaylistDialogFragment(title,
                                                                        serviceIntent);
         dialog.show(this.getSupportFragmentManager(), "PlaylistDialogFragment");
     }
 
-    public class SelectPlaylistDialogFragment extends DialogFragment implements
-            DialogInterface.OnClickListener {
+    public class SelectPlaylistDialogFragment extends DialogFragment implements DialogInterface.OnClickListener {
 
         private Intent mIntent = null;
 
@@ -354,15 +357,13 @@ public class AlbumInfoActivity extends BaseActivity implements
         }
     }
 
-    public class CreatePlaylistDialogFragment extends DialogFragment implements
-            DialogInterface.OnClickListener {
+    public class CreatePlaylistDialogFragment extends DialogFragment implements DialogInterface.OnClickListener {
 
         private String mTitle = null;
         private Intent mIntent = null;
         private EditText mTitleView = null;
 
-        public CreatePlaylistDialogFragment(final String title,
-                final Intent serviceIntent) {
+        public CreatePlaylistDialogFragment(final String title, final Intent serviceIntent) {
             this.mTitle = title;
             this.mIntent = serviceIntent;
         }

@@ -10,6 +10,7 @@ import info.tongrenlu.domain.TrackBean;
 
 import java.util.List;
 
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ContentResolver;
@@ -31,11 +32,13 @@ public class DownloadService extends Service implements DownloadListener {
     public static final String ACTION_STOP = "info.tongrenlu.android.music.DownloadService.action.stop";
 
     private DownloadManager mDownloadManager;
+    private NotificationManager mNotificationManager = null;
 
     @Override
     public void onCreate() {
         final TongrenluApplication app = (TongrenluApplication) this.getApplication();
         this.mDownloadManager = app.getDownloadManager();
+        this.mNotificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
     }
 
     @Override
@@ -43,12 +46,13 @@ public class DownloadService extends Service implements DownloadListener {
         super.onDestroy();
         this.stopForeground(true);
         this.mDownloadManager = null;
+
+        this.mNotificationManager.cancel(NOTIFICATION_ID);
+        this.mNotificationManager = null;
     }
 
     @Override
-    public int onStartCommand(final Intent intent,
-                              final int flags,
-                              final int startId) {
+    public int onStartCommand(final Intent intent, final int flags, final int startId) {
         final String action = intent.getAction();
         if (DownloadService.ACTION_ADD.equals(action)) {
             this.processAddRequest(intent);
@@ -104,13 +108,12 @@ public class DownloadService extends Service implements DownloadListener {
         final NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
         builder.setContentIntent(contentIntent);
         builder.setSmallIcon(R.drawable.ic_launcher);
-        builder.setOngoing(false);
-        builder.setAutoCancel(true);
         final String contentTitle = "download ok:" + trackBean.getTitle();
         builder.setTicker(contentTitle);
         builder.setContentTitle(contentTitle);
         builder.setWhen(System.currentTimeMillis());
-        this.startForeground(DownloadService.NOTIFICATION_ID, builder.build());
+
+        this.mNotificationManager.notify(NOTIFICATION_ID, builder.build());
     }
 
     @Override
@@ -144,6 +147,7 @@ public class DownloadService extends Service implements DownloadListener {
 
             final ContentResolver contentResolver = this.getContentResolver();
             contentResolver.insert(contentUri, values);
+            contentResolver.notifyChange(contentUri, null);
 
             // play
             final Intent serviceIntent = new Intent(this, MusicService.class);
@@ -155,14 +159,20 @@ public class DownloadService extends Service implements DownloadListener {
 
     private boolean isTrackExists(final TrackBean trackBean) {
         final ContentResolver contentResolver = this.getContentResolver();
-        final Cursor cursor = contentResolver.query(TongrenluContentProvider.TRACK_URI,
-                                                    null,
-                                                    "article_id = ? and file_id = ?",
-                                                    new String[] { trackBean.getArticleId(),
-                                                                  trackBean.getFileId() },
-                                                    null);
-        final int count = cursor.getCount();
-        return count > 0;
+        Cursor cursor = null;
+        try {
+            cursor = contentResolver.query(TongrenluContentProvider.TRACK_URI,
+                                           null,
+                                           "article_id = ? and file_id = ?",
+                                           new String[] { trackBean.getArticleId(),
+                                                   trackBean.getFileId() },
+                                           null);
+            return cursor.getCount() > 0;
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
     }
 
     private void insertTrack(final TrackBean trackBean) {

@@ -35,8 +35,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.GridView;
 
-public class AlbumFragment extends TitleFragment implements
-        OnItemClickListener, View.OnClickListener {
+public class AlbumFragment extends TitleFragment implements OnItemClickListener, View.OnClickListener {
 
     public static final int ALBUM_CURSOR_LOADER = 1;
     public static final int ALBUM_LIST_LOADER = 2;
@@ -58,9 +57,7 @@ public class AlbumFragment extends TitleFragment implements
     }
 
     @Override
-    public View onCreateView(final LayoutInflater inflater,
-                             final ViewGroup container,
-                             final Bundle savedInstanceState) {
+    public View onCreateView(final LayoutInflater inflater, final ViewGroup container, final Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.fragment_album, null, false);
         this.mProgress = view.findViewById(android.R.id.progress);
         this.mEmpty = view.findViewById(android.R.id.empty);
@@ -120,10 +117,7 @@ public class AlbumFragment extends TitleFragment implements
     }
 
     @Override
-    public void onItemClick(final AdapterView<?> listView,
-                            final View itemView,
-                            final int position,
-                            final long itemId) {
+    public void onItemClick(final AdapterView<?> listView, final View itemView, final int position, final long itemId) {
         final Cursor c = (Cursor) listView.getItemAtPosition(position);
         final String articleId = c.getString(c.getColumnIndex("article_id"));
         final String title = c.getString(c.getColumnIndex("title"));
@@ -156,15 +150,14 @@ public class AlbumFragment extends TitleFragment implements
     private class AlbumCursorLoaderCallback implements LoaderCallbacks<Cursor> {
 
         @Override
-        public Loader<Cursor> onCreateLoader(final int loaderId,
-                                             final Bundle args) {
+        public Loader<Cursor> onCreateLoader(final int loaderId, final Bundle args) {
             final Context context = AlbumFragment.this.getActivity();
             return new CursorLoader(context,
                                     TongrenluContentProvider.ALBUM_URI,
                                     null,
                                     null,
                                     null,
-                                    null);
+                                    "article_id desc");
         }
 
         @Override
@@ -188,12 +181,10 @@ public class AlbumFragment extends TitleFragment implements
 
     }
 
-    private class MusicListLoaderCallback implements
-            LoaderCallbacks<PaginateSupport> {
+    private class MusicListLoaderCallback implements LoaderCallbacks<PaginateSupport> {
 
         @Override
-        public Loader<PaginateSupport> onCreateLoader(final int loaderId,
-                                                      final Bundle args) {
+        public Loader<PaginateSupport> onCreateLoader(final int loaderId, final Bundle args) {
             final Context context = AlbumFragment.this.getActivity();
             final Uri uri = HttpConstants.getMusicListUri(context);
             final Bundle bundle = new Bundle();
@@ -202,8 +193,7 @@ public class AlbumFragment extends TitleFragment implements
         }
 
         @Override
-        public void onLoadFinished(final Loader<PaginateSupport> loader,
-                                   final PaginateSupport data) {
+        public void onLoadFinished(final Loader<PaginateSupport> loader, final PaginateSupport data) {
             AlbumFragment.this.getActivity()
                               .getSupportLoaderManager()
                               .getLoader(AlbumFragment.ALBUM_CURSOR_LOADER)
@@ -217,14 +207,12 @@ public class AlbumFragment extends TitleFragment implements
 
     private static class MusicListLoader extends JSONLoader<PaginateSupport> {
 
-        public MusicListLoader(final Context ctx, final Uri uri,
-                final Bundle parameters) {
+        public MusicListLoader(final Context ctx, final Uri uri, final Bundle parameters) {
             super(ctx, uri, parameters);
         }
 
         @Override
-        protected PaginateSupport parseJSON(final JSONObject responseJSON)
-                throws JSONException {
+        protected PaginateSupport parseJSON(final JSONObject responseJSON) throws JSONException {
             final PaginateSupport paginate = new PaginateSupport();
             if (responseJSON.getBoolean("result")) {
                 final JSONObject pageJSON = responseJSON.getJSONObject("page");
@@ -238,17 +226,26 @@ public class AlbumFragment extends TitleFragment implements
                     final JSONObject musicJsonObject = items.getJSONObject(i);
                     final String articleId = musicJsonObject.getString("articleId");
                     final String title = musicJsonObject.getString("title");
-                    final Cursor c = contentResolver.query(TongrenluContentProvider.ALBUM_URI,
-                                                           null,
-                                                           "article_id = ?",
-                                                           new String[] { articleId },
-                                                           null);
-                    final ContentValues contentValues = new ContentValues();
-                    contentValues.put("article_id", articleId);
-                    contentValues.put("title", title);
-                    if (c.getCount() == 0) {
-                        contentResolver.insert(TongrenluContentProvider.ALBUM_URI,
-                                               contentValues);
+                    Cursor cursor = null;
+                    try {
+                        cursor = contentResolver.query(TongrenluContentProvider.ALBUM_URI,
+                                                       null,
+                                                       "article_id = ?",
+                                                       new String[] { articleId },
+                                                       null);
+                        final ContentValues contentValues = new ContentValues();
+                        contentValues.put("article_id", articleId);
+                        contentValues.put("title", title);
+                        if (cursor.getCount() == 0) {
+                            contentResolver.insert(TongrenluContentProvider.ALBUM_URI,
+                                                   contentValues);
+                            contentResolver.notifyChange(TongrenluContentProvider.ALBUM_URI,
+                                                         null);
+                        }
+                    } finally {
+                        if (cursor != null) {
+                            cursor.close();
+                        }
                     }
                 }
 
