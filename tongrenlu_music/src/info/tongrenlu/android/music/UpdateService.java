@@ -1,12 +1,8 @@
 package info.tongrenlu.android.music;
 
-import info.tongrenlu.app.HttpConstants;
 import android.app.IntentService;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
-import android.net.Uri;
-import android.preference.PreferenceManager;
 
 public class UpdateService extends IntentService {
 
@@ -25,18 +21,11 @@ public class UpdateService extends IntentService {
         final String action = intent.getAction();
         if (ACTION_CHECK.equals(action)) {
             this.doCheck();
-        } else {
-            final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-            final long nextUpdateDate = sharedPreferences.getLong(SettingsActivity.PREF_KEY_NEXT_UPDATE_DATE,
-                                                                  System.currentTimeMillis());
-            if (nextUpdateDate < System.currentTimeMillis()) {
-                this.doCheck();
-            }
         }
     }
 
     protected void doCheck() {
-        final Uri uri = HttpConstants.getVersionInfoUri(this);
+        // final Uri uri = HttpConstants.getVersionInfoUri(this);
         // new ApplicationVersionLoadTask().execute(uri);
     }
     //
