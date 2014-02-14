@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="info.tongrenlu.android.music"
-    android:versionCode="4"
-    android:versionName="Tongrenlu / 1.0.4" >
+    android:versionCode="5"
+    android:versionName="Tongrenlu / 1.5a" >
 
     <uses-sdk android:minSdkVersion="7" android:targetSdkVersion="19" />
     <uses-permission android:name="android.permission.INTERNET"/>
@@ -27,7 +27,7 @@
         <activity android:name="PlaylistTrackActivity" 
             android:screenOrientation="portrait"></activity>
         
-        <activity android:name="AlbumInfoActivity" 
+        <activity android:name="AlbumPageActivity" 
             android:screenOrientation="portrait"></activity>
         
         <activity android:name="MusicPlayerActivity" 

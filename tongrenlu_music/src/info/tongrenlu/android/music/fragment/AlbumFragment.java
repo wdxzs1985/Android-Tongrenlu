@@ -2,7 +2,7 @@ package info.tongrenlu.android.music.fragment;
 
 import info.tongrenlu.android.fragment.TitleFragment;
 import info.tongrenlu.android.loader.BaseLoader;
-import info.tongrenlu.android.music.AlbumInfoActivity;
+import info.tongrenlu.android.music.AlbumPageActivity;
 import info.tongrenlu.android.music.R;
 import info.tongrenlu.android.music.adapter.AlbumGridAdapter;
 import info.tongrenlu.android.music.provider.TongrenluContentProvider;
@@ -128,9 +128,10 @@ public class AlbumFragment extends TitleFragment implements OnItemClickListener,
         final String title = c.getString(c.getColumnIndex("title"));
 
         final Intent intent = new Intent();
-        intent.setClass(this.getActivity(), AlbumInfoActivity.class);
+        intent.setClass(this.getActivity(), AlbumPageActivity.class);
         intent.putExtra("articleId", articleId);
         intent.putExtra("title", title);
+        intent.putExtra("position", position);
 
         this.startActivity(intent);
     }

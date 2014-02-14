@@ -19,6 +19,7 @@ public class TongrenluDBV1 implements DatabaseBuilder {
             + "album text,"
             + "songTitle text,"
             + "leadArtist text,"
+            + "original text,"
             + "trackNumber integer,"
             + "downloadFlg integer"
             + ")";
@@ -28,6 +29,7 @@ public class TongrenluDBV1 implements DatabaseBuilder {
             + "playlistId integer,"
             + "articleId text,"
             + "fileId text,"
+            + "album text,"
             + "songTitle text,"
             + "leadArtist text,"
             + "trackNumber integer"

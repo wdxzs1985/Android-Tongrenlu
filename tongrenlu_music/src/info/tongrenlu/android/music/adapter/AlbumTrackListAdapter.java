@@ -34,11 +34,17 @@ public class AlbumTrackListAdapter extends CursorAdapter {
         final String fileId = c.getString(c.getColumnIndex("fileId"));
         final String songTitle = c.getString(c.getColumnIndex("songTitle"));
         final String leadArtist = c.getString(c.getColumnIndex("leadArtist"));
+        final String original = c.getString(c.getColumnIndex("original"));
+        final int trackNumber = c.getInt(c.getColumnIndex("trackNumber"));
+        final int downloadFlg = c.getInt(c.getColumnIndex("downloadFlg"));
         final TrackBean trackBean = new TrackBean();
         trackBean.setArticleId(articleId);
         trackBean.setFileId(fileId);
         trackBean.setSongTitle(songTitle);
         trackBean.setLeadArtist(leadArtist);
+        trackBean.setOriginal(original);
+        trackBean.setTrackNumber(trackNumber);
+        trackBean.setDownloadFlg(downloadFlg);
         holder.update(context, trackBean);
     }
 
@@ -53,8 +59,10 @@ public class AlbumTrackListAdapter extends CursorAdapter {
             }
             this.trackBean = trackBean;
 
-            this.titleView.setText(trackBean.getSongTitle());
-            this.artistView.setText(trackBean.getLeadArtist());
+            this.titleView.setText(String.format("%s %s",
+                                                 trackBean.getSongTitle(),
+                                                 trackBean.getLeadArtist()));
+            this.artistView.setText(trackBean.getOriginal());
         }
     }
 }

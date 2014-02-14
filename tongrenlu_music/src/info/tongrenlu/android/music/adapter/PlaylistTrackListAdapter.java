@@ -46,11 +46,13 @@ public class PlaylistTrackListAdapter extends CursorAdapter {
         final String fileId = c.getString(c.getColumnIndex("fileId"));
         final String songTitle = c.getString(c.getColumnIndex("songTitle"));
         final String leadArtist = c.getString(c.getColumnIndex("leadArtist"));
+        final int trackNumber = c.getInt(c.getColumnIndex("trackNumber"));
         final TrackBean trackBean = new TrackBean();
         trackBean.setArticleId(articleId);
         trackBean.setFileId(fileId);
         trackBean.setSongTitle(songTitle);
         trackBean.setLeadArtist(leadArtist);
+        trackBean.setTrackNumber(trackNumber);
         holder.update(context, trackBean);
     }
 
@@ -70,7 +72,9 @@ public class PlaylistTrackListAdapter extends CursorAdapter {
             }
             this.trackBean = trackBean;
 
-            this.titleView.setText(trackBean.getSongTitle());
+            this.titleView.setText(String.format("%d %s",
+                                                 trackBean.getTrackNumber(),
+                                                 trackBean.getSongTitle()));
             this.artistView.setText(trackBean.getLeadArtist());
 
             this.task = new LoadImageCacheTask() {

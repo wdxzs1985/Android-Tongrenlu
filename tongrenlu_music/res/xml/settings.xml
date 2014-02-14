@@ -22,17 +22,9 @@
             android:title="@string/pref_title_wifi_only"
             android:defaultValue="true"/>
     </PreferenceCategory>
-    <PreferenceCategory android:title="@string/prefs_title_other">
-        <Preference android:key="pref_key_clear_cache"
-            android:title="@string/pref_title_clear_cache"/>
-        <Preference android:key="pref_key_clear_data"
-            android:title="@string/pref_title_clear_data"/>
-    </PreferenceCategory>
     <PreferenceCategory android:title="@string/prefs_title_version">
         <Preference android:key="pref_key_version_name"
             android:title="@string/pref_title_version_name" />
-        <Preference android:key="pref_key_next_update_date"
-            android:title="@string/pref_title_next_update_date" />
         <Preference android:key="pref_key_check_update"
             android:title="@string/pref_title_check_update" >
         </Preference>

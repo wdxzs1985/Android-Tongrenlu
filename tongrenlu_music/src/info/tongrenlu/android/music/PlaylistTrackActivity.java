@@ -25,9 +25,7 @@ import android.view.View;
 
 import com.tjerkw.slideexpandable.library.ActionSlideExpandableListView;
 
-public class PlaylistTrackActivity extends FragmentActivity implements
-        ActionSlideExpandableListView.OnActionClickListener,
-        LoaderCallbacks<Cursor> {
+public class PlaylistTrackActivity extends FragmentActivity implements ActionSlideExpandableListView.OnActionClickListener, LoaderCallbacks<Cursor> {
 
     public static final int PLAYLIST_LOADER_ID = 0;
 
@@ -49,12 +47,11 @@ public class PlaylistTrackActivity extends FragmentActivity implements
         this.mProgress = this.findViewById(android.R.id.progress);
         this.mEmpty = this.findViewById(android.R.id.empty);
         this.mListView = (ActionSlideExpandableListView) this.findViewById(android.R.id.list);
-        //
         this.mListView.setAdapter(this.mAdapter);
         this.mListView.setItemActionListener(this,
                                              R.id.item,
                                              R.id.action_play,
-                                             R.id.action_download);
+                                             R.id.action_delete);
 
         this.registerForContextMenu(this.mListView);
 
@@ -121,9 +118,7 @@ public class PlaylistTrackActivity extends FragmentActivity implements
     }
 
     @Override
-    public void onClick(final View itemView,
-                        final View clickedView,
-                        final int position) {
+    public void onClick(final View itemView, final View clickedView, final int position) {
         switch (clickedView.getId()) {
         case R.id.item:
         case R.id.action_play:
@@ -166,9 +161,11 @@ public class PlaylistTrackActivity extends FragmentActivity implements
     private void deleteTrack(final int position) {
         final Cursor c = (Cursor) this.mListView.getItemAtPosition(position);
         final long id = c.getLong(c.getColumnIndex("_id"));
-        final Uri uri = ContentUris.withAppendedId(this.mTrackUri, id);
+        final Uri uri = ContentUris.withAppendedId(TongrenluContentProvider.PLAYLIST_TRACK_URI,
+                                                   id);
         final ContentResolver contentResolver = this.getContentResolver();
         contentResolver.delete(uri, null, null);
+        contentResolver.update(this.mTrackUri, null, null, null);
         contentResolver.notifyChange(this.mTrackUri, null);
     }
 
@@ -194,6 +191,7 @@ public class PlaylistTrackActivity extends FragmentActivity implements
     private void deletePlaylist() {
         final ContentResolver contentResolver = this.getContentResolver();
         contentResolver.delete(this.mUri, null, null);
+        contentResolver.delete(this.mTrackUri, null, null);
         contentResolver.notifyChange(TongrenluContentProvider.PLAYLIST_URI,
                                      null);
         this.finish();

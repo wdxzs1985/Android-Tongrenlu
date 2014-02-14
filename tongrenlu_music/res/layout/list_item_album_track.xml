@@ -8,25 +8,20 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/item">
-        <TextView
+        <TextView android:id="@+id/track_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentTop="true"
                 android:singleLine="true"
-                android:id="@+id/track_title"
                 android:text="@string/track_title"/>
-
-        <TextView
+        <TextView android:id="@+id/track_artist"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
                 android:layout_below="@+id/track_title"
-                android:singleLine="true"
-                android:id="@+id/track_artist"
                 android:text="@string/track_artist"/>
-        <ImageButton
-                android:id="@id/expandable_toggle_button"
+        <ImageButton android:id="@id/expandable_toggle_button"
                 android:src="@android:drawable/ic_menu_more"
                 android:contentDescription="@string/label_more"
                 android:layout_width="wrap_content"
@@ -35,11 +30,10 @@
                 android:layout_alignParentRight="true"/>
     </RelativeLayout>
     
-    <LinearLayout
+    <LinearLayout android:id="@id/expandable"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:id="@id/expandable"
             android:background="#000000">
             <Button android:id="@+id/action_play" 
                 android:layout_width="0dp"
@@ -47,7 +41,6 @@
                 android:layout_height="wrap_content"
                 android:drawableTop="@android:drawable/ic_media_play"
                 android:text="@string/action_play"/>
-            
             <Button android:id="@+id/action_download" 
                 android:layout_width="0dp"
                 android:layout_weight="1"

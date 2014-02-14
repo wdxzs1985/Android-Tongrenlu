@@ -2,29 +2,30 @@ package info.tongrenlu.android.music;
 
 import info.tongrenlu.android.music.adapter.PlaylistTrackListAdapter;
 import info.tongrenlu.android.music.provider.TongrenluContentProvider;
+import info.tongrenlu.app.HttpConstants;
 import info.tongrenlu.domain.TrackBean;
 
+import java.io.File;
 import java.util.ArrayList;
 
+import org.apache.commons.io.FileUtils;
+
 import android.content.ContentResolver;
-import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.database.ContentObserver;
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.view.ContextMenu;
-import android.view.ContextMenu.ContextMenuInfo;
-import android.view.MenuInflater;
 import android.view.View;
 
 import com.tjerkw.slideexpandable.library.ActionSlideExpandableListView;
 
-public class TrackActivity extends BaseActivity implements ActionSlideExpandableListView.OnActionClickListener, LoaderCallbacks<Cursor> {
+public class TrackActivity extends FragmentActivity implements ActionSlideExpandableListView.OnActionClickListener, LoaderCallbacks<Cursor> {
 
     public static final int TRACK_LOADER_ID = 0;
 
@@ -76,6 +77,7 @@ public class TrackActivity extends BaseActivity implements ActionSlideExpandable
         loader.setUri(TongrenluContentProvider.TRACK_URI);
         loader.setSelection("downloadFlg = ?");
         loader.setSelectionArgs(new String[] { "1" });
+        loader.setSortOrder("_id asc");
         return loader;
     }
 
@@ -104,13 +106,6 @@ public class TrackActivity extends BaseActivity implements ActionSlideExpandable
         this.getContentResolver()
             .unregisterContentObserver(this.contentObserver);
         this.getSupportLoaderManager().destroyLoader(TRACK_LOADER_ID);
-    }
-
-    @Override
-    public void onCreateContextMenu(final ContextMenu menu, final View v, final ContextMenuInfo menuInfo) {
-        super.onCreateContextMenu(menu, v, menuInfo);
-        final MenuInflater inflater = this.getMenuInflater();
-        inflater.inflate(R.menu.fragment_playlist_track, menu);
     }
 
     @Override
@@ -158,11 +153,38 @@ public class TrackActivity extends BaseActivity implements ActionSlideExpandable
 
     private void deleteTrack(int position) {
         final Cursor c = (Cursor) this.mListView.getItemAtPosition(position);
-        long id = c.getLong(c.getColumnIndex("_id"));
-        Uri uri = ContentUris.withAppendedId(TongrenluContentProvider.TRACK_URI,
-                                             id);
+        this.deleteFromTrack(c);
+        this.deleteFromPlaylistTrack(c);
+        this.deleteMp3File(c);
+    }
+
+    private void deleteMp3File(Cursor c) {
+        String articleId = c.getString(c.getColumnIndex("articleId"));
+        String fileId = c.getString(c.getColumnIndex("fileId"));
+
+        File file = HttpConstants.getMp3(this, articleId, fileId);
+        FileUtils.deleteQuietly(file);
+    }
+
+    private void deleteFromTrack(Cursor c) {
+        String articleId = c.getString(c.getColumnIndex("articleId"));
+        String fileId = c.getString(c.getColumnIndex("fileId"));
         ContentResolver contentResolver = this.getContentResolver();
-        contentResolver.delete(uri, null, null);
+        ContentValues values = new ContentValues();
+        values.put("downloadFlg", 0);
+        contentResolver.update(TongrenluContentProvider.TRACK_URI,
+                               values,
+                               "articleId = ? and fileId = ? and downloadFlg = 1",
+                               new String[] { articleId, fileId });
         contentResolver.notifyChange(TongrenluContentProvider.TRACK_URI, null);
+    }
+
+    private void deleteFromPlaylistTrack(Cursor c) {
+        String articleId = c.getString(c.getColumnIndex("articleId"));
+        String fileId = c.getString(c.getColumnIndex("fileId"));
+        ContentResolver contentResolver = this.getContentResolver();
+        contentResolver.delete(TongrenluContentProvider.PLAYLIST_TRACK_URI,
+                               "articleId = ? and fileId = ?",
+                               new String[] { articleId, fileId });
     }
 }

@@ -15,6 +15,8 @@ public class TrackBean implements Parcelable {
 
     private String songTitle = null;
 
+    private String original = null;
+
     private int trackNumber = 0;
 
     private int downloadFlg = 0;
@@ -57,6 +59,14 @@ public class TrackBean implements Parcelable {
 
     public void setSongTitle(String songTitle) {
         this.songTitle = songTitle;
+    }
+
+    public String getOriginal() {
+        return this.original;
+    }
+
+    public void setOriginal(String original) {
+        this.original = original;
     }
 
     public int getTrackNumber() {
@@ -127,6 +137,7 @@ public class TrackBean implements Parcelable {
                 this.album,
                 this.songTitle,
                 this.leadArtist,
+                this.original,
                 String.valueOf(this.trackNumber),
                 String.valueOf(this.downloadFlg) });
     }
@@ -134,7 +145,7 @@ public class TrackBean implements Parcelable {
     public static final Parcelable.Creator<TrackBean> CREATOR = new Parcelable.Creator<TrackBean>() {
         @Override
         public TrackBean createFromParcel(final Parcel in) {
-            final String[] data = new String[7];
+            final String[] data = new String[8];
             in.readStringArray(data);
 
             final TrackBean trackBean = new TrackBean();
@@ -143,8 +154,9 @@ public class TrackBean implements Parcelable {
             trackBean.album = data[2];
             trackBean.songTitle = data[3];
             trackBean.leadArtist = data[4];
-            trackBean.trackNumber = Integer.valueOf(data[5]);
-            trackBean.downloadFlg = Integer.valueOf(data[6]);
+            trackBean.original = data[5];
+            trackBean.trackNumber = Integer.valueOf(data[6]);
+            trackBean.downloadFlg = Integer.valueOf(data[7]);
             return trackBean;
         }
 
