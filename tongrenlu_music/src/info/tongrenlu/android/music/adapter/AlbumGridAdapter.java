@@ -70,6 +70,16 @@ public class AlbumGridAdapter extends CursorAdapter {
                 }
 
                 @Override
+                protected Drawable doInBackground(Object... params) {
+                    Drawable result = super.doInBackground(params);
+                    if (result == null) {
+                        result = context.getResources()
+                                        .getDrawable(R.drawable.default_180);
+                    }
+                    return result;
+                }
+
+                @Override
                 protected void onPostExecute(final Drawable result) {
                     super.onPostExecute(result);
                     if (!this.isCancelled() && result != null) {

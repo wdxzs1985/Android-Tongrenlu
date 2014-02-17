@@ -2,11 +2,22 @@ package info.tongrenlu.android.music.adapter;
 
 import info.tongrenlu.android.music.R;
 import info.tongrenlu.domain.TrackBean;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
+
 import android.content.Context;
 import android.database.Cursor;
 import android.support.v4.widget.CursorAdapter;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ListAdapter;
+import android.widget.ListView;
+import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
 public class AlbumTrackListAdapter extends CursorAdapter {
@@ -22,7 +33,7 @@ public class AlbumTrackListAdapter extends CursorAdapter {
                                        null);
         final ViewHolder holder = new ViewHolder();
         holder.titleView = (TextView) view.findViewById(R.id.track_title);
-        holder.artistView = (TextView) view.findViewById(R.id.track_artist);
+        holder.originalList = (ListView) view.findViewById(R.id.originalList);
         view.setTag(holder);
         return view;
     }
@@ -50,7 +61,7 @@ public class AlbumTrackListAdapter extends CursorAdapter {
 
     public class ViewHolder {
         public TextView titleView;
-        public TextView artistView;
+        public ListView originalList;
         public TrackBean trackBean;
 
         public void update(final Context context, final TrackBean trackBean) {
@@ -58,11 +69,45 @@ public class AlbumTrackListAdapter extends CursorAdapter {
                 return;
             }
             this.trackBean = trackBean;
+            this.titleView.setText(String.format("%02d  %s",
+                                                 trackBean.getTrackNumber(),
+                                                 trackBean.getSongTitle()));
 
-            this.titleView.setText(String.format("%s %s",
-                                                 trackBean.getSongTitle(),
-                                                 trackBean.getLeadArtist()));
-            this.artistView.setText(trackBean.getOriginal());
+            String[] originals = StringUtils.split(trackBean.getOriginal(),
+                                                   System.getProperty("line.separator"));
+            List<Map<String, String>> data = new ArrayList<Map<String, String>>();
+            for (String original : originals) {
+                data.add(Collections.singletonMap("original",
+                                                  StringUtils.strip(original)));
+            }
+
+            SimpleAdapter adapter = new SimpleAdapter(context,
+                                                      data,
+                                                      R.layout.list_item_original,
+                                                      new String[] { "original" },
+                                                      new int[] { android.R.id.text1 });
+            this.originalList.setAdapter(adapter);
+            this.setListViewHeightBasedOnChildren(this.originalList);
+        }
+
+        public void setListViewHeightBasedOnChildren(ListView listView) {
+            ListAdapter listAdapter = listView.getAdapter();
+            if (listAdapter == null) {
+                // pre-condition
+                return;
+            }
+
+            int totalHeight = 0;
+            for (int i = 0; i < listAdapter.getCount(); i++) {
+                View listItem = listAdapter.getView(i, null, listView);
+                listItem.measure(0, 0);
+                totalHeight += listItem.getMeasuredHeight();
+            }
+
+            ViewGroup.LayoutParams params = listView.getLayoutParams();
+            params.height = totalHeight + (listView.getDividerHeight() * (listAdapter.getCount() - 1));
+            listView.setLayoutParams(params);
+            listView.requestLayout();
         }
     }
 }

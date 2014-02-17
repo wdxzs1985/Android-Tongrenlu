@@ -45,6 +45,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.tjerkw.slideexpandable.library.ActionSlideExpandableListView;
 
@@ -53,7 +54,7 @@ public class AlbumInfoFragment extends Fragment implements ActionSlideExpandable
     public static final int ALBUM_TRACK_CURSOR_LOADER = 1;
     public static final int ALBUM_TRACK_JSON_LOADER = 2;
 
-    private View mProgress = null;
+    private View mProgressContainer = null;
     private View mEmpty = null;
     private ActionSlideExpandableListView mListView = null;
     private AlbumTrackListAdapter mAdapter = null;
@@ -101,26 +102,11 @@ public class AlbumInfoFragment extends Fragment implements ActionSlideExpandable
                         .onContentChanged();
             }
         };
-        activity.getContentResolver()
-                .registerContentObserver(this.mTrackUri,
-                                         true,
-                                         this.contentObserver);
 
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        this.getActivity()
-            .getSupportLoaderManager()
-            .initLoader(this.albumTrackCursorLoaderId,
-                        null,
-                        new AlbumTrackCursorLoaderCallback());
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        // this.setContentView(R.layout.activity_album_info);
         View view = inflater.inflate(R.layout.activity_album_info, null, false);
 
         final TongrenluApplication application = (TongrenluApplication) this.getActivity()
@@ -130,7 +116,18 @@ public class AlbumInfoFragment extends Fragment implements ActionSlideExpandable
                                                      this.mArticleId,
                                                      HttpConstants.S_COVER);
         final ImageView coverView = (ImageView) view.findViewById(R.id.article_cover);
+        coverView.setImageDrawable(null);
         new LoadImageCacheTask() {
+
+            @Override
+            protected Drawable doInBackground(Object... params) {
+                Drawable result = super.doInBackground(params);
+                if (result == null) {
+                    result = AlbumInfoFragment.this.getResources()
+                                                   .getDrawable(R.drawable.default_120);
+                }
+                return result;
+            }
 
             @Override
             protected void onPostExecute(final Drawable result) {
@@ -151,9 +148,6 @@ public class AlbumInfoFragment extends Fragment implements ActionSlideExpandable
 
         this.mAdapter = new AlbumTrackListAdapter(this.getActivity(), null);
 
-        this.mProgress = view.findViewById(android.R.id.progress);
-        this.mProgress.setVisibility(View.VISIBLE);
-
         this.mEmpty = view.findViewById(android.R.id.empty);
         this.mEmpty.setVisibility(View.GONE);
 
@@ -165,12 +159,32 @@ public class AlbumInfoFragment extends Fragment implements ActionSlideExpandable
                                              R.id.action_download);
         this.mListView.setVisibility(View.GONE);
 
+        this.mProgressContainer = view.findViewById(R.id.progressContainer);
+
         final Button playAllButton = (Button) view.findViewById(R.id.action_play_all);
         playAllButton.setOnClickListener(this);
         final Button downloadAllButton = (Button) view.findViewById(R.id.action_download_all);
         downloadAllButton.setOnClickListener(this);
 
         return view;
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        final FragmentActivity activity = this.getActivity();
+
+        this.mProgressContainer.setVisibility(View.VISIBLE);
+
+        activity.getSupportLoaderManager()
+                .initLoader(this.albumTrackCursorLoaderId,
+                            null,
+                            new AlbumTrackCursorLoaderCallback());
+
+        activity.getContentResolver()
+                .registerContentObserver(this.mTrackUri,
+                                         true,
+                                         this.contentObserver);
     }
 
     @Override
@@ -200,10 +214,10 @@ public class AlbumInfoFragment extends Fragment implements ActionSlideExpandable
         @Override
         public void onLoadFinished(final Loader<Cursor> loader, final Cursor c) {
             AlbumInfoFragment.this.mAdapter.swapCursor(c);
+            AlbumInfoFragment.this.mProgressContainer.setVisibility(View.GONE);
             if (AlbumInfoFragment.this.mAdapter.isEmpty()) {
                 AlbumInfoFragment.this.refreshAlbumList();
             } else {
-                AlbumInfoFragment.this.mProgress.setVisibility(View.GONE);
                 AlbumInfoFragment.this.mEmpty.setVisibility(View.GONE);
                 AlbumInfoFragment.this.mListView.setVisibility(View.VISIBLE);
             }
@@ -221,9 +235,7 @@ public class AlbumInfoFragment extends Fragment implements ActionSlideExpandable
         loaderManager.initLoader(this.albumTrackJsonLoaderId,
                                  null,
                                  new AlbumTrackJsonLoaderCallback());
-        this.mProgress.setVisibility(View.VISIBLE);
-        this.mListView.setVisibility(View.VISIBLE);
-        this.mEmpty.setVisibility(View.GONE);
+        this.mProgressContainer.setVisibility(View.VISIBLE);
     }
 
     private class AlbumTrackJsonLoaderCallback implements LoaderCallbacks<Boolean> {
@@ -242,11 +254,19 @@ public class AlbumInfoFragment extends Fragment implements ActionSlideExpandable
         }
 
         @Override
-        public void onLoadFinished(final Loader<Boolean> loader, final Boolean data) {
-            AlbumInfoFragment.this.getActivity()
-                                  .getSupportLoaderManager()
-                                  .getLoader(AlbumInfoFragment.this.albumTrackCursorLoaderId)
-                                  .onContentChanged();
+        public void onLoadFinished(final Loader<Boolean> loader, final Boolean noError) {
+
+            if (noError) {
+                AlbumInfoFragment.this.getActivity()
+                                      .getSupportLoaderManager()
+                                      .getLoader(AlbumInfoFragment.this.albumTrackCursorLoaderId)
+                                      .onContentChanged();
+            } else {
+                AlbumInfoFragment.this.mProgressContainer.setVisibility(View.GONE);
+                Toast.makeText(AlbumInfoFragment.this.getActivity(),
+                               R.string.err_network,
+                               Toast.LENGTH_LONG).show();
+            }
         }
 
         @Override

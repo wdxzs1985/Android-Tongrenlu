@@ -324,4 +324,5 @@ public class AlbumPageActivity extends FragmentActivity implements AlbumInfoFrag
                                      null);
         return ContentUris.parseId(uri);
     }
+
 }

@@ -39,20 +39,17 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.GridView;
+import android.widget.Toast;
 
 public class AlbumFragment extends TitleFragment implements OnItemClickListener, View.OnClickListener {
 
     public static final int ALBUM_CURSOR_LOADER = 1;
     public static final int ALBUM_JSON_LOADER = 2;
 
-    private View mProgress = null;
+    private View mProgressContainer = null;
     private View mEmpty = null;
     private GridView mListView = null;
     private AlbumGridAdapter mAdapter = null;
-
-    public AlbumFragment() {
-        this.setTitle("所有专辑");
-    }
 
     @Override
     public void onCreate(final Bundle savedInstanceState) {
@@ -64,7 +61,6 @@ public class AlbumFragment extends TitleFragment implements OnItemClickListener,
     @Override
     public View onCreateView(final LayoutInflater inflater, final ViewGroup container, final Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.fragment_album, null, false);
-        this.mProgress = view.findViewById(android.R.id.progress);
         this.mEmpty = view.findViewById(android.R.id.empty);
         this.mEmpty.findViewById(R.id.action_refresh).setOnClickListener(this);
 
@@ -72,21 +68,24 @@ public class AlbumFragment extends TitleFragment implements OnItemClickListener,
         this.mListView.setAdapter(this.mAdapter);
         this.mListView.setOnItemClickListener(this);
 
+        this.mProgressContainer = view.findViewById(R.id.progressContainer);
         return view;
     }
 
     @Override
     public void onActivityCreated(final Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+
         final FragmentActivity activity = this.getActivity();
+        String title = activity.getApplicationContext()
+                               .getString(R.string.label_album);
+        this.setTitle(title);
+
         activity.getSupportLoaderManager()
                 .initLoader(AlbumFragment.ALBUM_CURSOR_LOADER,
                             null,
                             new AlbumCursorLoaderCallback());
-
-        this.mProgress.setVisibility(View.VISIBLE);
-        this.mListView.setVisibility(View.GONE);
-        this.mEmpty.setVisibility(View.GONE);
+        this.mProgressContainer.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -116,9 +115,7 @@ public class AlbumFragment extends TitleFragment implements OnItemClickListener,
         loaderManager.initLoader(AlbumFragment.ALBUM_JSON_LOADER,
                                  null,
                                  new AlbumJsonLoaderCallback());
-        this.mProgress.setVisibility(View.VISIBLE);
-        this.mListView.setVisibility(View.VISIBLE);
-        this.mEmpty.setVisibility(View.GONE);
+        this.mProgressContainer.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -169,12 +166,11 @@ public class AlbumFragment extends TitleFragment implements OnItemClickListener,
         @Override
         public void onLoadFinished(final Loader<Cursor> loader, final Cursor c) {
             AlbumFragment.this.mAdapter.swapCursor(c);
+            AlbumFragment.this.mProgressContainer.setVisibility(View.GONE);
             if (c.getCount() == 0) {
-                AlbumFragment.this.mProgress.setVisibility(View.GONE);
                 AlbumFragment.this.mEmpty.setVisibility(View.VISIBLE);
                 AlbumFragment.this.mListView.setVisibility(View.GONE);
             } else {
-                AlbumFragment.this.mProgress.setVisibility(View.GONE);
                 AlbumFragment.this.mEmpty.setVisibility(View.GONE);
                 AlbumFragment.this.mListView.setVisibility(View.VISIBLE);
             }
@@ -196,11 +192,17 @@ public class AlbumFragment extends TitleFragment implements OnItemClickListener,
         }
 
         @Override
-        public void onLoadFinished(final Loader<Boolean> loader, final Boolean data) {
-            AlbumFragment.this.getActivity()
-                              .getSupportLoaderManager()
-                              .getLoader(AlbumFragment.ALBUM_CURSOR_LOADER)
-                              .onContentChanged();
+        public void onLoadFinished(final Loader<Boolean> loader, final Boolean noError) {
+            if (noError) {
+                AlbumFragment.this.getActivity()
+                                  .getSupportLoaderManager()
+                                  .getLoader(AlbumFragment.ALBUM_CURSOR_LOADER)
+                                  .onContentChanged();
+            } else {
+                Toast.makeText(AlbumFragment.this.getActivity(),
+                               R.string.err_network,
+                               Toast.LENGTH_LONG).show();
+            }
         }
 
         @Override

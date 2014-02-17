@@ -23,6 +23,7 @@ import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.CursorAdapter;
+import android.support.v4.widget.SimpleCursorAdapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,22 +31,15 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
-import android.widget.TextView;
 
 public class PlaylistFragment extends TitleFragment implements OnItemClickListener {
 
     public static final int PLAYLIST_LOADER = 0;
 
-    private View mProgress = null;
-    private ListView mList1View = null;
-    private ListView mList2View = null;
-    private CursorAdapter mAdapter2 = null;
+    private View mProgressContainer = null;
+    private ListView mListView = null;
 
     private ContentObserver contentObserver = null;
-
-    public PlaylistFragment() {
-        this.setTitle("播放列表");
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -84,66 +78,55 @@ public class PlaylistFragment extends TitleFragment implements OnItemClickListen
         final View view = inflater.inflate(R.layout.fragment_playlist,
                                            null,
                                            false);
-        View listContainer = view.findViewById(android.R.id.list);
-        listContainer.setVisibility(View.VISIBLE);
         //
-        this.mList1View = (ListView) listContainer.findViewById(R.id.list1);
-        this.mList1View.setOnItemClickListener(this);
-        this.mList1View.setVisibility(View.VISIBLE);
+        ListView list1 = (ListView) view.findViewById(R.id.list1);
+        list1.setOnItemClickListener(this);
+        list1.setVisibility(View.VISIBLE);
 
-        this.mList2View = (ListView) listContainer.findViewById(R.id.list2);
-        this.mList2View.setOnItemClickListener(this);
-        this.mList2View.setVisibility(View.GONE);
+        List<Map<String, String>> items = new ArrayList<Map<String, String>>();
+        items.add(Collections.singletonMap("name", "playing"));
+        items.add(Collections.singletonMap("name", "all tracks"));
+        SimpleAdapter adapter = new SimpleAdapter(this.getActivity(),
+                                                  items,
+                                                  R.layout.list_item_playlist,
+                                                  new String[] { "name" },
+                                                  new int[] { android.R.id.text1 });
+        list1.setAdapter(adapter);
 
-        this.mProgress = view.findViewById(android.R.id.progress);
-        this.mProgress.setVisibility(View.GONE);
+        this.mListView = (ListView) view.findViewById(android.R.id.list);
+        this.mListView.setOnItemClickListener(this);
+        this.mListView.setVisibility(View.GONE);
+        this.mListView.setAdapter(new SimpleCursorAdapter(this.getActivity(),
+                                                          R.layout.list_item_playlist,
+                                                          null,
+                                                          new String[] { "title" },
+                                                          new int[] { android.R.id.text1 },
+                                                          CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER));
+
+        this.mProgressContainer = view.findViewById(R.id.progressContainer);
         return view;
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        List<Map<String, String>> items = new ArrayList<Map<String, String>>();
-        items.add(Collections.singletonMap("name", "playing"));
-        items.add(Collections.singletonMap("name", "all tracks"));
-        SimpleAdapter adapter = new SimpleAdapter(this.getActivity(),
-                                                  items,
-                                                  android.R.layout.simple_list_item_1,
-                                                  new String[] { "name" },
-                                                  new int[] { android.R.id.text1 });
-        this.mList1View.setAdapter(adapter);
-
         FragmentActivity activity = this.getActivity();
-        this.mAdapter2 = new CursorAdapter(activity, null, true) {
-
-            @Override
-            public View newView(Context context, Cursor cursor, ViewGroup parent) {
-                View view = View.inflate(context,
-                                         android.R.layout.simple_list_item_1,
-                                         null);
-                return view;
-            }
-
-            @Override
-            public void bindView(View view, Context context, Cursor cursor) {
-                String title = cursor.getString(cursor.getColumnIndex("title"));
-                TextView titleView = (TextView) view.findViewById(android.R.id.text1);
-                titleView.setText(title);
-            }
-        };
-        this.mList2View.setAdapter(this.mAdapter2);
+        String title = activity.getApplicationContext()
+                               .getString(R.string.label_playlist);
+        this.setTitle(title);
 
         activity.getSupportLoaderManager()
                 .initLoader(PLAYLIST_LOADER,
                             null,
                             new PlaylistCursorLoaderCallback());
+        this.mProgressContainer.setVisibility(View.VISIBLE);
 
     }
 
     @Override
     public void onItemClick(final AdapterView<?> listView, final View itemView, final int position, final long itemId) {
         FragmentActivity activity = this.getActivity();
-        if (listView == this.mList1View) {
+        if (listView != this.mListView) {
             if (itemId == 0) {
                 final Intent intent = new Intent(activity,
                                                  MusicPlayerActivity.class);
@@ -175,19 +158,20 @@ public class PlaylistFragment extends TitleFragment implements OnItemClickListen
 
         @Override
         public void onLoadFinished(Loader<Cursor> loader, Cursor c) {
-            PlaylistFragment.this.mAdapter2.swapCursor(c);
+            CursorAdapter adapter = (CursorAdapter) PlaylistFragment.this.mListView.getAdapter();
+            adapter.swapCursor(c);
+            PlaylistFragment.this.mProgressContainer.setVisibility(View.GONE);
             if (c.getCount() == 0) {
-                PlaylistFragment.this.mProgress.setVisibility(View.GONE);
-                PlaylistFragment.this.mList2View.setVisibility(View.GONE);
+                PlaylistFragment.this.mListView.setVisibility(View.GONE);
             } else {
-                PlaylistFragment.this.mProgress.setVisibility(View.GONE);
-                PlaylistFragment.this.mList2View.setVisibility(View.VISIBLE);
+                PlaylistFragment.this.mListView.setVisibility(View.VISIBLE);
             }
         }
 
         @Override
         public void onLoaderReset(Loader<Cursor> loader) {
-            PlaylistFragment.this.mAdapter2.swapCursor(null);
+            CursorAdapter adapter = (CursorAdapter) PlaylistFragment.this.mListView.getAdapter();
+            adapter.swapCursor(null);
         }
 
     }

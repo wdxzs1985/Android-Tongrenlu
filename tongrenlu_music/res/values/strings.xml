@@ -5,6 +5,8 @@
     <string name="menu_settings">设置</string>
     
     <string name="label_more">More</string>
+    <string name="label_album">专辑</string>
+    <string name="label_playlist">播放列表</string>
 
     <string name="loading">少女祈祷中。。。</string>
     <string name="no_data">神马都没有找到QAQ</string>

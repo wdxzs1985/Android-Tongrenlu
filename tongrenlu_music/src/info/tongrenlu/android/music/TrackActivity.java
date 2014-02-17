@@ -21,6 +21,7 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v4.widget.CursorAdapter;
 import android.view.View;
 
 import com.tjerkw.slideexpandable.library.ActionSlideExpandableListView;
@@ -29,10 +30,10 @@ public class TrackActivity extends FragmentActivity implements ActionSlideExpand
 
     public static final int TRACK_LOADER_ID = 0;
 
-    private View mProgress = null;
+    private View mProgressContainer = null;
     private View mEmpty = null;
     private ActionSlideExpandableListView mListView = null;
-    private PlaylistTrackListAdapter mAdapter = null;
+    private CursorAdapter mAdapter = null;
 
     private ContentObserver contentObserver = null;
 
@@ -42,7 +43,6 @@ public class TrackActivity extends FragmentActivity implements ActionSlideExpand
         this.mAdapter = new PlaylistTrackListAdapter(this, null);
 
         this.setContentView(R.layout.activity_playlist_info);
-        this.mProgress = this.findViewById(android.R.id.progress);
         this.mEmpty = this.findViewById(android.R.id.empty);
         this.mListView = (ActionSlideExpandableListView) this.findViewById(android.R.id.list);
         //
@@ -51,10 +51,10 @@ public class TrackActivity extends FragmentActivity implements ActionSlideExpand
                                              R.id.item,
                                              R.id.action_play,
                                              R.id.action_delete);
-
-        this.registerForContextMenu(this.mListView);
+        this.mProgressContainer = this.findViewById(R.id.progressContainer);
 
         this.getSupportLoaderManager().initLoader(TRACK_LOADER_ID, null, this);
+        this.mProgressContainer.setVisibility(View.VISIBLE);
 
         this.contentObserver = new ContentObserver(new Handler()) {
             @Override
@@ -84,14 +84,13 @@ public class TrackActivity extends FragmentActivity implements ActionSlideExpand
     @Override
     public void onLoadFinished(final Loader<Cursor> loader, final Cursor c) {
         this.mAdapter.swapCursor(c);
-        this.mProgress.setVisibility(View.GONE);
+        this.mProgressContainer.setVisibility(View.GONE);
         if (this.mAdapter.isEmpty()) {
             this.mListView.setVisibility(View.GONE);
             this.mEmpty.setVisibility(View.VISIBLE);
         } else {
             this.mEmpty.setVisibility(View.GONE);
             this.mListView.setVisibility(View.VISIBLE);
-            this.mAdapter.notifyDataSetChanged();
         }
     }
 

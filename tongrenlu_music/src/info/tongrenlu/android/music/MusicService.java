@@ -611,7 +611,7 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
         final PendingIntent contentIntent = PendingIntent.getActivity(context,
                                                                       0,
                                                                       intent,
-                                                                      PendingIntent.FLAG_UPDATE_CURRENT);
+                                                                      PendingIntent.FLAG_CANCEL_CURRENT);
         final NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
         builder.setContentIntent(contentIntent);
         builder.setSmallIcon(R.drawable.ic_launcher);
@@ -630,7 +630,7 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
         final PendingIntent skipActionIntent = PendingIntent.getService(context,
                                                                         0,
                                                                         skipAction,
-                                                                        PendingIntent.FLAG_UPDATE_CURRENT);
+                                                                        PendingIntent.FLAG_CANCEL_CURRENT);
         builder.addAction(R.drawable.av_next,
                           context.getString(R.string.player_next),
                           skipActionIntent);
@@ -640,7 +640,7 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
         final PendingIntent stopActionIntent = PendingIntent.getService(context,
                                                                         0,
                                                                         stopAction,
-                                                                        PendingIntent.FLAG_UPDATE_CURRENT);
+                                                                        PendingIntent.FLAG_CANCEL_CURRENT);
         builder.addAction(R.drawable.av_stop,
                           context.getString(R.string.player_stop),
                           stopActionIntent);

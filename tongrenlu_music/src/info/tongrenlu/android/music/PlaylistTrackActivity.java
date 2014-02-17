@@ -18,6 +18,7 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v4.widget.CursorAdapter;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -29,10 +30,10 @@ public class PlaylistTrackActivity extends FragmentActivity implements ActionSli
 
     public static final int PLAYLIST_LOADER_ID = 0;
 
-    private View mProgress = null;
+    private View mProgressContainer = null;
     private View mEmpty = null;
     private ActionSlideExpandableListView mListView = null;
-    private PlaylistTrackListAdapter mAdapter = null;
+    private CursorAdapter mAdapter = null;
 
     private Uri mUri = null;
     private Uri mTrackUri = null;
@@ -44,7 +45,6 @@ public class PlaylistTrackActivity extends FragmentActivity implements ActionSli
         this.mAdapter = new PlaylistTrackListAdapter(this, null);
 
         this.setContentView(R.layout.activity_playlist_info);
-        this.mProgress = this.findViewById(android.R.id.progress);
         this.mEmpty = this.findViewById(android.R.id.empty);
         this.mListView = (ActionSlideExpandableListView) this.findViewById(android.R.id.list);
         this.mListView.setAdapter(this.mAdapter);
@@ -52,8 +52,7 @@ public class PlaylistTrackActivity extends FragmentActivity implements ActionSli
                                              R.id.item,
                                              R.id.action_play,
                                              R.id.action_delete);
-
-        this.registerForContextMenu(this.mListView);
+        this.mProgressContainer = this.findViewById(R.id.progressContainer);
 
         final long playlistId = this.getIntent().getLongExtra("playlistId", -1);
         if (playlistId == -1) {
@@ -67,6 +66,7 @@ public class PlaylistTrackActivity extends FragmentActivity implements ActionSli
 
         this.getSupportLoaderManager()
             .initLoader(PlaylistTrackActivity.PLAYLIST_LOADER_ID, null, this);
+        this.mProgressContainer.setVisibility(View.VISIBLE);
 
         this.contentObserver = new ContentObserver(new Handler()) {
             @Override
@@ -92,14 +92,13 @@ public class PlaylistTrackActivity extends FragmentActivity implements ActionSli
     @Override
     public void onLoadFinished(final Loader<Cursor> loader, final Cursor c) {
         this.mAdapter.swapCursor(c);
-        this.mProgress.setVisibility(View.GONE);
+        this.mProgressContainer.setVisibility(View.GONE);
         if (this.mAdapter.isEmpty()) {
             this.mListView.setVisibility(View.GONE);
             this.mEmpty.setVisibility(View.VISIBLE);
         } else {
             this.mEmpty.setVisibility(View.GONE);
             this.mListView.setVisibility(View.VISIBLE);
-            this.mAdapter.notifyDataSetChanged();
         }
     }
 

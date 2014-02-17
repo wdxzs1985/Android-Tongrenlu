@@ -23,6 +23,7 @@
             android:layout_height="wrap_content"
             android:maxLines="2"
             android:text="@string/article_title"
+            android:textSize="32sp"
             android:layout_alignTop="@+id/article_cover"
             android:layout_toRightOf="@+id/article_cover"
             />

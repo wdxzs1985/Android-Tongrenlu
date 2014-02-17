@@ -11,10 +11,13 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 public class HttpConstants {
 
@@ -149,5 +152,19 @@ public class HttpConstants {
 
     public static String getAvaliableFilename(final String name) {
         return name.replaceAll("[:\\\\/*?|<>]", "_");
+    }
+
+    public static boolean networkEnable(Context context) {
+        Context applicationContext = context.getApplicationContext();
+        ConnectivityManager connectivity = (ConnectivityManager) applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo network = connectivity.getActiveNetworkInfo();
+        if (network == null) {
+            Toast.makeText(applicationContext,
+                           "connection disactive.",
+                           Toast.LENGTH_SHORT).show();
+            return false;
+        } else {
+            return true;
+        }
     }
 }

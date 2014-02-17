@@ -1,51 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:slideexpandable="http://schemas.android.com/apk/res-auto"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
               android:orientation="vertical">
-    <RelativeLayout
+    <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/item">
         <TextView android:id="@+id/track_title"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentTop="true"
+                android:layout_weight="1"
                 android:singleLine="true"
-                android:text="@string/track_title"/>
-        <TextView android:id="@+id/track_artist"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_below="@+id/track_title"
-                android:text="@string/track_artist"/>
+                android:ellipsize="marquee"
+                android:textSize="18sp"
+                android:padding="16dp"/>
         <ImageButton android:id="@id/expandable_toggle_button"
                 android:src="@android:drawable/ic_menu_more"
                 android:contentDescription="@string/label_more"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentTop="true"
-                android:layout_alignParentRight="true"/>
-    </RelativeLayout>
+                android:layout_height="match_parent"
+                android:layout_gravity="center_vertical"
+                />
+    </LinearLayout>
     
     <LinearLayout android:id="@id/expandable"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
+            android:orientation="vertical"
             android:background="#000000">
-            <Button android:id="@+id/action_play" 
-                android:layout_width="0dp"
-                android:layout_weight="1"
+        <ListView android:id="@+id/originalList"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+        </ListView>
+        <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:drawableTop="@android:drawable/ic_media_play"
-                android:text="@string/action_play"/>
-            <Button android:id="@+id/action_download" 
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:drawableTop="@android:drawable/ic_menu_save"
-                android:text="@string/action_download"/>
+                android:orientation="horizontal">
+                <Button android:id="@+id/action_play" 
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:drawableTop="@android:drawable/ic_media_play"
+                    android:text="@string/action_play"/>
+                <Button android:id="@+id/action_download" 
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:drawableTop="@android:drawable/ic_menu_save"
+                    android:text="@string/action_download"/>
+        </LinearLayout>
     </LinearLayout>
 </LinearLayout>
