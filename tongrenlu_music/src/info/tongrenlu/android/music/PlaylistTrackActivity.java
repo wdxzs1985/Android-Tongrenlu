@@ -44,7 +44,7 @@ public class PlaylistTrackActivity extends FragmentActivity implements ActionSli
         super.onCreate(savedInstanceState);
         this.mAdapter = new PlaylistTrackListAdapter(this, null);
 
-        this.setContentView(R.layout.activity_playlist_info);
+        this.setContentView(R.layout.fragment_expandable_list_view);
         this.mEmpty = this.findViewById(android.R.id.empty);
         this.mListView = (ActionSlideExpandableListView) this.findViewById(android.R.id.list);
         this.mListView.setAdapter(this.mAdapter);
@@ -178,6 +178,9 @@ public class PlaylistTrackActivity extends FragmentActivity implements ActionSli
     @Override
     public boolean onOptionsItemSelected(final MenuItem item) {
         switch (item.getItemId()) {
+        case R.id.action_play_all:
+            this.playTrack(0);
+            break;
         case R.id.action_delete:
             this.deletePlaylist();
             break;

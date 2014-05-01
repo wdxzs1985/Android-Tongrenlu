@@ -42,7 +42,7 @@ public class TrackActivity extends FragmentActivity implements ActionSlideExpand
         super.onCreate(savedInstanceState);
         this.mAdapter = new PlaylistTrackListAdapter(this, null);
 
-        this.setContentView(R.layout.activity_playlist_info);
+        this.setContentView(R.layout.fragment_expandable_list_view);
         this.mEmpty = this.findViewById(android.R.id.empty);
         this.mListView = (ActionSlideExpandableListView) this.findViewById(android.R.id.list);
         //

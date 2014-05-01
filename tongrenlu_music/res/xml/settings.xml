@@ -18,19 +18,5 @@
         <EditTextPreference android:key="pref_key_server"
             android:title="@string/pref_title_server"
             android:defaultValue="http://www.tongrenlu.info" />
-        <CheckBoxPreference android:key="pref_key_wifi_only"
-            android:title="@string/pref_title_wifi_only"
-            android:defaultValue="true"/>
-    </PreferenceCategory>
-    <PreferenceCategory android:title="@string/prefs_title_version">
-        <Preference android:key="pref_key_version_name"
-            android:title="@string/pref_title_version_name" />
-        <Preference android:key="pref_key_check_update"
-            android:title="@string/pref_title_check_update" >
-        </Preference>
-        <Preference android:title="@string/pref_title_web" >
-            <intent android:action="android.intent.action.VIEW" 
-                android:data="http://www.tongrenlu.info" />
-        </Preference>
     </PreferenceCategory>
 </PreferenceScreen>

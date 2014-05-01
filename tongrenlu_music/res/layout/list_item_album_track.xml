@@ -42,13 +42,11 @@
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:layout_height="wrap_content"
-                    android:drawableTop="@android:drawable/ic_media_play"
                     android:text="@string/action_play"/>
                 <Button android:id="@+id/action_download" 
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:layout_height="wrap_content"
-                    android:drawableTop="@android:drawable/ic_menu_save"
                     android:text="@string/action_download"/>
         </LinearLayout>
     </LinearLayout>

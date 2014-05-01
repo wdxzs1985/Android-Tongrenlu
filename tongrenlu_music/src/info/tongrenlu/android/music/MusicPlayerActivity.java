@@ -13,6 +13,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ShapeDrawable;
@@ -35,6 +36,11 @@ import android.widget.TextView;
 
 public class MusicPlayerActivity extends BaseActivity implements OnClickListener, OnSeekBarChangeListener {
 
+    public static final String LAST_ALBUM = "LAST_ALBUM";
+    public static final String LAST_FILE_ID = "LAST_FILE_ID";
+    public static final String LAST_TRACK_TITLE = "LAST_TRACK_TITLE";
+    public static final String LAST_TRACK_ARTIST = "LAST_TRACK_ARTIST";
+
     private LocalBroadcastManager mLocalBroadcastManager = null;
     private BroadcastReceiver mMusicReceiver = null;
 
@@ -43,9 +49,15 @@ public class MusicPlayerActivity extends BaseActivity implements OnClickListener
     private ImageButton mRandomButton = null;
     private SeekBar mProgress = null;
 
+    private View mEmpty = null;
+    private View mPlayer = null;
+
     private TrackBean mTrackBean = null;
+    private int mState = MusicService.STATE_STOPPED;
 
     private boolean mLockSeekbar = false;
+
+    private SharedPreferences mSharedPreferences = null;
 
     public final static int UPDATE_UI = 0;
     protected Handler mHandler = new Handler() {
@@ -64,6 +76,8 @@ public class MusicPlayerActivity extends BaseActivity implements OnClickListener
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.setContentView(R.layout.activity_player);
+        this.mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+
         this.initController();
         this.initLoopButtonImage();
         this.initShuffleButtonImage();
@@ -84,6 +98,9 @@ public class MusicPlayerActivity extends BaseActivity implements OnClickListener
     }
 
     private void initController() {
+        this.mPlayer = this.findViewById(R.id.player);
+        this.mEmpty = this.findViewById(android.R.id.empty);
+
         this.mPlayButton = (ImageButton) this.findViewById(R.id.player_play);
         this.mPlayButton.setOnClickListener(this);
         final ImageButton prevButton = (ImageButton) this.findViewById(R.id.player_prev);
@@ -151,9 +168,8 @@ public class MusicPlayerActivity extends BaseActivity implements OnClickListener
     }
 
     private void initLoopButtonImage() {
-        final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        final String value = sharedPreferences.getString(SettingsActivity.PREF_KEY_LOOP_PLAY,
-                                                         SettingsActivity.PREF_DEFAULT_LOOP_PLAY);
+        final String value = this.mSharedPreferences.getString(SettingsActivity.PREF_KEY_LOOP_PLAY,
+                                                               SettingsActivity.PREF_DEFAULT_LOOP_PLAY);
         final Resources res = this.getResources();
         final String[] entryValues = res.getStringArray(R.array.pref_entry_values_loop_play);
         final int index = ArrayUtils.indexOf(entryValues, value);
@@ -171,23 +187,21 @@ public class MusicPlayerActivity extends BaseActivity implements OnClickListener
     }
 
     public void actionLoop() {
-        final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        final String value = sharedPreferences.getString(SettingsActivity.PREF_KEY_LOOP_PLAY,
-                                                         SettingsActivity.PREF_DEFAULT_LOOP_PLAY);
+        final String value = this.mSharedPreferences.getString(SettingsActivity.PREF_KEY_LOOP_PLAY,
+                                                               SettingsActivity.PREF_DEFAULT_LOOP_PLAY);
         final Resources res = this.getResources();
         final String[] entryValues = res.getStringArray(R.array.pref_entry_values_loop_play);
         final int index = ArrayUtils.indexOf(entryValues, value);
         final int nextIndex = (index + 1) % entryValues.length;
-        sharedPreferences.edit()
-                         .putString(SettingsActivity.PREF_KEY_LOOP_PLAY,
-                                    entryValues[nextIndex])
-                         .commit();
+        this.mSharedPreferences.edit()
+                               .putString(SettingsActivity.PREF_KEY_LOOP_PLAY,
+                                          entryValues[nextIndex])
+                               .commit();
     }
 
     private void initShuffleButtonImage() {
-        final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        final String value = sharedPreferences.getString(SettingsActivity.PREF_KEY_SHUFFLE_PLAY,
-                                                         SettingsActivity.PREF_DEFAULT_SHUFFLE_PLAY);
+        final String value = this.mSharedPreferences.getString(SettingsActivity.PREF_KEY_SHUFFLE_PLAY,
+                                                               SettingsActivity.PREF_DEFAULT_SHUFFLE_PLAY);
         final Resources res = this.getResources();
         final String[] entryValues = res.getStringArray(R.array.pref_entry_values_shuffle_play);
         final int index = ArrayUtils.indexOf(entryValues, value);
@@ -202,17 +216,16 @@ public class MusicPlayerActivity extends BaseActivity implements OnClickListener
     }
 
     public void actionShuffle() {
-        final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        final String value = sharedPreferences.getString(SettingsActivity.PREF_KEY_SHUFFLE_PLAY,
-                                                         SettingsActivity.PREF_DEFAULT_SHUFFLE_PLAY);
+        final String value = this.mSharedPreferences.getString(SettingsActivity.PREF_KEY_SHUFFLE_PLAY,
+                                                               SettingsActivity.PREF_DEFAULT_SHUFFLE_PLAY);
         final Resources res = this.getResources();
         final String[] entryValues = res.getStringArray(R.array.pref_entry_values_shuffle_play);
         final int index = ArrayUtils.indexOf(entryValues, value);
         final int nextIndex = (index + 1) % entryValues.length;
-        sharedPreferences.edit()
-                         .putString(SettingsActivity.PREF_KEY_SHUFFLE_PLAY,
-                                    entryValues[nextIndex])
-                         .commit();
+        this.mSharedPreferences.edit()
+                               .putString(SettingsActivity.PREF_KEY_SHUFFLE_PLAY,
+                                          entryValues[nextIndex])
+                               .commit();
     }
 
     @Override
@@ -237,34 +250,50 @@ public class MusicPlayerActivity extends BaseActivity implements OnClickListener
     }
 
     protected void onMusicPlayerUpdate(final Intent intent) {
-        final int state = intent.getIntExtra("state",
-                                             MusicService.STATE_STOPPED);
-        this.updatePlayButton(state);
+        this.mState = intent.getIntExtra("state", MusicService.STATE_STOPPED);
+        if (this.mState == MusicService.STATE_STOPPED) {
+            this.mPlayer.setVisibility(View.GONE);
+            this.mEmpty.setVisibility(View.VISIBLE);
+        } else {
+            this.mPlayer.setVisibility(View.VISIBLE);
+            this.mEmpty.setVisibility(View.GONE);
 
-        final TrackBean trackBean = intent.getParcelableExtra("trackBean");
-        if (trackBean != null && !trackBean.equals(this.mTrackBean)) {
-            this.mTrackBean = trackBean;
-            this.updateCover();
-            this.updateTitle();
-            this.updateArtist();
-        }
+            this.updatePlayButton(this.mState);
 
-        final int duration = intent.getIntExtra("duration", 0);
-        this.updateDuration(duration);
+            final TrackBean trackBean = intent.getParcelableExtra("trackBean");
+            if (trackBean != null && !trackBean.equals(this.mTrackBean)) {
+                this.mTrackBean = trackBean;
+                this.updateCover();
+                this.updateTitle();
+                this.updateArtist();
 
-        if (!this.mLockSeekbar) {
-            final int progress = intent.getIntExtra("progress", 0);
-            this.updateCurrentTime(progress);
-            this.updateProgress(progress);
+                Editor editor = this.mSharedPreferences.edit();
+                editor.putString(LAST_ALBUM, this.mTrackBean.getAlbum())
+                      .putString(LAST_FILE_ID, this.mTrackBean.getFileId())
+                      .putString(LAST_TRACK_ARTIST,
+                                 this.mTrackBean.getLeadArtist())
+                      .putString(LAST_TRACK_TITLE,
+                                 this.mTrackBean.getSongTitle())
+                      .commit();
+            }
 
-            final int delay = 1000 - progress % 1000;
-            this.mHandler.sendEmptyMessageDelayed(MusicPlayerActivity.UPDATE_UI,
-                                                  delay);
-        }
+            final int duration = intent.getIntExtra("duration", 0);
+            this.updateDuration(duration);
 
-        if (intent.hasExtra("percent")) {
-            final int percent = intent.getIntExtra("percent", 0);
-            this.updateSecondaryProgress(percent * duration / 100);
+            if (!this.mLockSeekbar) {
+                final int progress = intent.getIntExtra("progress", 0);
+                this.updateCurrentTime(progress);
+                this.updateProgress(progress);
+
+                final int delay = 1000 - progress % 1000;
+                this.mHandler.sendEmptyMessageDelayed(MusicPlayerActivity.UPDATE_UI,
+                                                      delay);
+            }
+
+            if (intent.hasExtra("percent")) {
+                final int percent = intent.getIntExtra("percent", 0);
+                this.updateSecondaryProgress(percent * duration / 100);
+            }
         }
     }
 

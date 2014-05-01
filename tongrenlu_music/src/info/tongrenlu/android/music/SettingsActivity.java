@@ -33,11 +33,10 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
         super.onCreate(savedInstanceState);
         this.addPreferencesFromResource(R.xml.settings);
 
-        // final SharedPreferences sharedPreferences =
-        // PreferenceManager.getDefaultSharedPreferences(this);
-        // this.initShufflePlayPref(sharedPreferences);
-        // this.initLoopPlayPref(sharedPreferences);
-        // this.initServerPref(sharedPreferences);
+        final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        this.initShufflePlayPref(sharedPreferences);
+        this.initLoopPlayPref(sharedPreferences);
+        this.initServerPref(sharedPreferences);
         //
         // this.initVersionPref();
         // this.initCheckUpdate();
