@@ -5,4 +5,7 @@
         AppBaseTheme from res/values/styles.xml on API 11+ devices.
     -->
 
+    <style name="Theme.Default" parent="@android:style/Theme.Holo.Light"></style>
+    <style name="Theme.Player" parent="@android:style/Theme.Holo"></style>
+    
 </resources>

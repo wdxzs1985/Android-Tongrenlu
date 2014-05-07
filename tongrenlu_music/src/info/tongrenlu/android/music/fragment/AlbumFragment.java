@@ -30,7 +30,6 @@ public class AlbumFragment extends TitleFragment implements OnItemClickListener 
     public static final int ALBUM_CURSOR_LOADER = 1;
 
     private View mProgressContainer = null;
-    private final View mEmpty = null;
     private GridView mListView = null;
     private AlbumGridAdapter mAdapter = null;
 
