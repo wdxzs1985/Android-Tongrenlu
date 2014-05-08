@@ -9,7 +9,7 @@ import uk.co.senab.bitmapcache.CacheableBitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 
-public class LoadImageCacheTask extends AsyncTask<Object, Object, Drawable> {
+public class LoadImageTask extends AsyncTask<Object, Object, Drawable> {
 
     @Override
     protected Drawable doInBackground(Object... params) {

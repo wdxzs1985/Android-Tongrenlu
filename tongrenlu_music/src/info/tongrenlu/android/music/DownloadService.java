@@ -208,13 +208,14 @@ public class DownloadService extends Service implements DownloadListener {
 
     @Override
     public void onDownloadProgressUpdate(final DownloadTaskInfo taskinfo) {
-        final MusicDownloadTaskInfo taskinfo2 = (MusicDownloadTaskInfo) taskinfo;
-        final TrackBean trackBean = taskinfo2.getTrackBean();
-        System.out.println(String.format("%s is downloading. %d%% (%d / %d)",
-                                         trackBean.getSongTitle(),
-                                         taskinfo.getProgress(),
-                                         taskinfo.getRead(),
-                                         taskinfo.getTotal()));
+        // final MusicDownloadTaskInfo taskinfo2 = (MusicDownloadTaskInfo)
+        // taskinfo;
+        // final TrackBean trackBean = taskinfo2.getTrackBean();
+        // System.out.println(String.format("%s is downloading. %d%% (%d / %d)",
+        // trackBean.getSongTitle(),
+        // taskinfo.getProgress(),
+        // taskinfo.getRead(),
+        // taskinfo.getTotal()));
     }
 
     public class MusicDownloadTask extends DownloadTask {

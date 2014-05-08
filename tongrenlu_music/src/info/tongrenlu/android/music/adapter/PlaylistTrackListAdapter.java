@@ -2,7 +2,7 @@ package info.tongrenlu.android.music.adapter;
 
 import info.tongrenlu.android.music.R;
 import info.tongrenlu.android.music.TongrenluApplication;
-import info.tongrenlu.android.music.async.LoadImageCacheTask;
+import info.tongrenlu.android.music.async.LoadImageTask;
 import info.tongrenlu.app.HttpConstants;
 import info.tongrenlu.domain.TrackBean;
 import uk.co.senab.bitmapcache.BitmapLruCache;
@@ -61,7 +61,7 @@ public class PlaylistTrackListAdapter extends CursorAdapter {
         public TextView titleView;
         public TextView artistView;
         public TrackBean trackBean;
-        public LoadImageCacheTask task;
+        public LoadImageTask task;
 
         @TargetApi(Build.VERSION_CODES.HONEYCOMB)
         public void update(final Context context, final TrackBean trackBean) {
@@ -72,12 +72,10 @@ public class PlaylistTrackListAdapter extends CursorAdapter {
             }
             this.trackBean = trackBean;
 
-            this.titleView.setText(String.format("%d %s",
-                                                 trackBean.getTrackNumber(),
-                                                 trackBean.getSongTitle()));
+            this.titleView.setText(trackBean.getSongTitle());
             this.artistView.setText(trackBean.getLeadArtist());
 
-            this.task = new LoadImageCacheTask() {
+            this.task = new LoadImageTask() {
                 @Override
                 protected void onPreExecute() {
                     super.onPreExecute();

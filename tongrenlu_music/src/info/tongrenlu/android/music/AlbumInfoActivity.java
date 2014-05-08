@@ -33,7 +33,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
 
-public class AlbumPageActivity extends FragmentActivity implements AlbumInfoFragmentListener {
+public class AlbumInfoActivity extends FragmentActivity implements AlbumInfoFragmentListener {
 
     public static final int ALBUM_CURSOR_LOADER = 1;
 
@@ -43,7 +43,7 @@ public class AlbumPageActivity extends FragmentActivity implements AlbumInfoFrag
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        this.setContentView(R.layout.activity_album_page);
+        this.setContentView(R.layout.activity_album);
 
         final FragmentManager fm = this.getSupportFragmentManager();
         final CursorFragmentAdapter adapter = new CursorFragmentAdapter(fm,
@@ -75,7 +75,7 @@ public class AlbumPageActivity extends FragmentActivity implements AlbumInfoFrag
 
         int position = this.getIntent().getIntExtra("position", 0);
         this.getSupportLoaderManager()
-            .initLoader(AlbumPageActivity.ALBUM_CURSOR_LOADER,
+            .initLoader(AlbumInfoActivity.ALBUM_CURSOR_LOADER,
                         null,
                         new AlbumCursorLoaderCallback(position));
     }
@@ -90,7 +90,7 @@ public class AlbumPageActivity extends FragmentActivity implements AlbumInfoFrag
 
         @Override
         public Loader<Cursor> onCreateLoader(final int loaderId, final Bundle args) {
-            final Context context = AlbumPageActivity.this;
+            final Context context = AlbumInfoActivity.this;
             return new CursorLoader(context,
                                     TongrenluContentProvider.ALBUM_URI,
                                     null,
@@ -101,17 +101,17 @@ public class AlbumPageActivity extends FragmentActivity implements AlbumInfoFrag
 
         @Override
         public void onLoadFinished(final Loader<Cursor> loader, final Cursor c) {
-            AlbumPageActivity.this.mAdapter.swapCursor(c);
+            AlbumInfoActivity.this.mAdapter.swapCursor(c);
             if (c.getCount() == 0) {
-                AlbumPageActivity.this.finish();
+                AlbumInfoActivity.this.finish();
             } else {
-                AlbumPageActivity.this.mPager.setCurrentItem(this.mPosition);
+                AlbumInfoActivity.this.mPager.setCurrentItem(this.mPosition);
             }
         }
 
         @Override
         public void onLoaderReset(final Loader<Cursor> loader) {
-            AlbumPageActivity.this.mAdapter.swapCursor(null);
+            AlbumInfoActivity.this.mAdapter.swapCursor(null);
         }
 
     }
@@ -223,7 +223,7 @@ public class AlbumPageActivity extends FragmentActivity implements AlbumInfoFrag
             final AlertDialog.Builder builder = new AlertDialog.Builder(this.getActivity());
             builder.setTitle(R.string.dial_select_playlist)
                    .setCursor(cursor, this, "title")
-                   .setPositiveButton(R.string.action_create, this)
+                   .setPositiveButton(R.string.action_new_playlist, this)
                    .setNegativeButton(R.string.action_cancel, this);
             return builder.create();
         }
@@ -285,9 +285,9 @@ public class AlbumPageActivity extends FragmentActivity implements AlbumInfoFrag
             switch (which) {
             case DialogInterface.BUTTON_POSITIVE:
                 String title = this.mTitleView.getText().toString();
-                final long playlistId = AlbumPageActivity.this.insertPlaylist(title);
+                final long playlistId = AlbumInfoActivity.this.insertPlaylist(title);
                 this.mIntent.putExtra("playlistId", playlistId);
-                AlbumPageActivity.this.startService(this.mIntent);
+                AlbumInfoActivity.this.startService(this.mIntent);
                 break;
             default:
 

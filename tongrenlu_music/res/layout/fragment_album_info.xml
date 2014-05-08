@@ -2,12 +2,15 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical" >
+    android:orientation="vertical" 
+    >
     
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp">
+        android:background="#99333333"
+        android:paddingBottom="8dp"
+        >
 	    <ImageView android:id="@+id/article_cover"
 	        android:layout_width="@dimen/image_m"
 	        android:layout_height="@dimen/image_m"
@@ -26,6 +29,7 @@
             android:textSize="32sp"
             android:layout_alignTop="@+id/article_cover"
             android:layout_toRightOf="@+id/article_cover"
+            style="@style/WhiteText"
             />
         <LinearLayout android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -37,6 +41,7 @@
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
                 android:text="@string/action_play_all"
+                style="@style/transparentButton"
                 />
 	        <Button
 	            android:id="@+id/action_download_all"
@@ -44,6 +49,7 @@
 	            android:layout_weight="1"
 	            android:layout_height="wrap_content"
 	            android:text="@string/action_download_all"
+                style="@style/transparentButton"
 	            />
         </LinearLayout>
     </RelativeLayout>

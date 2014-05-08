@@ -42,24 +42,30 @@
                 android:layout_width="wrap_content"
                 android:layout_height="@dimen/image_xs"
                 android:layout_alignParentTop="true"
-                android:layout_alignParentRight="true"/>
+                android:layout_alignParentRight="true"
+                android:padding="16dp"
+                style="@style/transparentButton"
+                />
     </RelativeLayout>
     
     <LinearLayout android:id="@id/expandable"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:background="#000000">
+            android:orientation="horizontal">
             <Button android:id="@+id/action_play" 
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:text="@string/action_play"/>
+                android:text="@string/action_play"
+                style="@style/transparentButton"
+                />
             
             <Button android:id="@+id/action_delete" 
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:text="@string/action_delete"/>
+                android:text="@string/action_delete"
+                style="@style/transparentButton"
+                />
     </LinearLayout>
 </LinearLayout>

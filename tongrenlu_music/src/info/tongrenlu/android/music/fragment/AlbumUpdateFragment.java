@@ -1,6 +1,7 @@
 package info.tongrenlu.android.music.fragment;
 
 import info.tongrenlu.android.loader.BaseLoader;
+import info.tongrenlu.android.music.MainActivity;
 import info.tongrenlu.android.music.R;
 import info.tongrenlu.android.music.provider.TongrenluContentProvider;
 import info.tongrenlu.app.HttpConstants;
@@ -71,8 +72,9 @@ public class AlbumUpdateFragment extends DialogFragment {
             if (noError) {
                 AlbumUpdateFragment.this.getActivity()
                                         .getSupportLoaderManager()
-                                        .getLoader(AlbumFragment.ALBUM_CURSOR_LOADER)
+                                        .getLoader(MainActivity.ALBUM_LOADER)
                                         .onContentChanged();
+                AlbumUpdateFragment.this.dismissAllowingStateLoss();
             } else {
                 Toast.makeText(AlbumUpdateFragment.this.getActivity(),
                                R.string.err_network,

@@ -4,7 +4,8 @@ import info.tongrenlu.android.loader.BaseLoader;
 import info.tongrenlu.android.music.R;
 import info.tongrenlu.android.music.TongrenluApplication;
 import info.tongrenlu.android.music.adapter.AlbumTrackListAdapter;
-import info.tongrenlu.android.music.async.LoadImageCacheTask;
+import info.tongrenlu.android.music.async.LoadBlurImageTask;
+import info.tongrenlu.android.music.async.LoadImageTask;
 import info.tongrenlu.android.music.provider.TongrenluContentProvider;
 import info.tongrenlu.app.HttpConstants;
 import info.tongrenlu.domain.TrackBean;
@@ -107,17 +108,19 @@ public class AlbumInfoFragment extends Fragment implements ActionSlideExpandable
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.activity_album_info, null, false);
+        final View view = inflater.inflate(R.layout.fragment_album_info,
+                                           null,
+                                           false);
 
         final TongrenluApplication application = (TongrenluApplication) this.getActivity()
                                                                             .getApplication();
         final BitmapLruCache bitmapCache = application.getBitmapCache();
         final String url = HttpConstants.getCoverUrl(application,
                                                      this.mArticleId,
-                                                     HttpConstants.S_COVER);
+                                                     HttpConstants.L_COVER);
         final ImageView coverView = (ImageView) view.findViewById(R.id.article_cover);
         coverView.setImageDrawable(null);
-        new LoadImageCacheTask() {
+        new LoadImageTask() {
 
             @Override
             protected Drawable doInBackground(Object... params) {
@@ -142,6 +145,18 @@ public class AlbumInfoFragment extends Fragment implements ActionSlideExpandable
             }
 
         }.execute(bitmapCache, url);
+
+        new LoadBlurImageTask() {
+
+            @Override
+            protected void onPostExecute(final Drawable result) {
+                super.onPostExecute(result);
+                if (!this.isCancelled() && result != null) {
+                    view.setBackground(result);
+                }
+            }
+
+        }.execute(bitmapCache, url, application);
 
         final TextView articleTitle = (TextView) view.findViewById(R.id.article_title);
         articleTitle.setText(this.mTitle);

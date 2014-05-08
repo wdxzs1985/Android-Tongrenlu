@@ -3,26 +3,50 @@
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
               android:orientation="vertical">
-    <LinearLayout
+    <RelativeLayout android:id="@+id/item"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/item">
+            android:layout_height="@dimen/image_xs">
         <TextView android:id="@+id/track_title"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:singleLine="true"
-                android:ellipsize="marquee"
-                android:textSize="18sp"
-                android:padding="16dp"/>
-        <ImageButton android:id="@id/expandable_toggle_button"
-                android:src="@android:drawable/ic_menu_more"
-                android:contentDescription="@string/label_more"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_gravity="center_vertical"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentLeft="true"
+                android:layout_toRightOf="@id/expandable_toggle_button"
+                android:singleLine="true"
+                android:ellipsize="start"
+                android:text="@string/track_title"
+                android:textSize="16sp"
+                android:paddingLeft="16dp"
+                android:paddingTop="8dp"
+                style="@style/WhiteText"
                 />
-    </LinearLayout>
+        <TextView android:id="@+id/track_artist"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/track_title"
+                android:layout_alignParentLeft="true"
+                android:layout_toRightOf="@id/expandable_toggle_button"
+                android:singleLine="true"
+                android:ellipsize="start"
+                android:text="@string/track_artist"
+                android:textSize="12sp"
+                android:paddingLeft="16dp"
+                android:paddingTop="8dp"
+                style="@style/WhiteText"
+                />
+
+        <ImageButton
+            android:id="@id/expandable_toggle_button"
+            style="@style/transparentButton"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/image_xs"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:contentDescription="@string/label_more"
+            android:padding="16dp"
+            android:src="@android:drawable/ic_menu_more" />
+
+    </RelativeLayout>
     
     <LinearLayout android:id="@id/expandable"
             android:layout_width="match_parent"
@@ -42,12 +66,16 @@
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:layout_height="wrap_content"
-                    android:text="@string/action_play"/>
+                    android:text="@string/action_play"
+                    style="@style/transparentButton"
+                    />
                 <Button android:id="@+id/action_download" 
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:layout_height="wrap_content"
-                    android:text="@string/action_download"/>
+                    android:text="@string/action_download"
+                    style="@style/transparentButton"
+                    />
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>

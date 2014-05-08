@@ -33,6 +33,7 @@ public class AlbumTrackListAdapter extends CursorAdapter {
                                        null);
         final ViewHolder holder = new ViewHolder();
         holder.titleView = (TextView) view.findViewById(R.id.track_title);
+        holder.artistView = (TextView) view.findViewById(R.id.track_artist);
         holder.originalList = (ListView) view.findViewById(R.id.originalList);
         view.setTag(holder);
         return view;
@@ -61,6 +62,7 @@ public class AlbumTrackListAdapter extends CursorAdapter {
 
     public class ViewHolder {
         public TextView titleView;
+        public TextView artistView;
         public ListView originalList;
         public TrackBean trackBean;
 
@@ -72,6 +74,8 @@ public class AlbumTrackListAdapter extends CursorAdapter {
             this.titleView.setText(String.format("%02d  %s",
                                                  trackBean.getTrackNumber(),
                                                  trackBean.getSongTitle()));
+
+            this.artistView.setText(trackBean.getLeadArtist());
 
             String[] originals = StringUtils.split(trackBean.getOriginal(),
                                                    System.getProperty("line.separator"));

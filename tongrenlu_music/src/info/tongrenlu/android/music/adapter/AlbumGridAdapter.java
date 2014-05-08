@@ -2,7 +2,7 @@ package info.tongrenlu.android.music.adapter;
 
 import info.tongrenlu.android.music.R;
 import info.tongrenlu.android.music.TongrenluApplication;
-import info.tongrenlu.android.music.async.LoadImageCacheTask;
+import info.tongrenlu.android.music.async.LoadImageTask;
 import info.tongrenlu.app.HttpConstants;
 import info.tongrenlu.domain.ArticleBean;
 import uk.co.senab.bitmapcache.BitmapLruCache;
@@ -22,8 +22,8 @@ import android.widget.TextView;
 
 public class AlbumGridAdapter extends CursorAdapter {
 
-    public AlbumGridAdapter(final Context context, final Cursor c) {
-        super(context, c, true);
+    public AlbumGridAdapter(final Context context) {
+        super(context, null, true);
     }
 
     @Override
@@ -51,7 +51,7 @@ public class AlbumGridAdapter extends CursorAdapter {
         public ImageView coverView;
         public TextView titleView;
         public ArticleBean articleBean;
-        public LoadImageCacheTask task;
+        public LoadImageTask task;
 
         @TargetApi(Build.VERSION_CODES.HONEYCOMB)
         public void update(final Context context, final ArticleBean articleBean) {
@@ -61,7 +61,7 @@ public class AlbumGridAdapter extends CursorAdapter {
                 this.task.cancel(true);
             }
             this.articleBean = articleBean;
-            this.task = new LoadImageCacheTask() {
+            this.task = new LoadImageTask() {
                 @Override
                 protected void onPreExecute() {
                     super.onPreExecute();

@@ -1,7 +1,7 @@
 package info.tongrenlu.android.music.fragment;
 
 import info.tongrenlu.android.fragment.TitleFragment;
-import info.tongrenlu.android.music.AlbumPageActivity;
+import info.tongrenlu.android.music.AlbumInfoActivity;
 import info.tongrenlu.android.music.MainActivity;
 import info.tongrenlu.android.music.R;
 import info.tongrenlu.android.music.adapter.AlbumGridAdapter;
@@ -15,6 +15,7 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v4.widget.CursorAdapter;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -27,45 +28,42 @@ import android.widget.GridView;
 
 public class AlbumFragment extends TitleFragment implements OnItemClickListener {
 
-    public static final int ALBUM_CURSOR_LOADER = 1;
-
     private View mProgressContainer = null;
     private GridView mListView = null;
-    private AlbumGridAdapter mAdapter = null;
+
+    private CursorAdapter mAdapter = null;
 
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.setHasOptionsMenu(true);
-        this.mAdapter = new AlbumGridAdapter(this.getActivity(), null);
+
+        FragmentActivity activity = this.getActivity();
+        String title = activity.getApplicationContext()
+                               .getString(R.string.label_album);
+        this.setTitle(title);
     }
 
     @Override
     public View onCreateView(final LayoutInflater inflater, final ViewGroup container, final Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.fragment_album, null, false);
-
+        this.mAdapter = new AlbumGridAdapter(this.getActivity());
         this.mListView = (GridView) view.findViewById(android.R.id.list);
         this.mListView.setAdapter(this.mAdapter);
         this.mListView.setOnItemClickListener(this);
-
         this.mProgressContainer = view.findViewById(R.id.progressContainer);
+        this.mProgressContainer.setVisibility(View.VISIBLE);
         return view;
     }
 
     @Override
     public void onActivityCreated(final Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
         final FragmentActivity activity = this.getActivity();
-        String title = activity.getApplicationContext()
-                               .getString(R.string.label_album);
-        this.setTitle(title);
-
         activity.getSupportLoaderManager()
-                .initLoader(AlbumFragment.ALBUM_CURSOR_LOADER,
+                .initLoader(MainActivity.ALBUM_LOADER,
                             null,
                             new AlbumCursorLoaderCallback());
-        this.mProgressContainer.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -73,7 +71,7 @@ public class AlbumFragment extends TitleFragment implements OnItemClickListener 
         super.onDestroy();
         final FragmentActivity activity = this.getActivity();
         final LoaderManager loaderManager = activity.getSupportLoaderManager();
-        loaderManager.destroyLoader(AlbumFragment.ALBUM_CURSOR_LOADER);
+        loaderManager.destroyLoader(MainActivity.ALBUM_LOADER);
     }
 
     @Override
@@ -83,7 +81,7 @@ public class AlbumFragment extends TitleFragment implements OnItemClickListener 
         final String title = c.getString(c.getColumnIndex("title"));
 
         final Intent intent = new Intent();
-        intent.setClass(this.getActivity(), AlbumPageActivity.class);
+        intent.setClass(this.getActivity(), AlbumInfoActivity.class);
         intent.putExtra("articleId", articleId);
         intent.putExtra("title", title);
         intent.putExtra("position", position);

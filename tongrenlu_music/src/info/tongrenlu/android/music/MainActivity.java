@@ -4,6 +4,7 @@ import info.tongrenlu.android.fragment.TitleFragmentAdapter;
 import info.tongrenlu.android.music.fragment.AlbumFragment;
 import info.tongrenlu.android.music.fragment.AlbumUpdateFragment;
 import info.tongrenlu.android.music.fragment.PlaylistFragment;
+import info.tongrenlu.android.music.fragment.TrackFragment;
 import info.tongrenlu.app.CommonConstants;
 import android.os.Bundle;
 import android.os.Handler;
@@ -17,6 +18,10 @@ import com.viewpagerindicator.PageIndicator;
 
 public class MainActivity extends BaseActivity {
 
+    public static final int ALBUM_LOADER = 0;
+    public static final int PLAYLIST_LOADER = 1;
+    public static final int TRACK_LOADER = 2;
+
     private long mExitTime = 0;
     protected FragmentPagerAdapter mAdapter;
     protected ViewPager mPager;
@@ -25,13 +30,14 @@ public class MainActivity extends BaseActivity {
     private Toast mToast = null;
 
     public final static int UPDATE_ALBUM = 1;
+
     protected Handler mHandler = new Handler() {
         @Override
         public void handleMessage(final Message msg) {
             super.handleMessage(msg);
             switch (msg.what) {
             case UPDATE_ALBUM:
-                MainActivity.this.performUpdateAlbum();
+                MainActivity.this.onUpdateAlbum();
                 break;
             }
         }
@@ -46,6 +52,7 @@ public class MainActivity extends BaseActivity {
         final TitleFragmentAdapter adapter = new TitleFragmentAdapter(fm);
         adapter.addItem(new AlbumFragment());
         adapter.addItem(new PlaylistFragment());
+        adapter.addItem(new TrackFragment());
         this.mAdapter = adapter;
 
         this.mPager = (ViewPager) this.findViewById(R.id.pager);
@@ -75,23 +82,11 @@ public class MainActivity extends BaseActivity {
         }
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        // this.registerReceiver(UpdateService.RECEIVER, UpdateService.FILTER);
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        // this.unregisterReceiver(UpdateService.RECEIVER);
-    }
-
     public void dispatchUpdateAlbum() {
         this.mHandler.sendEmptyMessage(UPDATE_ALBUM);
     }
 
-    public void performUpdateAlbum() {
+    public void onUpdateAlbum() {
         AlbumUpdateFragment fragment = new AlbumUpdateFragment();
         fragment.show(this.getSupportFragmentManager(), "update");
     }

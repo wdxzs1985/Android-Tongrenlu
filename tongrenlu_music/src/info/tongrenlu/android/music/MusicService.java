@@ -1,6 +1,6 @@
 package info.tongrenlu.android.music;
 
-import info.tongrenlu.android.music.async.LoadImageCacheTask;
+import info.tongrenlu.android.music.async.LoadImageTask;
 import info.tongrenlu.android.musicplayer.AudioFocusHelper;
 import info.tongrenlu.android.musicplayer.MusicFocusable;
 import info.tongrenlu.app.HttpConstants;
@@ -507,7 +507,7 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
         final String url = HttpConstants.getCoverUrl(this,
                                                      articleId,
                                                      HttpConstants.XS_COVER);
-        new LoadImageCacheTask() {
+        new LoadImageTask() {
 
             @Override
             protected void onPostExecute(final Drawable result) {

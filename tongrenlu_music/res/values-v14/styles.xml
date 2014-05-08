@@ -6,8 +6,8 @@
         res/values-v11/styles.xml on API 14+ devices.
     -->
 
-    <style name="Theme.Default" parent="@android:style/Theme.DeviceDefault.Light"></style>
-    <style name="Theme.Player" parent="@android:style/Theme.DeviceDefault"></style>
+    <style name="Theme.Default" parent="@android:style/Theme.DeviceDefault"></style>
+    <style name="Theme.Player" parent="@android:style/Theme.DeviceDefault.NoActionBar"></style>
     
     
 </resources>
