@@ -3,6 +3,7 @@ package info.tongrenlu.android.music;
 import info.tongrenlu.android.music.async.LoadImageTask;
 import info.tongrenlu.android.musicplayer.AudioFocusHelper;
 import info.tongrenlu.android.musicplayer.MusicFocusable;
+import info.tongrenlu.android.provider.HttpHelper;
 import info.tongrenlu.app.HttpConstants;
 import info.tongrenlu.domain.TrackBean;
 
@@ -507,6 +508,7 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
         final String url = HttpConstants.getCoverUrl(this,
                                                      articleId,
                                                      HttpConstants.XS_COVER);
+        HttpHelper http = application.getHttpHelper();
         new LoadImageTask() {
 
             @Override
@@ -518,7 +520,7 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
                 }
             }
 
-        }.execute(bitmapCache, url);
+        }.execute(bitmapCache, url, http);
     }
 
     private void playMusic(final Uri data) {

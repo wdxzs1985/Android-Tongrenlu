@@ -7,15 +7,15 @@ import info.tongrenlu.android.music.adapter.AlbumTrackListAdapter;
 import info.tongrenlu.android.music.async.LoadBlurImageTask;
 import info.tongrenlu.android.music.async.LoadImageTask;
 import info.tongrenlu.android.music.provider.TongrenluContentProvider;
+import info.tongrenlu.android.provider.HttpHelper;
 import info.tongrenlu.app.HttpConstants;
 import info.tongrenlu.domain.TrackBean;
-import info.tongrenlu.support.RESTClient;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -118,6 +118,8 @@ public class AlbumInfoFragment extends Fragment implements ActionSlideExpandable
         final String url = HttpConstants.getCoverUrl(application,
                                                      this.mArticleId,
                                                      HttpConstants.L_COVER);
+        HttpHelper http = application.getHttpHelper();
+
         final ImageView coverView = (ImageView) view.findViewById(R.id.article_cover);
         coverView.setImageDrawable(null);
         new LoadImageTask() {
@@ -144,7 +146,7 @@ public class AlbumInfoFragment extends Fragment implements ActionSlideExpandable
                 }
             }
 
-        }.execute(bitmapCache, url);
+        }.execute(bitmapCache, url, http);
 
         new LoadBlurImageTask() {
 
@@ -156,7 +158,7 @@ public class AlbumInfoFragment extends Fragment implements ActionSlideExpandable
                 }
             }
 
-        }.execute(bitmapCache, url, application);
+        }.execute(bitmapCache, url, http, application);
 
         final TextView articleTitle = (TextView) view.findViewById(R.id.article_title);
         articleTitle.setText(this.mTitle);
@@ -231,7 +233,7 @@ public class AlbumInfoFragment extends Fragment implements ActionSlideExpandable
             AlbumInfoFragment.this.mAdapter.swapCursor(c);
             AlbumInfoFragment.this.mProgressContainer.setVisibility(View.GONE);
             if (AlbumInfoFragment.this.mAdapter.isEmpty()) {
-                AlbumInfoFragment.this.refreshAlbumList();
+                AlbumInfoFragment.this.refreshAlbumTracks();
             } else {
                 AlbumInfoFragment.this.mEmpty.setVisibility(View.GONE);
                 AlbumInfoFragment.this.mListView.setVisibility(View.VISIBLE);
@@ -244,7 +246,7 @@ public class AlbumInfoFragment extends Fragment implements ActionSlideExpandable
         }
     }
 
-    private void refreshAlbumList() {
+    private void refreshAlbumTracks() {
         final LoaderManager loaderManager = this.getActivity()
                                                 .getSupportLoaderManager();
         loaderManager.initLoader(this.albumTrackJsonLoaderId,
@@ -257,15 +259,16 @@ public class AlbumInfoFragment extends Fragment implements ActionSlideExpandable
 
         @Override
         public Loader<Boolean> onCreateLoader(final int loaderId, final Bundle args) {
-            Context context = AlbumInfoFragment.this.getActivity();
+            TongrenluApplication application = (TongrenluApplication) AlbumInfoFragment.this.getActivity()
+                                                                                            .getApplication();
 
-            AlbumTrackDataLoader loader = new AlbumTrackDataLoader(context);
+            HttpHelper http = application.getHttpHelper();
 
-            Uri hostUri = HttpConstants.getHostUri(context);
-            String part = "fm/music/" + AlbumInfoFragment.this.mArticleId;
-            loader.mUri = Uri.withAppendedPath(hostUri, part);
+            String host = HttpConstants.getHost(application);
+            String part = "/fm/music/" + AlbumInfoFragment.this.mArticleId;
+            String url = host + part;
 
-            return loader;
+            return new AlbumTrackDataLoader(application, http, url);
         }
 
         @Override
@@ -297,10 +300,13 @@ public class AlbumInfoFragment extends Fragment implements ActionSlideExpandable
 
         private int mErrorCode = NO_ERROR;
 
-        private Uri mUri = null;
+        private final HttpHelper http;
+        private final String url;
 
-        public AlbumTrackDataLoader(Context ctx) {
+        public AlbumTrackDataLoader(Context ctx, HttpHelper http, String url) {
             super(ctx);
+            this.http = http;
+            this.url = url;
         }
 
         @Override
@@ -314,29 +320,16 @@ public class AlbumInfoFragment extends Fragment implements ActionSlideExpandable
         }
 
         private void refreshTrackData() {
-            Bundle param = new Bundle();
-            param.putInt("s", Integer.MAX_VALUE);
-            String json = this.processHttpGet(this.mUri, param);
-            if (this.isNoError() && StringUtils.isNotBlank(json)) {
-                try {
-                    JSONObject trackJson = new JSONObject(json);
-                    this.parseTrackJSON(trackJson);
-                } catch (JSONException e) {
-                    this.mErrorCode = PARSE_ERROR;
-                }
-            }
-        }
-
-        private String processHttpGet(Uri uri, Bundle param) {
-            RESTClient.RESTResponse response = new RESTClient(RESTClient.HTTPVerb.GET,
-                                                              uri,
-                                                              param).load();
-            final int code = response.getCode();
-            final String json = response.getData();
-            if (code != 200) {
+            try {
+                JSONObject responseJSON = this.http.getAsJson(this.url);
+                this.parseTrackJSON(responseJSON);
+            } catch (JSONException e) {
+                this.mErrorCode = PARSE_ERROR;
+                e.printStackTrace();
+            } catch (IOException e) {
                 this.mErrorCode = NETWORK_ERROR;
+                e.printStackTrace();
             }
-            return json;
         }
 
         protected void parseTrackJSON(final JSONObject responseJSON) throws JSONException {

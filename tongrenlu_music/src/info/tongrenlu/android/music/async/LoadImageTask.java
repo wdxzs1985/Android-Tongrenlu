@@ -1,8 +1,9 @@
 package info.tongrenlu.android.music.async;
 
-import info.tongrenlu.support.HttpHelper;
+import info.tongrenlu.android.provider.HttpHelper;
 
-import java.io.InputStream;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 
 import uk.co.senab.bitmapcache.BitmapLruCache;
 import uk.co.senab.bitmapcache.CacheableBitmapDrawable;
@@ -13,13 +14,16 @@ public class LoadImageTask extends AsyncTask<Object, Object, Drawable> {
 
     @Override
     protected Drawable doInBackground(Object... params) {
-        BitmapLruCache bitmapCache = (BitmapLruCache) params[0];
+        final BitmapLruCache bitmapCache = (BitmapLruCache) params[0];
         final String url = (String) params[1];
+        final HttpHelper http = (HttpHelper) params[2];
         CacheableBitmapDrawable wrapper = bitmapCache.get(url);
         if (wrapper == null) {
-            InputStream input = HttpHelper.loadImage(url);
-            if (input != null) {
-                wrapper = bitmapCache.put(url, input);
+            try {
+                byte[] data = http.getByteArray(url);
+                wrapper = bitmapCache.put(url, new ByteArrayInputStream(data));
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
         return wrapper;

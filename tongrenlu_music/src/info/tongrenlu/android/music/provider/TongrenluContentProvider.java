@@ -1,6 +1,6 @@
 package info.tongrenlu.android.music.provider;
 
-import info.tongrenlu.android.provider.SimpleDbHelper;
+import info.tongrenlu.android.provider.DatabaseHelper;
 
 import java.util.List;
 
@@ -88,12 +88,12 @@ public class TongrenluContentProvider extends ContentProvider {
     public static final Uri PLAYLIST_TRACK_URI = Uri.parse("content://" + TongrenluContentProvider.AUTHORITY
             + "/playlist/track");
 
-    private SimpleDbHelper mDbHelper = null;
+    private DatabaseHelper mDbHelper = null;
     private UriMatcher mUriMatcher = null;
 
     @Override
     public boolean onCreate() {
-        this.mDbHelper = new SimpleDbHelper(this.getContext(),
+        this.mDbHelper = new DatabaseHelper(this.getContext(),
                                             new TongrenluDBV1());
         this.mUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 

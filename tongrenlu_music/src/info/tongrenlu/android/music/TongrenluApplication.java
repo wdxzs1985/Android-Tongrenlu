@@ -2,6 +2,7 @@ package info.tongrenlu.android.music;
 
 import info.tongrenlu.android.downloadmanager.DownloadManager;
 import info.tongrenlu.android.downloadmanager.DownloadManagerImpl;
+import info.tongrenlu.android.provider.HttpHelper;
 
 import java.io.File;
 
@@ -20,12 +21,14 @@ public class TongrenluApplication extends Application {
 
     private BitmapLruCache mBitmapCache = null;
     private DownloadManager mDownloadManager = null;
+    private HttpHelper httpHelper = null;
 
     @Override
     public void onCreate() {
         this.clearNotification();
         this.initPackageInfo();
         this.initBitmapCache();
+        this.initHttpHelper();
         this.initDownloadManager();
     }
 
@@ -62,11 +65,19 @@ public class TongrenluApplication extends Application {
         return this.mBitmapCache;
     }
 
+    private void initHttpHelper() {
+        this.httpHelper = new HttpHelper();
+    }
+
     private void initDownloadManager() {
         this.mDownloadManager = new DownloadManagerImpl();
     }
 
     public DownloadManager getDownloadManager() {
         return this.mDownloadManager;
+    }
+
+    public HttpHelper getHttpHelper() {
+        return this.httpHelper;
     }
 }

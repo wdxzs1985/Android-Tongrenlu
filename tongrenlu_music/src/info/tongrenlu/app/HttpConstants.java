@@ -41,21 +41,6 @@ public class HttpConstants {
 
     public static final int L_COVER = 400;
 
-    public static Uri getHostUri(final Context context) {
-        final String host = HttpConstants.getHost(context);
-        return Uri.parse(host);
-    }
-
-    public static Uri getMusicListUri(final Context context) {
-        final String host = HttpConstants.getHost(context);
-        return Uri.parse(host + HttpConstants.MUSIC_LIST_URI);
-    }
-
-    public static Uri getMusicInfoUri(final Context context, final String articleId) {
-        final Uri baseUri = HttpConstants.getMusicListUri(context);
-        return Uri.withAppendedPath(baseUri, articleId);
-    }
-
     public static String getCoverUrl(final Context context, final String articleId, int size) {
         final String host = HttpConstants.getHost(context);
         final String filename = HttpConstants.getCoverFilename(articleId, size);
@@ -101,7 +86,7 @@ public class HttpConstants {
         return new File(dirs[0], fileId + ".mp3");
     }
 
-    private static String getHost(final Context context) {
+    public static String getHost(final Context context) {
         final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         final String host = sharedPreferences.getString(SettingsActivity.PREF_KEY_SERVER,
                                                         SettingsActivity.PREF_DEFAULT_SERVER);

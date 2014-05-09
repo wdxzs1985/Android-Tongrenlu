@@ -3,15 +3,16 @@ package info.tongrenlu.android.music.fragment;
 import info.tongrenlu.android.loader.BaseLoader;
 import info.tongrenlu.android.music.MainActivity;
 import info.tongrenlu.android.music.R;
+import info.tongrenlu.android.music.TongrenluApplication;
 import info.tongrenlu.android.music.provider.TongrenluContentProvider;
+import info.tongrenlu.android.provider.HttpHelper;
 import info.tongrenlu.app.HttpConstants;
-import info.tongrenlu.support.RESTClient;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -22,7 +23,6 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
@@ -62,9 +62,16 @@ public class AlbumUpdateFragment extends DialogFragment {
 
         @Override
         public Loader<Boolean> onCreateLoader(final int loaderId, final Bundle args) {
-            final Context context = AlbumUpdateFragment.this.getActivity()
-                                                            .getApplicationContext();
-            return new AlbumDataLoader(context);
+            TongrenluApplication application = (TongrenluApplication) AlbumUpdateFragment.this.getActivity()
+                                                                                              .getApplication();
+
+            HttpHelper http = application.getHttpHelper();
+
+            String host = HttpConstants.getHost(application);
+            String part = "/fm/music?s=" + Integer.MAX_VALUE;
+            String url = host + part;
+
+            return new AlbumDataLoader(application, http, url);
         }
 
         @Override
@@ -95,8 +102,13 @@ public class AlbumUpdateFragment extends DialogFragment {
 
         private int mErrorCode = NO_ERROR;
 
-        public AlbumDataLoader(Context ctx) {
+        private final HttpHelper http;
+        private final String url;
+
+        public AlbumDataLoader(Context ctx, HttpHelper http, String url) {
             super(ctx);
+            this.http = http;
+            this.url = url;
         }
 
         @Override
@@ -110,31 +122,16 @@ public class AlbumUpdateFragment extends DialogFragment {
         }
 
         private void refreshAlbumData() {
-            Uri hostUri = HttpConstants.getHostUri(this.getContext());
-            Uri albumUri = Uri.withAppendedPath(hostUri, "fm/music");
-            Bundle param = new Bundle();
-            param.putInt("s", Integer.MAX_VALUE);
-            String json = this.processHttpGet(albumUri, param);
-            if (this.isNoError() && StringUtils.isNotBlank(json)) {
-                try {
-                    JSONObject albumJson = new JSONObject(json);
-                    this.parseAlbumJSON(albumJson);
-                } catch (JSONException e) {
-                    this.mErrorCode = PARSE_ERROR;
-                }
-            }
-        }
-
-        private String processHttpGet(Uri uri, Bundle param) {
-            RESTClient.RESTResponse response = new RESTClient(RESTClient.HTTPVerb.GET,
-                                                              uri,
-                                                              param).load();
-            final int code = response.getCode();
-            final String json = response.getData();
-            if (code != 200) {
+            try {
+                JSONObject responseJSON = this.http.getAsJson(this.url);
+                this.parseAlbumJSON(responseJSON);
+            } catch (JSONException e) {
+                this.mErrorCode = PARSE_ERROR;
+                e.printStackTrace();
+            } catch (IOException e) {
                 this.mErrorCode = NETWORK_ERROR;
+                e.printStackTrace();
             }
-            return json;
         }
 
         protected void parseAlbumJSON(final JSONObject responseJSON) throws JSONException {

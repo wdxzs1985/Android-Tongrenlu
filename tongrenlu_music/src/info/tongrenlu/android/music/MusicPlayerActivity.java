@@ -2,15 +2,14 @@ package info.tongrenlu.android.music;
 
 import info.tongrenlu.android.music.async.LoadBlurImageTask;
 import info.tongrenlu.android.music.async.LoadImageTask;
+import info.tongrenlu.android.provider.HttpHelper;
 import info.tongrenlu.app.HttpConstants;
 import info.tongrenlu.domain.TrackBean;
-import info.tongrenlu.support.Blur;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import uk.co.senab.bitmapcache.BitmapLruCache;
-import uk.co.senab.bitmapcache.CacheableBitmapDrawable;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -18,8 +17,6 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.TransitionDrawable;
@@ -28,7 +25,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.DisplayMetrics;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -312,6 +308,8 @@ public class MusicPlayerActivity extends BaseActivity implements OnClickListener
         final String url = HttpConstants.getCoverUrl(application,
                                                      articleId,
                                                      HttpConstants.L_COVER);
+        HttpHelper http = application.getHttpHelper();
+
         final ImageView coverView = (ImageView) this.findViewById(R.id.article_cover);
         new LoadImageTask() {
 
@@ -324,35 +322,10 @@ public class MusicPlayerActivity extends BaseActivity implements OnClickListener
                             result });
                     coverView.setImageDrawable(result);
                     fadeInDrawable.startTransition(200);
-
-                    CacheableBitmapDrawable wrapper = (CacheableBitmapDrawable) result;
-                    Bitmap blurBitmap = wrapper.getBitmap();
-                    blurBitmap = Blur.fastblur(application, blurBitmap, 10);
-                    Resources resource = MusicPlayerActivity.this.getResources();
-                    DisplayMetrics metrics = resource.getDisplayMetrics();
-                    int screenWidth = metrics.widthPixels;
-                    int screenHeight = metrics.heightPixels;
-                    float screenRatio = (float) screenWidth / (float) screenHeight;
-
-                    int targetWidth = (int) (blurBitmap.getWidth() * screenRatio);
-                    int targetHeight = blurBitmap.getHeight();
-
-                    blurBitmap = Bitmap.createBitmap(blurBitmap,
-                                                     blurBitmap.getWidth() / 2
-                                                             - targetWidth
-                                                             / 2,
-                                                     0,
-                                                     targetWidth,
-                                                     targetHeight);
-
-                    BitmapDrawable blurDrawable = new BitmapDrawable(resource,
-                                                                     blurBitmap);
-                    MusicPlayerActivity.this.getWindow()
-                                            .setBackgroundDrawable(blurDrawable);
                 }
             }
 
-        }.execute(bitmapCache, url);
+        }.execute(bitmapCache, url, http);
 
         new LoadBlurImageTask() {
 
@@ -365,7 +338,7 @@ public class MusicPlayerActivity extends BaseActivity implements OnClickListener
                 }
             }
 
-        }.execute(bitmapCache, url, this.getApplicationContext());
+        }.execute(bitmapCache, url, http, application);
     }
 
     private void updatePlayButton(final int state) {

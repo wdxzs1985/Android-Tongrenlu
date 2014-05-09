@@ -3,6 +3,7 @@ package info.tongrenlu.android.music.adapter;
 import info.tongrenlu.android.music.R;
 import info.tongrenlu.android.music.TongrenluApplication;
 import info.tongrenlu.android.music.async.LoadImageTask;
+import info.tongrenlu.android.provider.HttpHelper;
 import info.tongrenlu.app.HttpConstants;
 import info.tongrenlu.domain.ArticleBean;
 import uk.co.senab.bitmapcache.BitmapLruCache;
@@ -91,18 +92,20 @@ public class AlbumGridAdapter extends CursorAdapter {
                     }
                 }
             };
-            final TongrenluApplication app = (TongrenluApplication) context.getApplicationContext();
-            final BitmapLruCache bitmapCache = app.getBitmapCache();
-            final String url = HttpConstants.getCoverUrl(app,
+            final TongrenluApplication application = (TongrenluApplication) context.getApplicationContext();
+            final BitmapLruCache bitmapCache = application.getBitmapCache();
+            final String url = HttpConstants.getCoverUrl(application,
                                                          articleBean.getArticleId(),
                                                          HttpConstants.M_COVER);
+            HttpHelper http = application.getHttpHelper();
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
                 this.task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
                                             bitmapCache,
-                                            url);
+                                            url,
+                                            http);
             } else {
-                this.task.execute(bitmapCache, url);
+                this.task.execute(bitmapCache, url, http);
             }
 
         }
