@@ -42,6 +42,9 @@
     <string name="download_loaded">0 KB</string>
     <string name="download_size">0 KB</string>
     <string name="used_size">已使用： %s</string>
+    <string name="downloading">正在努力下载: %s</string>
+    <string name="download_waiting">还有%d首正在等待</string>
+    <string name="download_finish">下载完成</string>
     
     <string name="action_play">播放</string>
     <string name="action_play_all">全部播放</string>

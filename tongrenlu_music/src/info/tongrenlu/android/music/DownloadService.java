@@ -19,6 +19,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.AsyncTask.Status;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 
@@ -78,6 +79,7 @@ public class DownloadService extends Service implements DownloadListener {
             }
         }
         this.mDownloadManager.start();
+        this.sendNotification();
     }
 
     private void addTask(final TrackBean trackBean, final long playlistId) {
@@ -100,9 +102,10 @@ public class DownloadService extends Service implements DownloadListener {
         this.mDownloadManager.addTask(task);
     }
 
-    protected void sendNotification(final DownloadTaskInfo taskinfo) {
-        final MusicDownloadTaskInfo taskinfo2 = (MusicDownloadTaskInfo) taskinfo;
-        final TrackBean trackBean = taskinfo2.getTrackBean();
+    protected void sendNotification() {
+        List<DownloadTask> tasks = this.mDownloadManager.getTasks();
+        DownloadTask runningTask = this.mDownloadManager.getRunning();
+
         final Context context = this.getApplicationContext();
         final Intent intent = new Intent(context, MusicPlayerActivity.class);
         final PendingIntent contentIntent = PendingIntent.getActivity(context,
@@ -112,9 +115,21 @@ public class DownloadService extends Service implements DownloadListener {
         final NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
         builder.setContentIntent(contentIntent);
         builder.setSmallIcon(R.drawable.ic_launcher);
-        final String contentTitle = "download ok:" + trackBean.getSongTitle();
-        builder.setTicker(contentTitle);
-        builder.setContentTitle(contentTitle);
+
+        if (tasks.size() == 0 && runningTask.getStatus() == Status.FINISHED) {
+            String downloadFinish = this.getString(R.string.download_finish);
+            builder.setTicker(downloadFinish);
+            builder.setContentTitle(downloadFinish);
+            builder.setContentText("");
+        } else {
+            String songTitle = ((MusicDownloadTaskInfo) runningTask.getTaskinfo()).getTrackBean()
+                                                                                  .getSongTitle();
+            String downloading = this.getString(R.string.downloading, songTitle);
+            builder.setTicker(downloading);
+            builder.setContentTitle(downloading);
+            builder.setContentText(this.getString(R.string.download_waiting,
+                                                  tasks.size()));
+        }
         builder.setWhen(System.currentTimeMillis());
 
         this.mNotificationManager.notify(NOTIFICATION_ID, builder.build());
@@ -136,8 +151,7 @@ public class DownloadService extends Service implements DownloadListener {
     @Override
     public void onDownloadFinish(final DownloadTaskInfo taskinfo) {
         if (taskinfo != null) {
-            this.sendNotification(taskinfo);
-
+            this.sendNotification();
             final MusicDownloadTaskInfo taskinfo2 = (MusicDownloadTaskInfo) taskinfo;
             final TrackBean trackBean = taskinfo2.getTrackBean();
 
