@@ -2,6 +2,7 @@ package info.tongrenlu.android.music.fragment;
 
 import info.tongrenlu.android.loader.BaseLoader;
 import info.tongrenlu.android.music.R;
+import info.tongrenlu.android.music.SettingsActivity;
 import info.tongrenlu.android.music.TongrenluApplication;
 import info.tongrenlu.android.music.adapter.AlbumTrackListAdapter;
 import info.tongrenlu.android.music.async.LoadBlurImageTask;
@@ -25,6 +26,7 @@ import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
@@ -33,6 +35,7 @@ import android.graphics.drawable.TransitionDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.LoaderManager;
@@ -148,17 +151,21 @@ public class AlbumInfoFragment extends Fragment implements ActionSlideExpandable
 
         }.execute(bitmapCache, url, http);
 
-        new LoadBlurImageTask() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(application);
+        if (sharedPreferences.getBoolean(SettingsActivity.PREF_KEY_BACKGROUND_RENDER,
+                                         true)) {
+            new LoadBlurImageTask() {
 
-            @Override
-            protected void onPostExecute(final Drawable result) {
-                super.onPostExecute(result);
-                if (!this.isCancelled() && result != null) {
-                    view.setBackground(result);
+                @Override
+                protected void onPostExecute(final Drawable result) {
+                    super.onPostExecute(result);
+                    if (!this.isCancelled() && result != null) {
+                        view.setBackground(result);
+                    }
                 }
-            }
 
-        }.execute(bitmapCache, url, http, application);
+            }.execute(bitmapCache, url, http, application);
+        }
 
         final TextView articleTitle = (TextView) view.findViewById(R.id.article_title);
         articleTitle.setText(this.mTitle);

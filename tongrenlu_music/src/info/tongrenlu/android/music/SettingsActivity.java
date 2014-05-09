@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.preference.CheckBoxPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
@@ -16,6 +17,7 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
     public static final String PREF_KEY_SHUFFLE_PLAY = "pref_key_shuffle_play";
     public static final String PREF_KEY_LOOP_PLAY = "pref_key_loop_play";
     public static final String PREF_KEY_SERVER = "pref_key_server";
+    public static final String PREF_KEY_BACKGROUND_RENDER = "pref_key_background_render";
     public static final String PREF_KEY_SAVE_TO_SDCARD = "pref_key_save_to_sdcard";
     public static final String PREF_KEY_CLEAR_CACHE = "pref_key_clear_cache";
     public static final String PREF_KEY_CLEAR_DATA = "pref_key_clear_data";
@@ -37,9 +39,7 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
         this.initShufflePlayPref(sharedPreferences);
         this.initLoopPlayPref(sharedPreferences);
         this.initServerPref(sharedPreferences);
-        //
-        // this.initVersionPref();
-        // this.initCheckUpdate();
+        this.initBackgroundRenderPref(sharedPreferences);
     }
 
     private void initShufflePlayPref(final SharedPreferences sharedPreferences) {
@@ -77,26 +77,11 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
         preference.setSummary(value);
     }
 
-    private void initVersionPref() {
-        final Preference preference = this.findPreference(SettingsActivity.PREF_KEY_VERSION_NAME);
-        preference.setSummary(TongrenluApplication.VERSION_NAME);
-    }
-
-    private void initCheckUpdate() {
-        // final Preference preference =
-        // this.findPreference(SettingsActivity.PREF_KEY_CHECK_UPDATE);
-        // preference.setOnPreferenceClickListener(new
-        // OnPreferenceClickListener() {
-        //
-        // @Override
-        // public boolean onPreferenceClick(final Preference preference) {
-        // final Intent service = new Intent(SettingsActivity.this,
-        // UpdateService.class);
-        // service.setAction(UpdateService.ACTION_CHECK);
-        // SettingsActivity.this.startService(service);
-        // return false;
-        // }
-        // });
+    private void initBackgroundRenderPref(final SharedPreferences sharedPreferences) {
+        final CheckBoxPreference preference = (CheckBoxPreference) this.findPreference(SettingsActivity.PREF_KEY_BACKGROUND_RENDER);
+        final boolean checked = sharedPreferences.getBoolean(PREF_KEY_BACKGROUND_RENDER,
+                                                             true);
+        preference.setChecked(checked);
     }
 
     @Override

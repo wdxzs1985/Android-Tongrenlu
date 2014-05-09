@@ -81,6 +81,9 @@
         <item >1</item>
         <item >2</item>
     </string-array>
+
+    <string name="prefs_title_gui">界面设置</string>
+    <string name="pref_background_render">渲染背景</string>
     
     <string name="prefs_title_network">网络设置</string>
     <string name="prefs_summary_network">网络设置</string>

@@ -327,18 +327,21 @@ public class MusicPlayerActivity extends BaseActivity implements OnClickListener
 
         }.execute(bitmapCache, url, http);
 
-        new LoadBlurImageTask() {
+        if (this.mSharedPreferences.getBoolean(SettingsActivity.PREF_KEY_BACKGROUND_RENDER,
+                                               true)) {
+            new LoadBlurImageTask() {
 
-            @Override
-            protected void onPostExecute(final Drawable result) {
-                super.onPostExecute(result);
-                if (!this.isCancelled() && result != null) {
-                    MusicPlayerActivity.this.getWindow()
-                                            .setBackgroundDrawable(result);
+                @Override
+                protected void onPostExecute(final Drawable result) {
+                    super.onPostExecute(result);
+                    if (!this.isCancelled() && result != null) {
+                        MusicPlayerActivity.this.getWindow()
+                                                .setBackgroundDrawable(result);
+                    }
                 }
-            }
 
-        }.execute(bitmapCache, url, http, application);
+            }.execute(bitmapCache, url, http, application);
+        }
     }
 
     private void updatePlayButton(final int state) {

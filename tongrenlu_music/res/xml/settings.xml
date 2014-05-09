@@ -14,6 +14,12 @@
             android:entryValues="@array/pref_entry_values_loop_play"
             android:defaultValue="0"/>
     </PreferenceCategory>
+    <PreferenceCategory android:title="@string/prefs_title_gui">
+        <CheckBoxPreference android:key="pref_key_background_render"
+            android:title="@string/pref_background_render"
+            android:defaultValue="true"
+            />
+    </PreferenceCategory>
     <PreferenceCategory android:title="@string/prefs_title_network">
         <EditTextPreference android:key="pref_key_server"
             android:title="@string/pref_title_server"
