@@ -6,7 +6,7 @@
     <FrameLayout android:id="@+id/listContainer"
         android:layout_width="match_parent" 
         android:layout_height="match_parent"
-        android:background="#99333333">
+        android:background="#99000000">
         <com.tjerkw.slideexpandable.library.ActionSlideExpandableListView
             android:id="@android:id/list"
             android:layout_width="match_parent"

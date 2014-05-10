@@ -19,7 +19,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.AsyncTask.Status;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 
@@ -49,12 +48,14 @@ public class DownloadService extends Service implements DownloadListener {
         this.stopForeground(true);
         this.mDownloadManager = null;
 
-        this.mNotificationManager.cancel(NOTIFICATION_ID);
+        this.mNotificationManager.cancel(DownloadService.NOTIFICATION_ID);
         this.mNotificationManager = null;
     }
 
     @Override
-    public int onStartCommand(final Intent intent, final int flags, final int startId) {
+    public int onStartCommand(final Intent intent,
+                              final int flags,
+                              final int startId) {
         final String action = intent.getAction();
         if (DownloadService.ACTION_ADD.equals(action)) {
             this.processAddRequest(intent);
@@ -65,8 +66,9 @@ public class DownloadService extends Service implements DownloadListener {
     }
 
     private void processAddRequest(final Intent intent) {
-        final long playlistId = intent.getLongExtra("playlistId", BAD_ID);
-        if (playlistId == BAD_ID) {
+        final long playlistId = intent.getLongExtra("playlistId",
+                                                    DownloadService.BAD_ID);
+        if (playlistId == DownloadService.BAD_ID) {
             return;
         }
         if (intent.hasExtra("trackBean")) {
@@ -79,7 +81,6 @@ public class DownloadService extends Service implements DownloadListener {
             }
         }
         this.mDownloadManager.start();
-        this.sendNotification();
     }
 
     private void addTask(final TrackBean trackBean, final long playlistId) {
@@ -102,10 +103,7 @@ public class DownloadService extends Service implements DownloadListener {
         this.mDownloadManager.addTask(task);
     }
 
-    protected void sendNotification() {
-        List<DownloadTask> tasks = this.mDownloadManager.getTasks();
-        DownloadTask runningTask = this.mDownloadManager.getRunning();
-
+    protected void sendNotification(final boolean isFinish) {
         final Context context = this.getApplicationContext();
         final Intent intent = new Intent(context, MusicPlayerActivity.class);
         final PendingIntent contentIntent = PendingIntent.getActivity(context,
@@ -116,15 +114,18 @@ public class DownloadService extends Service implements DownloadListener {
         builder.setContentIntent(contentIntent);
         builder.setSmallIcon(R.drawable.ic_launcher);
 
-        if (tasks.size() == 0 && runningTask.getStatus() == Status.FINISHED) {
-            String downloadFinish = this.getString(R.string.download_finish);
+        if (isFinish) {
+            final String downloadFinish = this.getString(R.string.download_finish);
             builder.setTicker(downloadFinish);
             builder.setContentTitle(downloadFinish);
             builder.setContentText("");
         } else {
-            String songTitle = ((MusicDownloadTaskInfo) runningTask.getTaskinfo()).getTrackBean()
-                                                                                  .getSongTitle();
-            String downloading = this.getString(R.string.downloading, songTitle);
+            final List<DownloadTask> tasks = this.mDownloadManager.getTasks();
+            final DownloadTask runningTask = this.mDownloadManager.getRunning();
+            final String songTitle = ((MusicDownloadTaskInfo) runningTask.getTaskinfo()).getTrackBean()
+                                                                                        .getSongTitle();
+            final String downloading = this.getString(R.string.downloading,
+                                                      songTitle);
             builder.setTicker(downloading);
             builder.setContentTitle(downloading);
             builder.setContentText(this.getString(R.string.download_waiting,
@@ -132,7 +133,8 @@ public class DownloadService extends Service implements DownloadListener {
         }
         builder.setWhen(System.currentTimeMillis());
 
-        this.mNotificationManager.notify(NOTIFICATION_ID, builder.build());
+        this.mNotificationManager.notify(DownloadService.NOTIFICATION_ID,
+                                         builder.build());
     }
 
     @Override
@@ -142,22 +144,24 @@ public class DownloadService extends Service implements DownloadListener {
 
     @Override
     public void onDownloadStart(final DownloadTaskInfo taskinfo) {
+        this.sendNotification(false);
     }
 
     @Override
     public void onDownloadCancel(final DownloadTaskInfo taskinfo) {
+        this.mNotificationManager.cancel(DownloadService.NOTIFICATION_ID);
     }
 
     @Override
     public void onDownloadFinish(final DownloadTaskInfo taskinfo) {
+        this.sendNotification(true);
         if (taskinfo != null) {
-            this.sendNotification();
             final MusicDownloadTaskInfo taskinfo2 = (MusicDownloadTaskInfo) taskinfo;
             final TrackBean trackBean = taskinfo2.getTrackBean();
 
             this.updateTrackState(trackBean);
 
-            long playlistId = taskinfo2.getPlaylistId();
+            final long playlistId = taskinfo2.getPlaylistId();
             this.insertPlaylistTrack(trackBean, playlistId);
 
             // play
@@ -177,16 +181,17 @@ public class DownloadService extends Service implements DownloadListener {
                                values,
                                "articleId = ? and fileId = ? and downloadFlg = 0",
                                new String[] { trackBean.getArticleId(),
-                                       trackBean.getFileId() });
+                                             trackBean.getFileId() });
 
-        Uri albumTrackContentUri = Uri.withAppendedPath(TongrenluContentProvider.ALBUM_URI,
-                                                        trackBean.getArticleId() + "/track");
+        final Uri albumTrackContentUri = Uri.withAppendedPath(TongrenluContentProvider.ALBUM_URI,
+                                                              trackBean.getArticleId() + "/track");
 
         contentResolver.notifyChange(albumTrackContentUri, null);
         contentResolver.notifyChange(TongrenluContentProvider.TRACK_URI, null);
     }
 
-    private void insertPlaylistTrack(final TrackBean trackBean, long playlistId) {
+    private void insertPlaylistTrack(final TrackBean trackBean,
+                                     final long playlistId) {
         final ContentValues values = new ContentValues();
         values.put("articleId", trackBean.getArticleId());
         values.put("fileId", trackBean.getFileId());

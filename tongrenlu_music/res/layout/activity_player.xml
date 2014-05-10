@@ -8,7 +8,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:orientation="vertical"
-        android:background="#99333333"
+        android:background="#99000000"
         >
         <TextView
             android:id="@+id/track_title"
@@ -76,7 +76,7 @@
         android:gravity="center"
         android:orientation="horizontal"
         android:layout_above="@+id/player_controller_container"
-        android:background="#99333333"
+        android:background="#99000000"
         >
 
         <TextView
@@ -114,7 +114,7 @@
         android:gravity="center"
         android:orientation="horizontal"
         android:layout_alignParentBottom="true"
-        android:background="#99333333"
+        android:background="#99000000"
         >
         <ImageButton
             android:contentDescription="@string/player_previous"

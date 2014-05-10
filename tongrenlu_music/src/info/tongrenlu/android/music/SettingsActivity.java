@@ -6,13 +6,15 @@ import org.apache.commons.lang3.StringUtils;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.res.Resources;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 
-public class SettingsActivity extends PreferenceActivity implements OnSharedPreferenceChangeListener {
+public class SettingsActivity extends PreferenceActivity implements
+        OnSharedPreferenceChangeListener {
 
     public static final String PREF_KEY_SHUFFLE_PLAY = "pref_key_shuffle_play";
     public static final String PREF_KEY_LOOP_PLAY = "pref_key_loop_play";
@@ -79,8 +81,8 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
 
     private void initBackgroundRenderPref(final SharedPreferences sharedPreferences) {
         final CheckBoxPreference preference = (CheckBoxPreference) this.findPreference(SettingsActivity.PREF_KEY_BACKGROUND_RENDER);
-        final boolean checked = sharedPreferences.getBoolean(PREF_KEY_BACKGROUND_RENDER,
-                                                             true);
+        final boolean checked = sharedPreferences.getBoolean(SettingsActivity.PREF_KEY_BACKGROUND_RENDER,
+                                                             Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN);
         preference.setChecked(checked);
     }
 
@@ -99,7 +101,8 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
     }
 
     @Override
-    public void onSharedPreferenceChanged(final SharedPreferences sharedPreferences, final String key) {
+    public void onSharedPreferenceChanged(final SharedPreferences sharedPreferences,
+                                          final String key) {
         if (StringUtils.equals(key, SettingsActivity.PREF_KEY_SHUFFLE_PLAY)) {
             this.initShufflePlayPref(sharedPreferences);
         } else if (StringUtils.equals(key, SettingsActivity.PREF_KEY_LOOP_PLAY)) {

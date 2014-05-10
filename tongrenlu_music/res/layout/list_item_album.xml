@@ -17,6 +17,6 @@
               android:minLines="2"
               android:padding="1dp"
               android:textColor="@android:color/white"
-              android:background="#99333333" />
+              android:background="#99000000" />
 
 </FrameLayout>

@@ -20,6 +20,7 @@ import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.TransitionDrawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -36,7 +37,8 @@ import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 
-public class MusicPlayerActivity extends BaseActivity implements OnClickListener, OnSeekBarChangeListener {
+public class MusicPlayerActivity extends BaseActivity implements
+        OnClickListener, OnSeekBarChangeListener {
 
     public static final String LAST_ALBUM = "LAST_ALBUM";
     public static final String LAST_FILE_ID = "LAST_FILE_ID";
@@ -225,7 +227,9 @@ public class MusicPlayerActivity extends BaseActivity implements OnClickListener
     }
 
     @Override
-    public void onProgressChanged(final SeekBar seekBar, final int progress, final boolean fromUser) {
+    public void onProgressChanged(final SeekBar seekBar,
+                                  final int progress,
+                                  final boolean fromUser) {
         if (fromUser) {
             this.updateCurrentTime(progress);
         }
@@ -259,12 +263,14 @@ public class MusicPlayerActivity extends BaseActivity implements OnClickListener
                 this.updateTitle();
                 this.updateArtist();
 
-                Editor editor = this.mSharedPreferences.edit();
-                editor.putString(LAST_ALBUM, this.mTrackBean.getAlbum())
-                      .putString(LAST_FILE_ID, this.mTrackBean.getFileId())
-                      .putString(LAST_TRACK_ARTIST,
+                final Editor editor = this.mSharedPreferences.edit();
+                editor.putString(MusicPlayerActivity.LAST_ALBUM,
+                                 this.mTrackBean.getAlbum())
+                      .putString(MusicPlayerActivity.LAST_FILE_ID,
+                                 this.mTrackBean.getFileId())
+                      .putString(MusicPlayerActivity.LAST_TRACK_ARTIST,
                                  this.mTrackBean.getLeadArtist())
-                      .putString(LAST_TRACK_TITLE,
+                      .putString(MusicPlayerActivity.LAST_TRACK_TITLE,
                                  this.mTrackBean.getSongTitle())
                       .commit();
             }
@@ -308,7 +314,7 @@ public class MusicPlayerActivity extends BaseActivity implements OnClickListener
         final String url = HttpConstants.getCoverUrl(application,
                                                      articleId,
                                                      HttpConstants.L_COVER);
-        HttpHelper http = application.getHttpHelper();
+        final HttpHelper http = application.getHttpHelper();
 
         final ImageView coverView = (ImageView) this.findViewById(R.id.article_cover);
         new LoadImageTask() {
@@ -319,7 +325,7 @@ public class MusicPlayerActivity extends BaseActivity implements OnClickListener
                 if (!this.isCancelled() && result != null) {
                     final Drawable emptyDrawable = new ShapeDrawable();
                     final TransitionDrawable fadeInDrawable = new TransitionDrawable(new Drawable[] { emptyDrawable,
-                            result });
+                                                                                                     result });
                     coverView.setImageDrawable(result);
                     fadeInDrawable.startTransition(200);
                 }
@@ -328,7 +334,7 @@ public class MusicPlayerActivity extends BaseActivity implements OnClickListener
         }.execute(bitmapCache, url, http);
 
         if (this.mSharedPreferences.getBoolean(SettingsActivity.PREF_KEY_BACKGROUND_RENDER,
-                                               true)) {
+                                               Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)) {
             new LoadBlurImageTask() {
 
                 @Override
