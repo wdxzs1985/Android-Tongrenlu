@@ -48,7 +48,10 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.telephony.TelephonyManager;
 import android.widget.Toast;
 
-public class MusicService extends Service implements OnCompletionListener, OnPreparedListener, OnBufferingUpdateListener, OnInfoListener, OnSeekCompleteListener, OnErrorListener, OnSharedPreferenceChangeListener, MusicFocusable {
+public class MusicService extends Service implements OnCompletionListener,
+        OnPreparedListener, OnBufferingUpdateListener, OnInfoListener,
+        OnSeekCompleteListener, OnErrorListener,
+        OnSharedPreferenceChangeListener, MusicFocusable {
 
     public static class IncomingPhoneReceiver extends BroadcastReceiver {
 
@@ -181,7 +184,9 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
     }
 
     @Override
-    public int onStartCommand(final Intent intent, final int flags, final int startId) {
+    public int onStartCommand(final Intent intent,
+                              final int flags,
+                              final int startId) {
         final String action = intent.getAction();
         if (MusicService.ACTION_TOGGLE_PLAYBACK.equals(action)) {
             this.processTogglePlaybackRequest();
@@ -305,7 +310,6 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
             final int position = intent.getIntExtra("position", 0);
             final int flag = this.getShuffleFlag();
             this.actionInitPlaylist(position, flag);
-            this.mNowPlaying = this.mPlayList.poll();
         }
         this.actionReset(this.mNowPlaying);
     }
@@ -316,10 +320,13 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
             final TrackBean trackBean = intent.getParcelableExtra("trackBean");
             this.mTrackList.add(trackBean);
         }
+        final int position = this.mTrackList.indexOf(this.mNowPlaying);
         final int flag = this.getShuffleFlag();
-        this.actionInitPlaylist(this.mTrackList.size() - 1, flag);
+        this.actionInitPlaylist(position, flag);
         if (this.mState != MusicService.STATE_PLAYING) {
-            this.actionReset(this.mPlayList.poll());
+            this.actionReset(this.mNowPlaying);
+        } else {
+            this.sendNotification();
         }
     }
 
@@ -446,7 +453,8 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
     }
 
     @Override
-    public void onSharedPreferenceChanged(final SharedPreferences sharedPreferences, final String key) {
+    public void onSharedPreferenceChanged(final SharedPreferences sharedPreferences,
+                                          final String key) {
         if (StringUtils.equals(key, SettingsActivity.PREF_KEY_SHUFFLE_PLAY)) {
             this.onShufflePlayChanged(sharedPreferences);
         } else if (StringUtils.equals(key, SettingsActivity.PREF_KEY_LOOP_PLAY)) {
@@ -475,6 +483,8 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
         for (int i = 0; i < index; i++) {
             this.mHistoryList.addLast(this.mPlayList.poll());
         }
+        // now playing
+        this.mNowPlaying = this.mPlayList.poll();
     }
 
     protected void actionReset(final TrackBean trackBean) {
@@ -508,7 +518,7 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
         final String url = HttpConstants.getCoverUrl(this,
                                                      articleId,
                                                      HttpConstants.XS_COVER);
-        HttpHelper http = application.getHttpHelper();
+        final HttpHelper http = application.getHttpHelper();
         new LoadImageTask() {
 
             @Override
@@ -701,14 +711,14 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
 
     private void tryToGetAudioFocus() {
         if (this.mAudioFocus != AudioFocus.Focused && this.mAudioFocusHelper != null
-                && this.mAudioFocusHelper.requestFocus()) {
+            && this.mAudioFocusHelper.requestFocus()) {
             this.mAudioFocus = AudioFocus.Focused;
         }
     }
 
     private void giveUpAudioFocus() {
         if (this.mAudioFocus == AudioFocus.Focused && this.mAudioFocusHelper != null
-                && this.mAudioFocusHelper.abandonFocus()) {
+            && this.mAudioFocusHelper.abandonFocus()) {
             this.mAudioFocus = AudioFocus.NoFocusNoDuck;
         }
     }
@@ -748,7 +758,7 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
                        Toast.LENGTH_SHORT)
              .show();
         this.mAudioFocus = canDuck ? AudioFocus.NoFocusCanDuck
-                : AudioFocus.NoFocusNoDuck;
+                                  : AudioFocus.NoFocusNoDuck;
 
         // start/restart/pause media player with new focus settings
         if (this.mMediaPlayer != null && this.mMediaPlayer.isPlaying()) {

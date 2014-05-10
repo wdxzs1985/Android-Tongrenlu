@@ -154,8 +154,9 @@ public class DownloadService extends Service implements DownloadListener {
 
     @Override
     public void onDownloadFinish(final DownloadTaskInfo taskinfo) {
-        this.sendNotification(true);
         if (taskinfo != null) {
+            this.sendNotification(true);
+
             final MusicDownloadTaskInfo taskinfo2 = (MusicDownloadTaskInfo) taskinfo;
             final TrackBean trackBean = taskinfo2.getTrackBean();
 
