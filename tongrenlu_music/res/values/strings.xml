@@ -51,6 +51,7 @@
     <string name="action_download">下载</string>
     <string name="action_download_all">全部下载</string>
     <string name="action_delete">删除</string>
+    <string name="action_delete_playlist">删除这个歌单</string>
     <string name="action_create">创建</string>
     <string name="action_new_playlist">加到新歌单</string>
     <string name="action_cancel">取消</string>
