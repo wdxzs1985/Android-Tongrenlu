@@ -1,6 +1,5 @@
 package info.tongrenlu.android.music.fragment;
 
-import info.tongrenlu.android.loader.BaseLoader;
 import info.tongrenlu.android.music.MainActivity;
 import info.tongrenlu.android.music.R;
 import info.tongrenlu.android.music.TongrenluApplication;
@@ -21,19 +20,19 @@ import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.ContentResolver;
 import android.content.ContentValues;
-import android.content.Context;
+import android.content.DialogInterface;
 import android.database.Cursor;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.app.LoaderManager.LoaderCallbacks;
-import android.support.v4.content.Loader;
 import android.widget.Toast;
 
 public class AlbumUpdateFragment extends DialogFragment {
 
     public static final int ALBUM_JSON_LOADER = 2;
+
+    private AlbumTask mTask = null;
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -41,137 +40,127 @@ public class AlbumUpdateFragment extends DialogFragment {
         ProgressDialog dialog = new ProgressDialog(activity);
         // dialog.setTitle(R.string.loading);
         dialog.setCanceledOnTouchOutside(false);
-        dialog.setMessage(activity.getText(R.string.loading));
-        dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        final LoaderManager loaderManager = activity.getSupportLoaderManager();
-        loaderManager.initLoader(ALBUM_JSON_LOADER,
-                                 null,
-                                 new AlbumJsonLoaderCallback());
+        dialog.setTitle(R.string.loading);
+        dialog.setMessage(activity.getText(R.string.loading_album));
+        dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+        dialog.setIndeterminate(true);
         return dialog;
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
-        final FragmentActivity activity = this.getActivity();
-        final LoaderManager loaderManager = activity.getSupportLoaderManager();
-        loaderManager.destroyLoader(ALBUM_JSON_LOADER);
+    public void onStart() {
+        super.onStart();
+        this.mTask = new AlbumTask();
+        this.mTask.execute();
     }
 
-    private class AlbumJsonLoaderCallback implements LoaderCallbacks<Boolean> {
+    @Override
+    public void onDismiss(DialogInterface dialog) {
+        super.onDismiss(dialog);
+
+        if (this.mTask != null) {
+            this.mTask.cancel(true);
+            this.mTask = null;
+        }
+    }
+
+    private class AlbumTask extends AsyncTask<Object, Integer, Boolean> {
 
         @Override
-        public Loader<Boolean> onCreateLoader(final int loaderId, final Bundle args) {
+        protected Boolean doInBackground(Object... params) {
             TongrenluApplication application = (TongrenluApplication) AlbumUpdateFragment.this.getActivity()
                                                                                               .getApplication();
-
-            HttpHelper http = application.getHttpHelper();
-
-            String host = HttpConstants.getHost(application);
-            String part = "/fm/music?s=" + Integer.MAX_VALUE;
-            String url = host + part;
-
-            return new AlbumDataLoader(application, http, url);
+            return this.refreshAlbumData(application);
         }
 
         @Override
-        public void onLoadFinished(final Loader<Boolean> loader, final Boolean noError) {
-            if (noError) {
+        protected void onPostExecute(Boolean result) {
+            super.onPostExecute(result);
+            if (result) {
                 AlbumUpdateFragment.this.getActivity()
                                         .getSupportLoaderManager()
                                         .getLoader(MainActivity.ALBUM_LOADER)
                                         .onContentChanged();
-                AlbumUpdateFragment.this.dismissAllowingStateLoss();
             } else {
                 Toast.makeText(AlbumUpdateFragment.this.getActivity(),
                                R.string.err_network,
                                Toast.LENGTH_LONG).show();
             }
+            AlbumUpdateFragment.this.dismissAllowingStateLoss();
         }
 
-        @Override
-        public void onLoaderReset(final Loader<Boolean> loader) {
-        }
-    }
+        private Boolean refreshAlbumData(TongrenluApplication application) {
+            final int s = 10;
+            int p = 1;
+            boolean isLast = false;
 
-    private static class AlbumDataLoader extends BaseLoader<Boolean> {
+            final HttpHelper http = application.getHttpHelper();
+            final String host = HttpConstants.getHost(application);
+            final ContentResolver contentResolver = application.getContentResolver();
 
-        static final int NO_ERROR = 0;
-        static final int NETWORK_ERROR = -100;
-        static final int PARSE_ERROR = -200;
+            ProgressDialog dialog = (ProgressDialog) AlbumUpdateFragment.this.getDialog();
 
-        private int mErrorCode = NO_ERROR;
-
-        private final HttpHelper http;
-        private final String url;
-
-        public AlbumDataLoader(Context ctx, HttpHelper http, String url) {
-            super(ctx);
-            this.http = http;
-            this.url = url;
-        }
-
-        @Override
-        public Boolean loadInBackground() {
-            this.refreshAlbumData();
-            return this.isNoError();
-        }
-
-        protected boolean isNoError() {
-            return this.mErrorCode == NO_ERROR;
-        }
-
-        private void refreshAlbumData() {
+            int progress = 0;
             try {
-                JSONObject responseJSON = this.http.getAsJson(this.url);
-                this.parseAlbumJSON(responseJSON);
-            } catch (JSONException e) {
-                this.mErrorCode = PARSE_ERROR;
-                e.printStackTrace();
-            } catch (IOException e) {
-                this.mErrorCode = NETWORK_ERROR;
-                e.printStackTrace();
-            }
-        }
+                while (!isLast && !this.isCancelled()) {
+                    String url = String.format("%s/fm/music?p=%d&s=%d",
+                                               host,
+                                               p,
+                                               s);
+                    JSONObject responseJSON = http.getAsJson(url);
+                    if (responseJSON.getBoolean("result")) {
+                        final JSONObject pageJSON = responseJSON.optJSONObject("page");
+                        isLast = pageJSON.optBoolean("last");
 
-        protected void parseAlbumJSON(final JSONObject responseJSON) throws JSONException {
-            if (responseJSON.getBoolean("result")) {
-                final JSONObject pageJSON = responseJSON.optJSONObject("page");
-                final JSONArray items = pageJSON.optJSONArray("items");
-                List<ContentValues> contentValuesList = new ArrayList<ContentValues>();
-                final ContentResolver contentResolver = this.getContext()
-                                                            .getContentResolver();
-                for (int i = 0; i < items.length(); i++) {
-                    final JSONObject albumObject = items.optJSONObject(i);
-                    final String articleId = albumObject.optString("articleId");
-                    final String title = albumObject.optString("title");
-                    Cursor cursor = null;
-                    try {
-                        cursor = contentResolver.query(TongrenluContentProvider.ALBUM_URI,
-                                                       null,
-                                                       "articleId = ?",
-                                                       new String[] { articleId },
-                                                       null);
-                        if (cursor.getCount() == 0) {
-                            final ContentValues contentValues = new ContentValues();
-                            contentValues.put("articleId", articleId);
-                            contentValues.put("title", title);
-                            contentValues.put("collectFlg", 0);
-                            contentValuesList.add(contentValues);
+                        dialog.setIndeterminate(false);
+                        dialog.setMax(pageJSON.getInt("itemCount"));
+
+                        final JSONArray items = pageJSON.optJSONArray("items");
+                        List<ContentValues> contentValuesList = new ArrayList<ContentValues>();
+                        for (int i = 0; i < items.length(); i++) {
+                            final JSONObject albumObject = items.optJSONObject(i);
+                            final String articleId = albumObject.optString("articleId");
+                            final String title = albumObject.optString("title");
+                            Cursor cursor = null;
+                            try {
+                                cursor = contentResolver.query(TongrenluContentProvider.ALBUM_URI,
+                                                               null,
+                                                               "articleId = ?",
+                                                               new String[] { articleId },
+                                                               null);
+                                if (cursor.getCount() == 0) {
+                                    final ContentValues contentValues = new ContentValues();
+                                    contentValues.put("articleId", articleId);
+                                    contentValues.put("title", title);
+                                    contentValues.put("collectFlg", 0);
+                                    contentValuesList.add(contentValues);
+                                }
+                            } finally {
+                                if (cursor != null) {
+                                    cursor.close();
+                                }
+                            }
+                            dialog.setProgress(++progress);
                         }
-                    } finally {
-                        if (cursor != null) {
-                            cursor.close();
+                        if (CollectionUtils.isNotEmpty(contentValuesList)) {
+                            contentResolver.bulkInsert(TongrenluContentProvider.ALBUM_URI,
+                                                       contentValuesList.toArray(new ContentValues[] {}));
+                            contentResolver.notifyChange(TongrenluContentProvider.ALBUM_URI,
+                                                         null);
                         }
+                        p++;
+                    } else {
+                        isLast = true;
                     }
                 }
-                if (CollectionUtils.isNotEmpty(contentValuesList)) {
-                    contentResolver.bulkInsert(TongrenluContentProvider.ALBUM_URI,
-                                               contentValuesList.toArray(new ContentValues[] {}));
-                    contentResolver.notifyChange(TongrenluContentProvider.ALBUM_URI,
-                                                 null);
-                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+                return false;
+            } catch (IOException e) {
+                e.printStackTrace();
+                return false;
             }
+            return true;
         }
     }
 

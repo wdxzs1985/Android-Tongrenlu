@@ -8,8 +8,11 @@
     <string name="label_album">专辑</string>
     <string name="label_playlist">歌单</string>
     <string name="label_track">所有歌曲</string>
+    <string name="label_search_hint">查找专辑</string>
 
-    <string name="loading">少女祈祷中。。。</string>
+    <string name="loading">少女祈祷中</string>
+    <string name="loading_album">正在更新专辑列表</string>
+    <string name="loading_track">正在更新专辑曲目</string>
     <string name="no_data">神马都没有找到QAQ</string>
     <string name="no_description">UP主很懒，神马都没有写</string>
     <string name="clear_complete">清除成功</string>
@@ -55,10 +58,11 @@
     <string name="action_create">创建</string>
     <string name="action_new_playlist">加到新歌单</string>
     <string name="action_cancel">取消</string>
-    <string name="action_refresh">更新</string>
+    <string name="action_refresh">更新专辑列表</string>
     <string name="action_update_now">马上更新</string>
     <string name="action_update_later">以后再说</string>
     <string name="action_update_never">永不更新</string>
+    <string name="action_search">搜搜</string>
     
     <string name="prefs_title_player">播放器设置</string>
     <string name="prefs_summary_player">播放器设置</string>

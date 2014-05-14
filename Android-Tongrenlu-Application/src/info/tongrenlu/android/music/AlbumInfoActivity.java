@@ -9,6 +9,7 @@ import info.tongrenlu.domain.TrackBean;
 import java.util.ArrayList;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -73,19 +74,19 @@ public class AlbumInfoActivity extends FragmentActivity implements AlbumInfoFrag
         this.mPager = (ViewPager) this.findViewById(R.id.pager);
         this.mPager.setAdapter(this.mAdapter);
 
-        int position = this.getIntent().getIntExtra("position", 0);
+        String articleId = this.getIntent().getStringExtra("articleId");
         this.getSupportLoaderManager()
             .initLoader(AlbumInfoActivity.ALBUM_CURSOR_LOADER,
                         null,
-                        new AlbumCursorLoaderCallback(position));
+                        new AlbumCursorLoaderCallback(articleId));
     }
 
     private class AlbumCursorLoaderCallback implements LoaderCallbacks<Cursor> {
 
-        private final int mPosition;
+        private final String mArticleId;
 
-        public AlbumCursorLoaderCallback(int position) {
-            this.mPosition = position;
+        public AlbumCursorLoaderCallback(String articleId) {
+            this.mArticleId = articleId;
         }
 
         @Override
@@ -102,10 +103,18 @@ public class AlbumInfoActivity extends FragmentActivity implements AlbumInfoFrag
         @Override
         public void onLoadFinished(final Loader<Cursor> loader, final Cursor c) {
             AlbumInfoActivity.this.mAdapter.swapCursor(c);
-            if (c.getCount() == 0) {
-                AlbumInfoActivity.this.finish();
+            if (c.moveToFirst()) {
+                while (!c.isAfterLast()) {
+                    String articleId = c.getString(c.getColumnIndex("articleId"));
+                    if (StringUtils.equals(articleId, this.mArticleId)) {
+                        AlbumInfoActivity.this.mPager.setCurrentItem(c.getPosition());
+                        break;
+                    } else {
+                        c.moveToNext();
+                    }
+                }
             } else {
-                AlbumInfoActivity.this.mPager.setCurrentItem(this.mPosition);
+                AlbumInfoActivity.this.finish();
             }
         }
 

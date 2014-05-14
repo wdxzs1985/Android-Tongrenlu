@@ -10,23 +10,17 @@ import uk.co.senab.bitmapcache.BitmapLruCache;
 import android.app.Application;
 import android.app.NotificationManager;
 import android.content.Context;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
 
 public class TongrenluApplication extends Application {
 
-    public static int VERSION_CODE = 0;
-    public static String VERSION_NAME = "unknown";
-
     private BitmapLruCache mBitmapCache = null;
-    private DownloadManager mDownloadManager = null;
     private HttpHelper httpHelper = null;
+
+    private DownloadManager mDownloadManager = null;
 
     @Override
     public void onCreate() {
         this.clearNotification();
-        this.initPackageInfo();
         this.initBitmapCache();
         this.initHttpHelper();
         this.initDownloadManager();
@@ -35,19 +29,6 @@ public class TongrenluApplication extends Application {
     private void clearNotification() {
         final NotificationManager notificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.cancelAll();
-    }
-
-    private void initPackageInfo() {
-        try {
-            final String packageName = this.getPackageName();
-            final PackageManager pm = this.getPackageManager();
-            final PackageInfo pInfo = pm.getPackageInfo(packageName,
-                                                        PackageManager.GET_META_DATA);
-            TongrenluApplication.VERSION_CODE = pInfo.versionCode;
-            TongrenluApplication.VERSION_NAME = pInfo.versionName;
-        } catch (final NameNotFoundException e) {
-            e.printStackTrace();
-        }
     }
 
     private void initBitmapCache() {
@@ -69,15 +50,15 @@ public class TongrenluApplication extends Application {
         this.httpHelper = new HttpHelper();
     }
 
+    public HttpHelper getHttpHelper() {
+        return this.httpHelper;
+    }
+
     private void initDownloadManager() {
         this.mDownloadManager = new DownloadManagerImpl();
     }
 
     public DownloadManager getDownloadManager() {
         return this.mDownloadManager;
-    }
-
-    public HttpHelper getHttpHelper() {
-        return this.httpHelper;
     }
 }

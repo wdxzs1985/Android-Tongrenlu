@@ -10,6 +10,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import uk.co.senab.bitmapcache.BitmapLruCache;
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -37,8 +38,7 @@ import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 
-public class MusicPlayerActivity extends BaseActivity implements
-        OnClickListener, OnSeekBarChangeListener {
+public class MusicPlayerActivity extends Activity implements OnClickListener, OnSeekBarChangeListener {
 
     public static final String LAST_ALBUM = "LAST_ALBUM";
     public static final String LAST_FILE_ID = "LAST_FILE_ID";
@@ -227,9 +227,7 @@ public class MusicPlayerActivity extends BaseActivity implements
     }
 
     @Override
-    public void onProgressChanged(final SeekBar seekBar,
-                                  final int progress,
-                                  final boolean fromUser) {
+    public void onProgressChanged(final SeekBar seekBar, final int progress, final boolean fromUser) {
         if (fromUser) {
             this.updateCurrentTime(progress);
         }
@@ -325,7 +323,7 @@ public class MusicPlayerActivity extends BaseActivity implements
                 if (!this.isCancelled() && result != null) {
                     final Drawable emptyDrawable = new ShapeDrawable();
                     final TransitionDrawable fadeInDrawable = new TransitionDrawable(new Drawable[] { emptyDrawable,
-                                                                                                     result });
+                            result });
                     coverView.setImageDrawable(result);
                     fadeInDrawable.startTransition(200);
                 }
