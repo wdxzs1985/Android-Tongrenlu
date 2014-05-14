@@ -76,7 +76,7 @@ public class TrackFragment extends TitleFragment implements ActionSlideExpandabl
         final View view = inflater.inflate(R.layout.fragment_expandable_list_view,
                                            null,
                                            false);
-        this.mAdapter = new PlaylistTrackListAdapter(this.getActivity(), null);
+        this.mAdapter = new PlaylistTrackListAdapter(this.getActivity());
         this.mEmpty = view.findViewById(android.R.id.empty);
         this.mListView = (ActionSlideExpandableListView) view.findViewById(android.R.id.list);
         this.mListView.setAdapter(this.mAdapter);

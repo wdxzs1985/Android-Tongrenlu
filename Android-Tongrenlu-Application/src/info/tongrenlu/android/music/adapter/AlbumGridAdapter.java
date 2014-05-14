@@ -24,7 +24,7 @@ import android.widget.TextView;
 public class AlbumGridAdapter extends CursorAdapter {
 
     public AlbumGridAdapter(final Context context) {
-        super(context, null, true);
+        super(context, null, false);
     }
 
     @Override

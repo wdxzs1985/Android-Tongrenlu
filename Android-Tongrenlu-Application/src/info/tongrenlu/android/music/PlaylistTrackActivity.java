@@ -42,7 +42,7 @@ public class PlaylistTrackActivity extends FragmentActivity implements ActionSli
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        this.mAdapter = new PlaylistTrackListAdapter(this, null);
+        this.mAdapter = new PlaylistTrackListAdapter(this);
 
         this.setContentView(R.layout.fragment_expandable_list_view);
         this.mEmpty = this.findViewById(android.R.id.empty);

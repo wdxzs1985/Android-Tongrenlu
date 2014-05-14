@@ -23,8 +23,8 @@ import android.widget.TextView;
 
 public class PlaylistTrackListAdapter extends CursorAdapter {
 
-    public PlaylistTrackListAdapter(final Context context, final Cursor c) {
-        super(context, c, true);
+    public PlaylistTrackListAdapter(final Context context) {
+        super(context, null, false);
     }
 
     @Override

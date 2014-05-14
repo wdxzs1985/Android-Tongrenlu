@@ -22,8 +22,8 @@ import android.widget.TextView;
 
 public class AlbumTrackListAdapter extends CursorAdapter {
 
-    public AlbumTrackListAdapter(final Context context, final Cursor c) {
-        super(context, c, true);
+    public AlbumTrackListAdapter(final Context context) {
+        super(context, null, false);
     }
 
     @Override
