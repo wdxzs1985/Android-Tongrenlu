@@ -1,8 +1,8 @@
 package info.tongrenlu.android.music.adapter;
 
+import info.tongrenlu.android.image.LoadImageTask;
 import info.tongrenlu.android.music.R;
 import info.tongrenlu.android.music.TongrenluApplication;
-import info.tongrenlu.android.music.async.LoadImageTask;
 import info.tongrenlu.android.provider.HttpHelper;
 import info.tongrenlu.app.HttpConstants;
 import info.tongrenlu.domain.ArticleBean;
@@ -62,11 +62,12 @@ public class AlbumGridAdapter extends CursorAdapter {
                 this.task.cancel(true);
             }
             this.articleBean = articleBean;
+            this.titleView.setText(articleBean.getTitle());
+
             this.task = new LoadImageTask() {
                 @Override
                 protected void onPreExecute() {
                     super.onPreExecute();
-                    ViewHolder.this.titleView.setText(articleBean.getTitle());
                     ViewHolder.this.coverView.setImageDrawable(null);
                 }
 

@@ -1,7 +1,7 @@
 package info.tongrenlu.android.music;
 
-import info.tongrenlu.android.music.async.LoadBlurImageTask;
-import info.tongrenlu.android.music.async.LoadImageTask;
+import info.tongrenlu.android.image.LoadBlurImageTask;
+import info.tongrenlu.android.image.LoadImageTask;
 import info.tongrenlu.android.provider.HttpHelper;
 import info.tongrenlu.app.HttpConstants;
 import info.tongrenlu.domain.TrackBean;

@@ -1,4 +1,4 @@
-package info.tongrenlu.support;
+package info.tongrenlu.android.image;
 
 import android.annotation.SuppressLint;
 import android.content.Context;

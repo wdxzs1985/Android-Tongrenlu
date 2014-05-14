@@ -1,12 +1,12 @@
 package info.tongrenlu.android.music.fragment;
 
+import info.tongrenlu.android.image.LoadBlurImageTask;
+import info.tongrenlu.android.image.LoadImageTask;
 import info.tongrenlu.android.loader.BaseLoader;
 import info.tongrenlu.android.music.R;
 import info.tongrenlu.android.music.SettingsActivity;
 import info.tongrenlu.android.music.TongrenluApplication;
 import info.tongrenlu.android.music.adapter.AlbumTrackListAdapter;
-import info.tongrenlu.android.music.async.LoadBlurImageTask;
-import info.tongrenlu.android.music.async.LoadImageTask;
 import info.tongrenlu.android.music.provider.TongrenluContentProvider;
 import info.tongrenlu.android.provider.HttpHelper;
 import info.tongrenlu.app.HttpConstants;

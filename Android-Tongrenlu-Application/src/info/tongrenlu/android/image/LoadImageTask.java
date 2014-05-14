@@ -1,4 +1,4 @@
-package info.tongrenlu.android.music.async;
+package info.tongrenlu.android.image;
 
 import info.tongrenlu.android.provider.HttpHelper;
 

@@ -1,6 +1,6 @@
 package info.tongrenlu.android.music;
 
-import info.tongrenlu.android.music.async.LoadImageTask;
+import info.tongrenlu.android.image.LoadImageTask;
 import info.tongrenlu.android.musicplayer.AudioFocusHelper;
 import info.tongrenlu.android.musicplayer.MusicFocusable;
 import info.tongrenlu.android.provider.HttpHelper;
