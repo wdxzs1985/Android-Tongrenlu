@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <resources>
-    <dimen name="album_art_size">240dp</dimen>
+    <dimen name="album_art_size">320dp</dimen>
     <dimen name="album_cover_size">120dp</dimen>
     <dimen name="album_thumb_size">90dp</dimen>
     <dimen name="album_icon_size">60dp</dimen>
@@ -9,4 +9,6 @@
     <dimen name="album_title_size">24sp</dimen>
     <dimen name="track_title_size">16sp</dimen>
     <dimen name="track_artist_size">12sp</dimen>
+    
+    <dimen name="player_button_height">44dp</dimen>
 </resources>
