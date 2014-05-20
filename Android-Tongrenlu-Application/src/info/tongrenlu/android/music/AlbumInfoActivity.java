@@ -24,17 +24,18 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
 
-public class AlbumInfoActivity extends FragmentActivity implements AlbumInfoFragmentListener {
+public class AlbumInfoActivity extends ActionBarActivity implements AlbumInfoFragmentListener {
 
     public static final int ALBUM_CURSOR_LOADER = 1;
 
@@ -45,6 +46,9 @@ public class AlbumInfoActivity extends FragmentActivity implements AlbumInfoFrag
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.setContentView(R.layout.activity_album);
+
+        ActionBar actionBar = this.getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
 
         final FragmentManager fm = this.getSupportFragmentManager();
         final CursorFragmentAdapter adapter = new CursorFragmentAdapter(fm,

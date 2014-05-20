@@ -7,12 +7,10 @@ import info.tongrenlu.android.music.R;
 import info.tongrenlu.android.music.adapter.AlbumGridAdapter;
 import info.tongrenlu.android.music.provider.TongrenluContentProvider;
 import android.app.Activity;
-import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.database.ContentObserver;
 import android.database.Cursor;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
@@ -29,7 +27,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.GridView;
-import android.widget.SearchView;
 
 public class AlbumFragment extends TitleFragment implements OnItemClickListener {
 
@@ -117,14 +114,6 @@ public class AlbumFragment extends TitleFragment implements OnItemClickListener 
     public void onCreateOptionsMenu(final Menu menu, final MenuInflater inflater) {
         inflater.inflate(R.menu.fragment_music_grid, menu);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            Activity activity = this.getActivity();
-            SearchManager searchManager = (SearchManager) activity.getSystemService(Context.SEARCH_SERVICE);
-            SearchView searchView = (SearchView) menu.findItem(R.id.action_search)
-                                                     .getActionView();
-            searchView.setSearchableInfo(searchManager.getSearchableInfo(activity.getComponentName()));
-            searchView.setIconifiedByDefault(false);
-        }
     }
 
     @Override
@@ -133,11 +122,7 @@ public class AlbumFragment extends TitleFragment implements OnItemClickListener 
         case R.id.action_refresh:
             ((MainActivity) this.getActivity()).dispatchUpdateAlbum();
             return true;
-        case R.id.action_search:
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
-                this.getActivity().onSearchRequested();
-            }
-            return true;
+
         default:
             break;
         }

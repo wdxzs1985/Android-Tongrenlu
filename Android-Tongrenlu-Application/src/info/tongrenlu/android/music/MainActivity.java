@@ -6,22 +6,27 @@ import info.tongrenlu.android.music.fragment.AlbumUpdateFragment;
 import info.tongrenlu.android.music.fragment.PlaylistFragment;
 import info.tongrenlu.android.music.fragment.TrackFragment;
 import info.tongrenlu.app.CommonConstants;
+import android.app.SearchManager;
+import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.SearchView;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.viewpagerindicator.PageIndicator;
 
-public class MainActivity extends FragmentActivity {
+public class MainActivity extends ActionBarActivity {
 
     public static final int ALBUM_LOADER = 0;
     public static final int PLAYLIST_LOADER = 1;
@@ -52,6 +57,9 @@ public class MainActivity extends FragmentActivity {
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.setContentView(R.layout.activity_main);
+
+        ActionBar actionBar = this.getSupportActionBar();
+        actionBar.setDisplayShowTitleEnabled(false);
 
         final FragmentManager fm = this.getSupportFragmentManager();
         final TitleFragmentAdapter adapter = new TitleFragmentAdapter(fm);
@@ -98,9 +106,15 @@ public class MainActivity extends FragmentActivity {
 
     @Override
     public boolean onCreateOptionsMenu(final Menu menu) {
-        final MenuInflater inflater = this.getMenuInflater();
-        inflater.inflate(R.menu.activity_main, menu);
+        this.getMenuInflater().inflate(R.menu.activity_main, menu);
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            SearchManager searchManager = (SearchManager) this.getSystemService(Context.SEARCH_SERVICE);
+            MenuItem searchItem = menu.findItem(R.id.action_search);
+            SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
+            searchView.setSearchableInfo(searchManager.getSearchableInfo(this.getComponentName()));
+            searchView.setIconifiedByDefault(false);
+        }
         return true;
     }
 
@@ -109,6 +123,11 @@ public class MainActivity extends FragmentActivity {
         switch (item.getItemId()) {
         case R.id.menu_settings:
             this.showSetting();
+            return true;
+        case R.id.action_search:
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
+                this.onSearchRequested();
+            }
             return true;
         default:
             return super.onOptionsItemSelected(item);
