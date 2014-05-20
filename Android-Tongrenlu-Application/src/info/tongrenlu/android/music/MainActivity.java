@@ -17,7 +17,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.SearchView;
 import android.view.Menu;
@@ -58,8 +57,8 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         this.setContentView(R.layout.activity_main);
 
-        ActionBar actionBar = this.getSupportActionBar();
-        actionBar.setDisplayShowTitleEnabled(false);
+        // ActionBar actionBar = this.getSupportActionBar();
+        // actionBar.setDisplayShowTitleEnabled(false);
 
         final FragmentManager fm = this.getSupportFragmentManager();
         final TitleFragmentAdapter adapter = new TitleFragmentAdapter(fm);
@@ -96,11 +95,11 @@ public class MainActivity extends ActionBarActivity {
     }
 
     public void dispatchUpdateAlbum() {
-        this.mHandler.sendEmptyMessage(UPDATE_ALBUM);
+        this.mHandler.sendEmptyMessage(MainActivity.UPDATE_ALBUM);
     }
 
     public void onUpdateAlbum() {
-        AlbumUpdateFragment fragment = new AlbumUpdateFragment();
+        final AlbumUpdateFragment fragment = new AlbumUpdateFragment();
         fragment.show(this.getSupportFragmentManager(), "update");
     }
 
@@ -109,9 +108,9 @@ public class MainActivity extends ActionBarActivity {
         this.getMenuInflater().inflate(R.menu.activity_main, menu);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            SearchManager searchManager = (SearchManager) this.getSystemService(Context.SEARCH_SERVICE);
-            MenuItem searchItem = menu.findItem(R.id.action_search);
-            SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
+            final SearchManager searchManager = (SearchManager) this.getSystemService(Context.SEARCH_SERVICE);
+            final MenuItem searchItem = menu.findItem(R.id.action_search);
+            final SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
             searchView.setSearchableInfo(searchManager.getSearchableInfo(this.getComponentName()));
             searchView.setIconifiedByDefault(false);
         }

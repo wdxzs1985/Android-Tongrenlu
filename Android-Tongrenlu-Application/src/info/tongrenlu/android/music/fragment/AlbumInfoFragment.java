@@ -55,7 +55,8 @@ import android.widget.Toast;
 
 import com.tjerkw.slideexpandable.library.ActionSlideExpandableListView;
 
-public class AlbumInfoFragment extends Fragment implements ActionSlideExpandableListView.OnActionClickListener, OnClickListener {
+public class AlbumInfoFragment extends Fragment implements
+        ActionSlideExpandableListView.OnActionClickListener, OnClickListener {
 
     public static final int ALBUM_TRACK_CURSOR_LOADER = 1;
     public static final int ALBUM_TRACK_JSON_LOADER = 2;
@@ -77,7 +78,8 @@ public class AlbumInfoFragment extends Fragment implements ActionSlideExpandable
     private final int albumTrackCursorLoaderId;
     private final int albumTrackJsonLoaderId;
 
-    public AlbumInfoFragment(final String articleId, final String title, final long id) {
+    public AlbumInfoFragment(final String articleId, final String title,
+            final long id) {
         this.mArticleId = articleId;
         this.mTitle = title;
         this.mUri = Uri.withAppendedPath(TongrenluContentProvider.ALBUM_URI,
@@ -112,7 +114,9 @@ public class AlbumInfoFragment extends Fragment implements ActionSlideExpandable
     }
 
     @Override
-    public View onCreateView(final LayoutInflater inflater, final ViewGroup container, final Bundle savedInstanceState) {
+    public View onCreateView(final LayoutInflater inflater,
+                             final ViewGroup container,
+                             final Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.fragment_album_info,
                                            null,
                                            false);
@@ -126,21 +130,17 @@ public class AlbumInfoFragment extends Fragment implements ActionSlideExpandable
         switch (application.getResources().getDisplayMetrics().densityDpi) {
         case DisplayMetrics.DENSITY_XXXHIGH:
         case DisplayMetrics.DENSITY_XXHIGH:
-            url = HttpConstants.getCoverUrl(application,
-                                            this.mArticleId,
-                                            HttpConstants.M_COVER);
-            break;
         case DisplayMetrics.DENSITY_XHIGH:
         case DisplayMetrics.DENSITY_HIGH:
         case DisplayMetrics.DENSITY_TV:
             url = HttpConstants.getCoverUrl(application,
                                             this.mArticleId,
-                                            HttpConstants.S_COVER);
+                                            HttpConstants.L_COVER);
             break;
         default:
             url = HttpConstants.getCoverUrl(application,
                                             this.mArticleId,
-                                            HttpConstants.XS_COVER);
+                                            HttpConstants.S_COVER);
             break;
         }
 
@@ -164,7 +164,7 @@ public class AlbumInfoFragment extends Fragment implements ActionSlideExpandable
                 if (!this.isCancelled() && result != null) {
                     final Drawable emptyDrawable = new ShapeDrawable();
                     final TransitionDrawable fadeInDrawable = new TransitionDrawable(new Drawable[] { emptyDrawable,
-                            result });
+                                                                                                     result });
                     coverView.setImageDrawable(result);
                     fadeInDrawable.startTransition(LoadImageTask.TIME_SHORT);
                 }
@@ -175,9 +175,9 @@ public class AlbumInfoFragment extends Fragment implements ActionSlideExpandable
         final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(application);
         if (sharedPreferences.getBoolean(SettingsActivity.PREF_KEY_BACKGROUND_RENDER,
                                          Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)) {
-            String backgroundUrl = HttpConstants.getCoverUrl(application,
-                                                             this.mArticleId,
-                                                             HttpConstants.L_COVER);
+            final String backgroundUrl = HttpConstants.getCoverUrl(application,
+                                                                   this.mArticleId,
+                                                                   HttpConstants.L_COVER);
             new LoadBlurImageTask() {
 
                 @Override
@@ -286,10 +286,12 @@ public class AlbumInfoFragment extends Fragment implements ActionSlideExpandable
         this.mProgressContainer.setVisibility(View.VISIBLE);
     }
 
-    private class AlbumTrackJsonLoaderCallback implements LoaderCallbacks<Boolean> {
+    private class AlbumTrackJsonLoaderCallback implements
+            LoaderCallbacks<Boolean> {
 
         @Override
-        public Loader<Boolean> onCreateLoader(final int loaderId, final Bundle args) {
+        public Loader<Boolean> onCreateLoader(final int loaderId,
+                                              final Bundle args) {
             final TongrenluApplication application = (TongrenluApplication) AlbumInfoFragment.this.getActivity()
                                                                                                   .getApplication();
 
@@ -303,7 +305,8 @@ public class AlbumInfoFragment extends Fragment implements ActionSlideExpandable
         }
 
         @Override
-        public void onLoadFinished(final Loader<Boolean> loader, final Boolean noError) {
+        public void onLoadFinished(final Loader<Boolean> loader,
+                                   final Boolean noError) {
 
             if (noError) {
                 AlbumInfoFragment.this.getActivity()
@@ -334,7 +337,8 @@ public class AlbumInfoFragment extends Fragment implements ActionSlideExpandable
         private final HttpHelper http;
         private final String url;
 
-        public AlbumTrackDataLoader(final Context ctx, final HttpHelper http, final String url) {
+        public AlbumTrackDataLoader(final Context ctx, final HttpHelper http,
+                final String url) {
             super(ctx);
             this.http = http;
             this.url = url;
@@ -363,7 +367,8 @@ public class AlbumInfoFragment extends Fragment implements ActionSlideExpandable
             }
         }
 
-        protected void parseTrackJSON(final JSONObject responseJSON) throws JSONException {
+        protected void parseTrackJSON(final JSONObject responseJSON)
+                throws JSONException {
             if (responseJSON.getBoolean("result")) {
                 final JSONObject articleObject = responseJSON.optJSONObject("articleBean");
                 final String album = articleObject.optString("title");
@@ -386,7 +391,7 @@ public class AlbumInfoFragment extends Fragment implements ActionSlideExpandable
                                                        null,
                                                        "articleId = ? and fileId = ?",
                                                        new String[] { articleId,
-                                                               fileId },
+                                                                     fileId },
                                                        null);
                         if (cursor.getCount() == 0) {
                             final ContentValues contentValues = new ContentValues();
@@ -416,11 +421,13 @@ public class AlbumInfoFragment extends Fragment implements ActionSlideExpandable
     }
 
     @Override
-    public void onClick(final View itemView, final View clickedView, final int position) {
+    public void onClick(final View itemView,
+                        final View clickedView,
+                        final int position) {
         switch (clickedView.getId()) {
         case R.id.item:
         case R.id.action_play:
-            this.mListener.onPlay(this.getTrackBean(position));
+            this.mListener.onPlayAll(this.getTrackBeans(), position);
             break;
         case R.id.action_download:
             this.mListener.onDownload(this.mTitle, this.getTrackBean(position));
@@ -435,7 +442,7 @@ public class AlbumInfoFragment extends Fragment implements ActionSlideExpandable
         if (!this.mAdapter.isEmpty()) {
             switch (v.getId()) {
             case R.id.action_play_all:
-                this.mListener.onPlayAll(this.getTrackBeans());
+                this.mListener.onPlayAll(this.getTrackBeans(), 0);
                 break;
             case R.id.action_download_all:
                 this.mListener.onDownloadAll(this.mTitle, this.getTrackBeans());
@@ -478,11 +485,9 @@ public class AlbumInfoFragment extends Fragment implements ActionSlideExpandable
 
     public interface AlbumInfoFragmentListener {
 
-        void onPlay(TrackBean trackBean);
-
         void onDownload(String title, TrackBean trackBean);
 
-        void onPlayAll(ArrayList<TrackBean> trackBeanList);
+        void onPlayAll(ArrayList<TrackBean> trackBeanList, int position);
 
         void onDownloadAll(String title, ArrayList<TrackBean> trackBeanList);
 

@@ -35,7 +35,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
 
-public class AlbumInfoActivity extends ActionBarActivity implements AlbumInfoFragmentListener {
+public class AlbumInfoActivity extends ActionBarActivity implements
+        AlbumInfoFragmentListener {
 
     public static final int ALBUM_CURSOR_LOADER = 1;
 
@@ -47,7 +48,7 @@ public class AlbumInfoActivity extends ActionBarActivity implements AlbumInfoFra
         super.onCreate(savedInstanceState);
         this.setContentView(R.layout.activity_album);
 
-        ActionBar actionBar = this.getSupportActionBar();
+        final ActionBar actionBar = this.getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
 
         final FragmentManager fm = this.getSupportFragmentManager();
@@ -55,19 +56,19 @@ public class AlbumInfoActivity extends ActionBarActivity implements AlbumInfoFra
                                                                         null) {
 
             @Override
-            protected Fragment newFragment(Cursor c) {
-                long id = c.getLong(c.getColumnIndex("_id"));
-                String articleId = c.getString(c.getColumnIndex("articleId"));
-                String title = c.getString(c.getColumnIndex("title"));
-                AlbumInfoFragment fragment = new AlbumInfoFragment(articleId,
-                                                                   title,
-                                                                   id);
+            protected Fragment newFragment(final Cursor c) {
+                final long id = c.getLong(c.getColumnIndex("_id"));
+                final String articleId = c.getString(c.getColumnIndex("articleId"));
+                final String title = c.getString(c.getColumnIndex("title"));
+                final AlbumInfoFragment fragment = new AlbumInfoFragment(articleId,
+                                                                         title,
+                                                                         id);
                 return fragment;
             }
 
             @Override
             public CharSequence getPageTitle(final int position) {
-                Cursor c = this.getCursor();
+                final Cursor c = this.getCursor();
                 c.moveToPosition(position);
                 return c.getString(c.getColumnIndex("title"));
             }
@@ -78,7 +79,7 @@ public class AlbumInfoActivity extends ActionBarActivity implements AlbumInfoFra
         this.mPager = (ViewPager) this.findViewById(R.id.pager);
         this.mPager.setAdapter(this.mAdapter);
 
-        String articleId = this.getIntent().getStringExtra("articleId");
+        final String articleId = this.getIntent().getStringExtra("articleId");
         this.getSupportLoaderManager()
             .initLoader(AlbumInfoActivity.ALBUM_CURSOR_LOADER,
                         null,
@@ -89,12 +90,13 @@ public class AlbumInfoActivity extends ActionBarActivity implements AlbumInfoFra
 
         private final String mArticleId;
 
-        public AlbumCursorLoaderCallback(String articleId) {
+        public AlbumCursorLoaderCallback(final String articleId) {
             this.mArticleId = articleId;
         }
 
         @Override
-        public Loader<Cursor> onCreateLoader(final int loaderId, final Bundle args) {
+        public Loader<Cursor> onCreateLoader(final int loaderId,
+                                             final Bundle args) {
             final Context context = AlbumInfoActivity.this;
             return new CursorLoader(context,
                                     TongrenluContentProvider.ALBUM_URI,
@@ -109,7 +111,7 @@ public class AlbumInfoActivity extends ActionBarActivity implements AlbumInfoFra
             AlbumInfoActivity.this.mAdapter.swapCursor(c);
             if (c.moveToFirst()) {
                 while (!c.isAfterLast()) {
-                    String articleId = c.getString(c.getColumnIndex("articleId"));
+                    final String articleId = c.getString(c.getColumnIndex("articleId"));
                     if (StringUtils.equals(articleId, this.mArticleId)) {
                         AlbumInfoActivity.this.mPager.setCurrentItem(c.getPosition());
                         break;
@@ -130,21 +132,14 @@ public class AlbumInfoActivity extends ActionBarActivity implements AlbumInfoFra
     }
 
     @Override
-    public void onPlay(TrackBean trackBean) {
-        final Intent serviceIntent = new Intent(this, MusicService.class);
-        serviceIntent.setAction(MusicService.ACTION_APPEND);
-        serviceIntent.putExtra("trackBean", trackBean);
-        this.startService(serviceIntent);
-    }
-
-    @Override
-    public void onPlayAll(ArrayList<TrackBean> trackBeanList) {
+    public void onPlayAll(final ArrayList<TrackBean> trackBeanList,
+                          final int position) {
         if (CollectionUtils.isNotEmpty(trackBeanList)) {
             final Intent serviceIntent = new Intent(this, MusicService.class);
             serviceIntent.setAction(MusicService.ACTION_ADD);
             serviceIntent.putParcelableArrayListExtra("trackBeanList",
                                                       trackBeanList);
-            serviceIntent.putExtra("position", 0);
+            serviceIntent.putExtra("position", position);
             this.startService(serviceIntent);
 
             final Intent activityIntent = new Intent(this,
@@ -154,7 +149,7 @@ public class AlbumInfoActivity extends ActionBarActivity implements AlbumInfoFra
     }
 
     @Override
-    public void onDownload(String title, TrackBean trackBean) {
+    public void onDownload(final String title, final TrackBean trackBean) {
         final Intent serviceIntent = new Intent(this, DownloadService.class);
         serviceIntent.setAction(DownloadService.ACTION_ADD);
         serviceIntent.putExtra("trackBean", trackBean);
@@ -183,7 +178,8 @@ public class AlbumInfoActivity extends ActionBarActivity implements AlbumInfoFra
     }
 
     @Override
-    public void onDownloadAll(String title, ArrayList<TrackBean> trackBeanList) {
+    public void onDownloadAll(final String title,
+                              final ArrayList<TrackBean> trackBeanList) {
         final Intent serviceIntent = new Intent(this, DownloadService.class);
         serviceIntent.setAction(DownloadService.ACTION_ADD);
         serviceIntent.putParcelableArrayListExtra("trackBeanList",
@@ -192,7 +188,8 @@ public class AlbumInfoActivity extends ActionBarActivity implements AlbumInfoFra
                                                                     "dialog");
     }
 
-    public void showCreatePlaylistDialog(String title, final Intent serviceIntent) {
+    public void showCreatePlaylistDialog(String title,
+                                         final Intent serviceIntent) {
         Cursor cursor = null;
         try {
             cursor = this.getContentResolver()
@@ -213,12 +210,14 @@ public class AlbumInfoActivity extends ActionBarActivity implements AlbumInfoFra
 
     }
 
-    public class SelectPlaylistDialogFragment extends DialogFragment implements DialogInterface.OnClickListener {
+    public class SelectPlaylistDialogFragment extends DialogFragment implements
+            DialogInterface.OnClickListener {
 
         private String mTitle = null;
         private Intent mIntent = null;
 
-        public SelectPlaylistDialogFragment(String title, final Intent serviceIntent) {
+        public SelectPlaylistDialogFragment(final String title,
+                final Intent serviceIntent) {
             this.mTitle = title;
             this.mIntent = serviceIntent;
         }
@@ -264,13 +263,15 @@ public class AlbumInfoActivity extends ActionBarActivity implements AlbumInfoFra
         }
     }
 
-    public class CreatePlaylistDialogFragment extends DialogFragment implements DialogInterface.OnClickListener {
+    public class CreatePlaylistDialogFragment extends DialogFragment implements
+            DialogInterface.OnClickListener {
 
         private String mTitle = null;
         private Intent mIntent = null;
         private EditText mTitleView = null;
 
-        public CreatePlaylistDialogFragment(final String title, final Intent serviceIntent) {
+        public CreatePlaylistDialogFragment(final String title,
+                final Intent serviceIntent) {
             this.mTitle = title;
             this.mIntent = serviceIntent;
         }
@@ -297,7 +298,7 @@ public class AlbumInfoActivity extends ActionBarActivity implements AlbumInfoFra
             System.out.println(which);
             switch (which) {
             case DialogInterface.BUTTON_POSITIVE:
-                String title = this.mTitleView.getText().toString();
+                final String title = this.mTitleView.getText().toString();
                 final long playlistId = AlbumInfoActivity.this.insertPlaylist(title);
                 this.mIntent.putExtra("playlistId", playlistId);
                 AlbumInfoActivity.this.startService(this.mIntent);
@@ -310,7 +311,7 @@ public class AlbumInfoActivity extends ActionBarActivity implements AlbumInfoFra
         }
     }
 
-    private long insertPlaylist(String title) {
+    private long insertPlaylist(final String title) {
         final ContentResolver contentResolver = this.getContentResolver();
         final ContentValues values = new ContentValues();
         Cursor cursor = null;

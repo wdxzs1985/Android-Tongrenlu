@@ -29,7 +29,9 @@ public class AlbumGridAdapter extends CursorAdapter {
     }
 
     @Override
-    public View newView(final Context context, final Cursor c, final ViewGroup parent) {
+    public View newView(final Context context,
+                        final Cursor c,
+                        final ViewGroup parent) {
         final View view = View.inflate(context, R.layout.list_item_album, null);
         final ViewHolder holder = new ViewHolder();
         holder.coverView = (ImageView) view.findViewById(R.id.article_cover);
@@ -73,7 +75,7 @@ public class AlbumGridAdapter extends CursorAdapter {
                 }
 
                 @Override
-                protected Drawable doInBackground(Object... params) {
+                protected Drawable doInBackground(final Object... params) {
                     Drawable result = super.doInBackground(params);
                     if (result == null) {
                         result = context.getResources()
@@ -88,7 +90,7 @@ public class AlbumGridAdapter extends CursorAdapter {
                     if (!this.isCancelled() && result != null) {
                         final Drawable emptyDrawable = new ShapeDrawable();
                         final TransitionDrawable fadeInDrawable = new TransitionDrawable(new Drawable[] { emptyDrawable,
-                                result });
+                                                                                                         result });
                         ViewHolder.this.coverView.setImageDrawable(fadeInDrawable);
                         fadeInDrawable.startTransition(LoadImageTask.TIME_SHORT);
                     }
@@ -96,27 +98,23 @@ public class AlbumGridAdapter extends CursorAdapter {
             };
             final TongrenluApplication application = (TongrenluApplication) context.getApplicationContext();
             final BitmapLruCache bitmapCache = application.getBitmapCache();
-            HttpHelper http = application.getHttpHelper();
+            final HttpHelper http = application.getHttpHelper();
 
             String url;
             switch (application.getResources().getDisplayMetrics().densityDpi) {
             case DisplayMetrics.DENSITY_XXXHIGH:
             case DisplayMetrics.DENSITY_XXHIGH:
-                url = HttpConstants.getCoverUrl(application,
-                                                articleBean.getArticleId(),
-                                                HttpConstants.L_COVER);
-                break;
             case DisplayMetrics.DENSITY_XHIGH:
             case DisplayMetrics.DENSITY_HIGH:
             case DisplayMetrics.DENSITY_TV:
                 url = HttpConstants.getCoverUrl(application,
                                                 articleBean.getArticleId(),
-                                                HttpConstants.M_COVER);
+                                                HttpConstants.L_COVER);
                 break;
             default:
                 url = HttpConstants.getCoverUrl(application,
                                                 articleBean.getArticleId(),
-                                                HttpConstants.S_COVER);
+                                                HttpConstants.M_COVER);
                 break;
             }
 

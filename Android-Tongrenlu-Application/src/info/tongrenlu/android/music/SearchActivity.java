@@ -19,38 +19,38 @@ import android.view.MenuItem;
 public class SearchActivity extends ActionBarActivity {
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.setContentView(R.layout.activity_search);
 
-        ActionBar actionBar = this.getSupportActionBar();
+        final ActionBar actionBar = this.getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setDisplayShowTitleEnabled(false);
+        // actionBar.setDisplayShowTitleEnabled(false);
 
         this.handleIntent(this.getIntent());
     }
 
     @Override
-    protected void onNewIntent(Intent intent) {
+    protected void onNewIntent(final Intent intent) {
         this.setIntent(intent);
         this.handleIntent(intent);
     }
 
-    private void handleIntent(Intent intent) {
+    private void handleIntent(final Intent intent) {
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-            String query = intent.getStringExtra(SearchManager.QUERY);
+            final String query = intent.getStringExtra(SearchManager.QUERY);
             this.doMySearch(query);
         }
     }
 
-    private void doMySearch(String query) {
-        FragmentManager fragmentManager = this.getSupportFragmentManager();
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
+    private void doMySearch(final String query) {
+        final FragmentManager fragmentManager = this.getSupportFragmentManager();
+        final FragmentTransaction transaction = fragmentManager.beginTransaction();
 
-        Bundle args = new Bundle();
+        final Bundle args = new Bundle();
         args.putString("query", query);
 
-        Fragment fragment = new AlbumFragment();
+        final Fragment fragment = new AlbumFragment();
         fragment.setArguments(args);
 
         transaction.replace(R.id.fragment_container, fragment);
@@ -63,13 +63,14 @@ public class SearchActivity extends ActionBarActivity {
         this.getMenuInflater().inflate(R.menu.activity_search, menu);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            SearchManager searchManager = (SearchManager) this.getSystemService(Context.SEARCH_SERVICE);
-            MenuItem searchItem = menu.findItem(R.id.action_search);
-            SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
+            final SearchManager searchManager = (SearchManager) this.getSystemService(Context.SEARCH_SERVICE);
+            final MenuItem searchItem = menu.findItem(R.id.action_search);
+            final SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
             searchView.setSearchableInfo(searchManager.getSearchableInfo(this.getComponentName()));
             searchView.setIconifiedByDefault(false);
 
-            String query = this.getIntent().getStringExtra(SearchManager.QUERY);
+            final String query = this.getIntent()
+                                     .getStringExtra(SearchManager.QUERY);
             searchView.setQuery(query, false);
         }
         return true;

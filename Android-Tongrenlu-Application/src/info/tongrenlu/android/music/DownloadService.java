@@ -166,10 +166,11 @@ public class DownloadService extends Service implements DownloadListener {
             this.insertPlaylistTrack(trackBean, playlistId);
 
             // play
-            final Intent serviceIntent = new Intent(this, MusicService.class);
-            serviceIntent.setAction(MusicService.ACTION_APPEND);
-            serviceIntent.putExtra("trackBean", trackBean);
-            this.startService(serviceIntent);
+            // final Intent serviceIntent = new Intent(this,
+            // MusicService.class);
+            // serviceIntent.setAction(MusicService.ACTION_APPEND);
+            // serviceIntent.putExtra("trackBean", trackBean);
+            // this.startService(serviceIntent);
         }
     }
 

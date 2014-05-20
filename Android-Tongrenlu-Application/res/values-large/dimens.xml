@@ -2,7 +2,7 @@
 <resources>
     <dimen name="album_art_size">400dp</dimen>
     <dimen name="album_cover_size">180dp</dimen>
-    <dimen name="album_thumb_size">120dp</dimen>
+    <dimen name="album_thumb_size">180dp</dimen>
     <dimen name="album_icon_size">90dp</dimen>
     
     <dimen name="album_title_size">32sp</dimen>

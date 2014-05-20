@@ -480,11 +480,11 @@ public class MusicService extends Service implements OnCompletionListener,
             Collections.shuffle(this.mPlayList);
             index = this.mPlayList.indexOf(this.mTrackList.get(index));
         }
-        for (int i = 0; i < index; i++) {
-            this.mHistoryList.addLast(this.mPlayList.poll());
+        for (int i = 0; i <= index; i++) {
+            this.mNowPlaying = this.mPlayList.poll();
+            this.mHistoryList.addLast(this.mNowPlaying);
         }
         // now playing
-        this.mNowPlaying = this.mPlayList.poll();
     }
 
     protected void actionReset(final TrackBean trackBean) {
@@ -565,9 +565,9 @@ public class MusicService extends Service implements OnCompletionListener,
 
     public void actionPlayPrev() {
         if (this.mMediaPlayer.getCurrentPosition() < 3000) {
-            if (this.mNowPlaying != null) {
-                this.mPlayList.addFirst(this.mNowPlaying);
-            }
+            // if (this.mNowPlaying != null) {
+            // this.mPlayList.addFirst(this.mNowPlaying);
+            // }
             if (this.mHistoryList.isEmpty()) {
                 final int flag = this.getLoopFlag();
                 if (flag == MusicService.FLAG_LOOP_ALL) {
@@ -578,16 +578,17 @@ public class MusicService extends Service implements OnCompletionListener,
                     return;
                 }
             }
-            this.actionReset(this.mHistoryList.pollLast());
+            this.mNowPlaying = this.mHistoryList.pollLast();
+            this.actionReset(this.mNowPlaying);
         } else {
             this.mMediaPlayer.seekTo(0);
         }
     }
 
     public void actionPlayNext() {
-        if (this.mNowPlaying != null) {
-            this.mHistoryList.addLast(this.mNowPlaying);
-        }
+        // if (this.mNowPlaying != null) {
+        // this.mHistoryList.addLast(this.mNowPlaying);
+        // }
         if (this.mPlayList.isEmpty()) {
             final int flag = this.getLoopFlag();
             if (flag == MusicService.FLAG_LOOP_ALL) {
