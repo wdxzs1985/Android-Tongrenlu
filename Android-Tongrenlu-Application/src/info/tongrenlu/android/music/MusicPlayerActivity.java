@@ -325,7 +325,7 @@ public class MusicPlayerActivity extends Activity implements OnClickListener, On
                     final TransitionDrawable fadeInDrawable = new TransitionDrawable(new Drawable[] { emptyDrawable,
                             result });
                     coverView.setImageDrawable(result);
-                    fadeInDrawable.startTransition(200);
+                    fadeInDrawable.startTransition(LoadImageTask.TIME_SHORT);
                 }
             }
 

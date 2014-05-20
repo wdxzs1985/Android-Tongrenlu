@@ -31,7 +31,7 @@
             android:padding="8dp"
             />
     </LinearLayout>
-    <LinearLayout 
+    <RelativeLayout 
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
@@ -41,16 +41,20 @@
         >
         <ImageView
             android:id="@+id/article_cover"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_width="@dimen/album_art_size"
+            android:layout_height="@dimen/album_art_size"
             android:scaleType="centerInside"
             android:contentDescription="@string/article_cover"
-            android:src="@drawable/default_cover" />
-        <LinearLayout 
+            android:src="@drawable/default_cover" 
+            android:layout_alignParentLeft="true"
+            />
+        <LinearLayout android:id="@+id/player_toggle_container"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
+            android:layout_toRightOf="@+id/article_cover"
+            android:layout_alignBottom="@+id/article_cover"
+            android:layout_alignParentRight="true"
             android:orientation="vertical">
             <ImageButton
                 android:id="@+id/player_shuffle"
@@ -68,7 +72,7 @@
                 android:contentDescription="@string/pref_title_loop_play"
                 android:src="@drawable/player_btn_player_mode_repeat" />
         </LinearLayout>
-    </LinearLayout>
+    </RelativeLayout>
     
     <LinearLayout android:id="@+id/player_progress_container"
         android:layout_width="match_parent"

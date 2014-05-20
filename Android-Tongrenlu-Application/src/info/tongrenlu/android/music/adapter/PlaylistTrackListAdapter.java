@@ -16,6 +16,7 @@ import android.graphics.drawable.TransitionDrawable;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.support.v4.widget.CursorAdapter;
+import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -91,16 +92,35 @@ public class PlaylistTrackListAdapter extends CursorAdapter {
                         final TransitionDrawable fadeInDrawable = new TransitionDrawable(new Drawable[] { emptyDrawable,
                                 result });
                         ViewHolder.this.coverView.setImageDrawable(fadeInDrawable);
-                        fadeInDrawable.startTransition(500);
+                        fadeInDrawable.startTransition(LoadImageTask.TIME_SHORT);
                     }
                 }
             };
             final TongrenluApplication application = (TongrenluApplication) context.getApplicationContext();
             final BitmapLruCache bitmapCache = application.getBitmapCache();
-            final String url = HttpConstants.getCoverUrl(application,
-                                                         trackBean.getArticleId(),
-                                                         HttpConstants.S_COVER);
             HttpHelper http = application.getHttpHelper();
+
+            String url;
+            switch (application.getResources().getDisplayMetrics().densityDpi) {
+            case DisplayMetrics.DENSITY_XXXHIGH:
+            case DisplayMetrics.DENSITY_XXHIGH:
+                url = HttpConstants.getCoverUrl(application,
+                                                trackBean.getArticleId(),
+                                                HttpConstants.S_COVER);
+                break;
+            case DisplayMetrics.DENSITY_XHIGH:
+            case DisplayMetrics.DENSITY_HIGH:
+            case DisplayMetrics.DENSITY_TV:
+                url = HttpConstants.getCoverUrl(application,
+                                                trackBean.getArticleId(),
+                                                HttpConstants.XS_COVER);
+                break;
+            default:
+                url = HttpConstants.getCoverUrl(application,
+                                                trackBean.getArticleId(),
+                                                HttpConstants.XXS_COVER);
+                break;
+            }
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
                 this.task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,

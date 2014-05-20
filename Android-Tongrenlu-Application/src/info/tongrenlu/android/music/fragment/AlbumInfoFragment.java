@@ -43,6 +43,7 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -119,10 +120,29 @@ public class AlbumInfoFragment extends Fragment implements ActionSlideExpandable
         final TongrenluApplication application = (TongrenluApplication) this.getActivity()
                                                                             .getApplication();
         final BitmapLruCache bitmapCache = application.getBitmapCache();
-        final String url = HttpConstants.getCoverUrl(application,
-                                                     this.mArticleId,
-                                                     HttpConstants.L_COVER);
         final HttpHelper http = application.getHttpHelper();
+
+        String url;
+        switch (application.getResources().getDisplayMetrics().densityDpi) {
+        case DisplayMetrics.DENSITY_XXXHIGH:
+        case DisplayMetrics.DENSITY_XXHIGH:
+            url = HttpConstants.getCoverUrl(application,
+                                            this.mArticleId,
+                                            HttpConstants.M_COVER);
+            break;
+        case DisplayMetrics.DENSITY_XHIGH:
+        case DisplayMetrics.DENSITY_HIGH:
+        case DisplayMetrics.DENSITY_TV:
+            url = HttpConstants.getCoverUrl(application,
+                                            this.mArticleId,
+                                            HttpConstants.S_COVER);
+            break;
+        default:
+            url = HttpConstants.getCoverUrl(application,
+                                            this.mArticleId,
+                                            HttpConstants.XS_COVER);
+            break;
+        }
 
         final ImageView coverView = (ImageView) view.findViewById(R.id.article_cover);
         coverView.setImageDrawable(null);
@@ -146,7 +166,7 @@ public class AlbumInfoFragment extends Fragment implements ActionSlideExpandable
                     final TransitionDrawable fadeInDrawable = new TransitionDrawable(new Drawable[] { emptyDrawable,
                             result });
                     coverView.setImageDrawable(result);
-                    fadeInDrawable.startTransition(200);
+                    fadeInDrawable.startTransition(LoadImageTask.TIME_SHORT);
                 }
             }
 
@@ -155,6 +175,9 @@ public class AlbumInfoFragment extends Fragment implements ActionSlideExpandable
         final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(application);
         if (sharedPreferences.getBoolean(SettingsActivity.PREF_KEY_BACKGROUND_RENDER,
                                          Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)) {
+            String backgroundUrl = HttpConstants.getCoverUrl(application,
+                                                             this.mArticleId,
+                                                             HttpConstants.L_COVER);
             new LoadBlurImageTask() {
 
                 @Override
@@ -165,7 +188,7 @@ public class AlbumInfoFragment extends Fragment implements ActionSlideExpandable
                     }
                 }
 
-            }.execute(bitmapCache, url, http, application);
+            }.execute(bitmapCache, backgroundUrl, http, application);
         }
 
         final TextView articleTitle = (TextView) view.findViewById(R.id.article_title);

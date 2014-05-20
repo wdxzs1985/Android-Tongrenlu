@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="album_art_size">360dp</dimen>
+    <dimen name="album_cover_size">180dp</dimen>
+    <dimen name="album_thumb_size">120dp</dimen>
+    <dimen name="album_icon_size">90dp</dimen>
+    
+    <dimen name="album_title_size">32sp</dimen>
+    <dimen name="track_title_size">24sp</dimen>
+    <dimen name="track_artist_size">18sp</dimen>
+</resources>

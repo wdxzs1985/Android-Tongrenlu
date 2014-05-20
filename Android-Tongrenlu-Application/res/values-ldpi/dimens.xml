@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <dimen name="image_l">200dp</dimen>
-    <dimen name="image_m">120dp</dimen>
-    <dimen name="image_s">60dp</dimen>
-    <dimen name="image_xs">44dp</dimen>
-</resources>

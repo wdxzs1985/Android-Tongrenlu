@@ -12,6 +12,10 @@ import android.os.AsyncTask;
 
 public class LoadImageTask extends AsyncTask<Object, Object, Drawable> {
 
+    public static final int TIME_LONG = 500;
+
+    public static final int TIME_SHORT = 200;
+
     @Override
     protected Drawable doInBackground(Object... params) {
         final BitmapLruCache bitmapCache = (BitmapLruCache) params[0];
@@ -28,4 +32,5 @@ public class LoadImageTask extends AsyncTask<Object, Object, Drawable> {
         }
         return wrapper;
     }
+
 }

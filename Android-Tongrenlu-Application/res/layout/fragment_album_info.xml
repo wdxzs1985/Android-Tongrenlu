@@ -12,8 +12,8 @@
         android:paddingBottom="8dp"
         >
 	    <ImageView android:id="@+id/article_cover"
-	        android:layout_width="@dimen/image_m"
-	        android:layout_height="@dimen/image_m"
+	        android:layout_width="@dimen/album_thumb_size"
+	        android:layout_height="@dimen/album_thumb_size"
 	        android:layout_marginRight="8dp"
 	        android:src="@drawable/default_cover"
 	        android:contentDescription="@string/article_cover"
@@ -26,15 +26,16 @@
             android:layout_height="wrap_content"
             android:maxLines="2"
             android:text="@string/article_title"
-            android:textSize="32sp"
+            android:textSize="@dimen/album_title_size"
             android:layout_alignTop="@+id/article_cover"
             android:layout_toRightOf="@+id/article_cover"
             style="@style/WhiteText"
             />
         <LinearLayout android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignBottom="@+id/article_cover"
-            android:layout_toRightOf="@+id/article_cover">
+            android:layout_below="@+id/article_cover"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentRight="true">
             <Button
                 android:id="@+id/action_play_all"
                 android:layout_width="0dp"

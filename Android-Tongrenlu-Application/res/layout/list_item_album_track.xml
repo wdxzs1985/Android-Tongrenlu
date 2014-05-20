@@ -5,7 +5,7 @@
               android:orientation="vertical">
     <RelativeLayout android:id="@+id/item"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="@dimen/album_icon_size">
 
         <TextView
             android:id="@+id/track_title"
@@ -14,34 +14,35 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
-            android:layout_toLeftOf="@id/expandable_toggle_button"
-            android:ellipsize="end"
+            android:layout_toLeftOf="@+id/expandable_toggle_button"
+            android:singleLine="true"
+            android:ellipsize="marquee"
             android:paddingLeft="16dp"
             android:paddingTop="8dp"
-            android:singleLine="true"
             android:text="@string/track_title"
-            android:textSize="16sp" />
+            android:textSize="@dimen/track_title_size"
+             />
 
         <TextView android:id="@+id/track_artist"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/track_title"
-                android:layout_alignParentLeft="true"
-                android:layout_toLeftOf="@id/expandable_toggle_button"
-                android:singleLine="true"
-                android:ellipsize="start"
-                android:text="@string/track_artist"
-                android:textSize="12sp"
-                android:paddingLeft="16dp"
-                android:paddingTop="8dp"
-                style="@style/WhiteText"
-                />
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/track_title"
+            android:layout_alignParentLeft="true"
+            android:layout_toLeftOf="@+id/expandable_toggle_button"
+            android:singleLine="true"
+            android:ellipsize="marquee"
+            android:text="@string/track_artist"
+            android:textSize="@dimen/track_artist_size"
+            android:paddingLeft="16dp"
+            android:paddingTop="8dp"
+            style="@style/WhiteText"
+            />
 
         <ImageButton
-            android:id="@id/expandable_toggle_button"
+            android:id="@+id/expandable_toggle_button"
             style="@style/transparentButton"
             android:layout_width="wrap_content"
-            android:layout_height="@dimen/image_xs"
+            android:layout_height="match_parent"
             android:layout_alignParentRight="true"
             android:layout_alignTop="@+id/track_title"
             android:layout_alignBottom="@+id/track_artist"

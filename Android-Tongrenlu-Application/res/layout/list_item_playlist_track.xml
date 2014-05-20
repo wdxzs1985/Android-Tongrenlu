@@ -6,11 +6,12 @@
               android:orientation="vertical">
     <RelativeLayout android:id="@+id/item"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/image_xs">
+            android:layout_height="@dimen/album_icon_size">
         <ImageView android:id="@+id/article_cover"
+                android:src="@drawable/default_cover"
                 android:contentDescription="@string/article_cover"
-                android:layout_width="@dimen/image_xs"
-                android:layout_height="@dimen/image_xs"
+                android:layout_width="@dimen/album_icon_size"
+                android:layout_height="@dimen/album_icon_size"
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentTop="true"
                 android:scaleType="centerCrop" />
@@ -18,11 +19,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_toRightOf="@+id/article_cover"
+                android:layout_toLeftOf="@+id/expandable_toggle_button"
                 android:layout_alignParentTop="true"
                 android:singleLine="true"
-                android:ellipsize="start"
+                android:ellipsize="marquee"
                 android:text="@string/track_title"
-                android:textSize="16sp"
+                android:textSize="@dimen/track_title_size"
                 android:paddingLeft="16dp"
                 android:paddingTop="8dp"/>
         <TextView android:id="@+id/track_artist"
@@ -30,17 +32,18 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/track_title"
                 android:layout_toRightOf="@+id/article_cover"
+                android:layout_toLeftOf="@+id/expandable_toggle_button"
                 android:singleLine="true"
-                android:ellipsize="start"
+                android:ellipsize="marquee"
                 android:text="@string/track_artist"
-                android:textSize="12sp"
+                android:textSize="@dimen/track_artist_size"
                 android:paddingLeft="16dp"
                 android:paddingTop="8dp"/>
-        <ImageButton android:id="@id/expandable_toggle_button"
+        <ImageButton android:id="@+id/expandable_toggle_button"
                 android:src="@android:drawable/ic_menu_more"
                 android:contentDescription="@string/label_more"
                 android:layout_width="wrap_content"
-                android:layout_height="@dimen/image_xs"
+                android:layout_height="match_parent"
                 android:layout_alignParentTop="true"
                 android:layout_alignParentRight="true"
                 android:padding="16dp"
@@ -48,7 +51,7 @@
                 />
     </RelativeLayout>
     
-    <LinearLayout android:id="@id/expandable"
+    <LinearLayout android:id="@+id/expandable"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
