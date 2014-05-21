@@ -1,42 +1,17 @@
 package info.tongrenlu.android.image;
 
-import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Build;
-import android.os.Build.VERSION;
-import android.renderscript.Allocation;
-import android.renderscript.Element;
-import android.renderscript.RenderScript;
-import android.renderscript.ScriptIntrinsicBlur;
 import android.util.Log;
 
-public class Blur {
+public class StackBlur {
 
-    @SuppressLint("NewApi")
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     public static Bitmap fastblur(final Context context,
                                   final Bitmap sentBitmap,
                                   final int radius) {
-
-        if (VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            final Bitmap bitmap = sentBitmap.copy(sentBitmap.getConfig(), true);
-
-            final RenderScript rs = RenderScript.create(context);
-            final Allocation input = Allocation.createFromBitmap(rs,
-                                                                 sentBitmap,
-                                                                 Allocation.MipmapControl.MIPMAP_NONE,
-                                                                 Allocation.USAGE_SCRIPT);
-            final Allocation output = Allocation.createTyped(rs,
-                                                             input.getType());
-            final ScriptIntrinsicBlur script = ScriptIntrinsicBlur.create(rs,
-                                                                          Element.U8_4(rs));
-            script.setRadius(radius /* e.g. 3.f */);
-            script.setInput(input);
-            script.forEach(output);
-            output.copyTo(bitmap);
-            return bitmap;
-        }
-
         // Stack Blur v1.0 from
         // http://www.quasimondo.com/StackBlurForCanvas/StackBlurDemo.html
         //
@@ -65,8 +40,7 @@ public class Blur {
         //
         // Stack Blur Algorithm by Mario Klingemann <mario@quasimondo.com>
 
-        final Bitmap bitmap = Bitmap.createBitmap(sentBitmap);
-
+        final Bitmap bitmap = sentBitmap.copy(sentBitmap.getConfig(), true);
         if (radius < 1) {
             return null;
         }

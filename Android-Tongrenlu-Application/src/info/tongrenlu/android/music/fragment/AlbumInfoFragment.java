@@ -174,17 +174,21 @@ public class AlbumInfoFragment extends Fragment implements
 
         final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(application);
         if (sharedPreferences.getBoolean(SettingsActivity.PREF_KEY_BACKGROUND_RENDER,
-                                         Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)) {
+                                         Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1)) {
             final String backgroundUrl = HttpConstants.getCoverUrl(application,
                                                                    this.mArticleId,
-                                                                   HttpConstants.L_COVER);
+                                                                   HttpConstants.M_COVER);
             new LoadBlurImageTask() {
 
                 @Override
                 protected void onPostExecute(final Drawable result) {
                     super.onPostExecute(result);
                     if (!this.isCancelled() && result != null) {
-                        view.setBackground(result);
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                            view.setBackground(result);
+                        } else {
+                            view.setBackgroundDrawable(result);
+                        }
                     }
                 }
 
