@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package info.tongrenlu.android.musicplayer;
+package info.tongrenlu.android.player;
 
 import info.tongrenlu.android.music.MusicService;
 import android.content.Context;

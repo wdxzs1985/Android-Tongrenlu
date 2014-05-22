@@ -1,6 +1,7 @@
 package info.tongrenlu.android.music;
 
 import info.tongrenlu.android.fragment.TitleFragmentAdapter;
+import info.tongrenlu.android.fragment.ZoomOutPageTransformer;
 import info.tongrenlu.android.music.fragment.AlbumFragment;
 import info.tongrenlu.android.music.fragment.AlbumUpdateFragment;
 import info.tongrenlu.android.music.fragment.PlaylistFragment;
@@ -69,6 +70,7 @@ public class MainActivity extends ActionBarActivity {
 
         this.mPager = (ViewPager) this.findViewById(R.id.pager);
         this.mPager.setAdapter(this.mAdapter);
+        this.mPager.setPageTransformer(true, new ZoomOutPageTransformer());
 
         this.mIndicator = (PageIndicator) this.findViewById(R.id.indicator);
         this.mIndicator.setViewPager(this.mPager);

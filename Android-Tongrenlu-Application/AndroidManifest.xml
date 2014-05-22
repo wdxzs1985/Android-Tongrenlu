@@ -79,7 +79,6 @@
 	            <action android:name="info.tongrenlu.android.MusicService.action.REWIND" />
 	            <action android:name="info.tongrenlu.android.MusicService.action.STOP" />
                 <action android:name="info.tongrenlu.android.MusicService.action.ADD" />
-                <action android:name="info.tongrenlu.android.MusicService.action.APPEND" />
             </intent-filter>
         </service>
         

@@ -10,6 +10,7 @@ import info.tongrenlu.android.music.adapter.AlbumTrackListAdapter;
 import info.tongrenlu.android.music.provider.TongrenluContentProvider;
 import info.tongrenlu.android.provider.HttpHelper;
 import info.tongrenlu.app.HttpConstants;
+import info.tongrenlu.domain.ArticleBean;
 import info.tongrenlu.domain.TrackBean;
 
 import java.io.IOException;
@@ -55,8 +56,7 @@ import android.widget.Toast;
 
 import com.tjerkw.slideexpandable.library.ActionSlideExpandableListView;
 
-public class AlbumInfoFragment extends Fragment implements
-        ActionSlideExpandableListView.OnActionClickListener, OnClickListener {
+public class AlbumInfoFragment extends Fragment implements ActionSlideExpandableListView.OnActionClickListener, OnClickListener {
 
     public static final int ALBUM_TRACK_CURSOR_LOADER = 1;
     public static final int ALBUM_TRACK_JSON_LOADER = 2;
@@ -70,23 +70,22 @@ public class AlbumInfoFragment extends Fragment implements
 
     private final Uri mUri;
     private final Uri mTrackUri;
-    private final String mArticleId;
-    private final String mTitle;
+    private final ArticleBean mArticleBean;
 
     private AlbumInfoFragmentListener mListener = null;
 
     private final int albumTrackCursorLoaderId;
     private final int albumTrackJsonLoaderId;
 
-    public AlbumInfoFragment(final String articleId, final String title,
-            final long id) {
-        this.mArticleId = articleId;
-        this.mTitle = title;
+    public AlbumInfoFragment(ArticleBean articleBean) {
+        this.mArticleBean = articleBean;
         this.mUri = Uri.withAppendedPath(TongrenluContentProvider.ALBUM_URI,
-                                         this.mArticleId);
+                                         this.mArticleBean.getArticleId());
         this.mTrackUri = Uri.withAppendedPath(this.mUri, "track");
-        this.albumTrackCursorLoaderId = (int) (id * 10 + AlbumInfoFragment.ALBUM_TRACK_CURSOR_LOADER);
-        this.albumTrackJsonLoaderId = (int) (id * 10 + AlbumInfoFragment.ALBUM_TRACK_JSON_LOADER);
+
+        long articleId = Long.valueOf(this.mArticleBean.getArticleId());
+        this.albumTrackCursorLoaderId = (int) (articleId * 10 + AlbumInfoFragment.ALBUM_TRACK_CURSOR_LOADER);
+        this.albumTrackJsonLoaderId = (int) (articleId * 10 + AlbumInfoFragment.ALBUM_TRACK_JSON_LOADER);
     }
 
     @Override
@@ -114,9 +113,7 @@ public class AlbumInfoFragment extends Fragment implements
     }
 
     @Override
-    public View onCreateView(final LayoutInflater inflater,
-                             final ViewGroup container,
-                             final Bundle savedInstanceState) {
+    public View onCreateView(final LayoutInflater inflater, final ViewGroup container, final Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.fragment_album_info,
                                            null,
                                            false);
@@ -126,6 +123,7 @@ public class AlbumInfoFragment extends Fragment implements
         final BitmapLruCache bitmapCache = application.getBitmapCache();
         final HttpHelper http = application.getHttpHelper();
 
+        String articleId = this.mArticleBean.getArticleId();
         String url;
         switch (application.getResources().getDisplayMetrics().densityDpi) {
         case DisplayMetrics.DENSITY_XXXHIGH:
@@ -134,12 +132,12 @@ public class AlbumInfoFragment extends Fragment implements
         case DisplayMetrics.DENSITY_HIGH:
         case DisplayMetrics.DENSITY_TV:
             url = HttpConstants.getCoverUrl(application,
-                                            this.mArticleId,
+                                            articleId,
                                             HttpConstants.L_COVER);
             break;
         default:
             url = HttpConstants.getCoverUrl(application,
-                                            this.mArticleId,
+                                            articleId,
                                             HttpConstants.S_COVER);
             break;
         }
@@ -164,7 +162,7 @@ public class AlbumInfoFragment extends Fragment implements
                 if (!this.isCancelled() && result != null) {
                     final Drawable emptyDrawable = new ShapeDrawable();
                     final TransitionDrawable fadeInDrawable = new TransitionDrawable(new Drawable[] { emptyDrawable,
-                                                                                                     result });
+                            result });
                     coverView.setImageDrawable(result);
                     fadeInDrawable.startTransition(LoadImageTask.TIME_SHORT);
                 }
@@ -176,7 +174,7 @@ public class AlbumInfoFragment extends Fragment implements
         if (sharedPreferences.getBoolean(SettingsActivity.PREF_KEY_BACKGROUND_RENDER,
                                          Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)) {
             final String backgroundUrl = HttpConstants.getCoverUrl(application,
-                                                                   this.mArticleId,
+                                                                   articleId,
                                                                    HttpConstants.L_COVER);
             new LoadBlurImageTask() {
 
@@ -192,7 +190,7 @@ public class AlbumInfoFragment extends Fragment implements
         }
 
         final TextView articleTitle = (TextView) view.findViewById(R.id.article_title);
-        articleTitle.setText(this.mTitle);
+        articleTitle.setText(this.mArticleBean.getTitle());
 
         this.mAdapter = new AlbumTrackListAdapter(this.getActivity());
 
@@ -286,27 +284,24 @@ public class AlbumInfoFragment extends Fragment implements
         this.mProgressContainer.setVisibility(View.VISIBLE);
     }
 
-    private class AlbumTrackJsonLoaderCallback implements
-            LoaderCallbacks<Boolean> {
+    private class AlbumTrackJsonLoaderCallback implements LoaderCallbacks<Boolean> {
 
         @Override
-        public Loader<Boolean> onCreateLoader(final int loaderId,
-                                              final Bundle args) {
+        public Loader<Boolean> onCreateLoader(final int loaderId, final Bundle args) {
             final TongrenluApplication application = (TongrenluApplication) AlbumInfoFragment.this.getActivity()
                                                                                                   .getApplication();
 
             final HttpHelper http = application.getHttpHelper();
 
             final String host = HttpConstants.getHost(application);
-            final String part = "/fm/music/" + AlbumInfoFragment.this.mArticleId;
+            final String part = "/fm/music/" + AlbumInfoFragment.this.mArticleBean.getArticleId();
             final String url = host + part;
 
             return new AlbumTrackDataLoader(application, http, url);
         }
 
         @Override
-        public void onLoadFinished(final Loader<Boolean> loader,
-                                   final Boolean noError) {
+        public void onLoadFinished(final Loader<Boolean> loader, final Boolean noError) {
 
             if (noError) {
                 AlbumInfoFragment.this.getActivity()
@@ -337,8 +332,7 @@ public class AlbumInfoFragment extends Fragment implements
         private final HttpHelper http;
         private final String url;
 
-        public AlbumTrackDataLoader(final Context ctx, final HttpHelper http,
-                final String url) {
+        public AlbumTrackDataLoader(final Context ctx, final HttpHelper http, final String url) {
             super(ctx);
             this.http = http;
             this.url = url;
@@ -367,8 +361,7 @@ public class AlbumInfoFragment extends Fragment implements
             }
         }
 
-        protected void parseTrackJSON(final JSONObject responseJSON)
-                throws JSONException {
+        protected void parseTrackJSON(final JSONObject responseJSON) throws JSONException {
             if (responseJSON.getBoolean("result")) {
                 final JSONObject articleObject = responseJSON.optJSONObject("articleBean");
                 final String album = articleObject.optString("title");
@@ -391,7 +384,7 @@ public class AlbumInfoFragment extends Fragment implements
                                                        null,
                                                        "articleId = ? and fileId = ?",
                                                        new String[] { articleId,
-                                                                     fileId },
+                                                               fileId },
                                                        null);
                         if (cursor.getCount() == 0) {
                             final ContentValues contentValues = new ContentValues();
@@ -421,16 +414,15 @@ public class AlbumInfoFragment extends Fragment implements
     }
 
     @Override
-    public void onClick(final View itemView,
-                        final View clickedView,
-                        final int position) {
+    public void onClick(final View itemView, final View clickedView, final int position) {
         switch (clickedView.getId()) {
         case R.id.item:
         case R.id.action_play:
             this.mListener.onPlayAll(this.getTrackBeans(), position);
             break;
         case R.id.action_download:
-            this.mListener.onDownload(this.mTitle, this.getTrackBean(position));
+            this.mListener.onDownload(this.mArticleBean.getTitle(),
+                                      this.getTrackBean(position));
             break;
         default:
             break;
@@ -445,7 +437,8 @@ public class AlbumInfoFragment extends Fragment implements
                 this.mListener.onPlayAll(this.getTrackBeans(), 0);
                 break;
             case R.id.action_download_all:
-                this.mListener.onDownloadAll(this.mTitle, this.getTrackBeans());
+                this.mListener.onDownloadAll(this.mArticleBean.getTitle(),
+                                             this.getTrackBeans());
                 break;
             default:
                 break;

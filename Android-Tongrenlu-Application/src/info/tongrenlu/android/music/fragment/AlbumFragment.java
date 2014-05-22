@@ -100,12 +100,10 @@ public class AlbumFragment extends TitleFragment implements OnItemClickListener 
     public void onItemClick(final AdapterView<?> listView, final View itemView, final int position, final long itemId) {
         final Cursor c = (Cursor) listView.getItemAtPosition(position);
         final String articleId = c.getString(c.getColumnIndex("articleId"));
-        final String title = c.getString(c.getColumnIndex("title"));
 
         final Intent intent = new Intent();
         intent.setClass(this.getActivity(), AlbumInfoActivity.class);
         intent.putExtra("articleId", articleId);
-        intent.putExtra("title", title);
 
         this.startActivity(intent);
     }

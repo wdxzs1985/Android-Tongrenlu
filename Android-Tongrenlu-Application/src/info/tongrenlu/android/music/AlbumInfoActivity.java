@@ -1,9 +1,11 @@
 package info.tongrenlu.android.music;
 
 import info.tongrenlu.android.fragment.CursorFragmentAdapter;
+import info.tongrenlu.android.fragment.DepthPageTransformer;
 import info.tongrenlu.android.music.fragment.AlbumInfoFragment;
 import info.tongrenlu.android.music.fragment.AlbumInfoFragment.AlbumInfoFragmentListener;
 import info.tongrenlu.android.music.provider.TongrenluContentProvider;
+import info.tongrenlu.domain.ArticleBean;
 import info.tongrenlu.domain.TrackBean;
 
 import java.util.ArrayList;
@@ -35,8 +37,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
 
-public class AlbumInfoActivity extends ActionBarActivity implements
-        AlbumInfoFragmentListener {
+public class AlbumInfoActivity extends ActionBarActivity implements AlbumInfoFragmentListener {
 
     public static final int ALBUM_CURSOR_LOADER = 1;
 
@@ -57,12 +58,14 @@ public class AlbumInfoActivity extends ActionBarActivity implements
 
             @Override
             protected Fragment newFragment(final Cursor c) {
-                final long id = c.getLong(c.getColumnIndex("_id"));
                 final String articleId = c.getString(c.getColumnIndex("articleId"));
                 final String title = c.getString(c.getColumnIndex("title"));
-                final AlbumInfoFragment fragment = new AlbumInfoFragment(articleId,
-                                                                         title,
-                                                                         id);
+
+                ArticleBean articleBean = new ArticleBean();
+                articleBean.setArticleId(articleId);
+                articleBean.setTitle(title);
+
+                final AlbumInfoFragment fragment = new AlbumInfoFragment(articleBean);
                 return fragment;
             }
 
@@ -78,6 +81,7 @@ public class AlbumInfoActivity extends ActionBarActivity implements
 
         this.mPager = (ViewPager) this.findViewById(R.id.pager);
         this.mPager.setAdapter(this.mAdapter);
+        this.mPager.setPageTransformer(true, new DepthPageTransformer());
 
         final String articleId = this.getIntent().getStringExtra("articleId");
         this.getSupportLoaderManager()
@@ -95,8 +99,7 @@ public class AlbumInfoActivity extends ActionBarActivity implements
         }
 
         @Override
-        public Loader<Cursor> onCreateLoader(final int loaderId,
-                                             final Bundle args) {
+        public Loader<Cursor> onCreateLoader(final int loaderId, final Bundle args) {
             final Context context = AlbumInfoActivity.this;
             return new CursorLoader(context,
                                     TongrenluContentProvider.ALBUM_URI,
@@ -132,8 +135,7 @@ public class AlbumInfoActivity extends ActionBarActivity implements
     }
 
     @Override
-    public void onPlayAll(final ArrayList<TrackBean> trackBeanList,
-                          final int position) {
+    public void onPlayAll(final ArrayList<TrackBean> trackBeanList, final int position) {
         if (CollectionUtils.isNotEmpty(trackBeanList)) {
             final Intent serviceIntent = new Intent(this, MusicService.class);
             serviceIntent.setAction(MusicService.ACTION_ADD);
@@ -178,8 +180,7 @@ public class AlbumInfoActivity extends ActionBarActivity implements
     }
 
     @Override
-    public void onDownloadAll(final String title,
-                              final ArrayList<TrackBean> trackBeanList) {
+    public void onDownloadAll(final String title, final ArrayList<TrackBean> trackBeanList) {
         final Intent serviceIntent = new Intent(this, DownloadService.class);
         serviceIntent.setAction(DownloadService.ACTION_ADD);
         serviceIntent.putParcelableArrayListExtra("trackBeanList",
@@ -188,8 +189,7 @@ public class AlbumInfoActivity extends ActionBarActivity implements
                                                                     "dialog");
     }
 
-    public void showCreatePlaylistDialog(String title,
-                                         final Intent serviceIntent) {
+    public void showCreatePlaylistDialog(String title, final Intent serviceIntent) {
         Cursor cursor = null;
         try {
             cursor = this.getContentResolver()
@@ -210,14 +210,12 @@ public class AlbumInfoActivity extends ActionBarActivity implements
 
     }
 
-    public class SelectPlaylistDialogFragment extends DialogFragment implements
-            DialogInterface.OnClickListener {
+    public class SelectPlaylistDialogFragment extends DialogFragment implements DialogInterface.OnClickListener {
 
         private String mTitle = null;
         private Intent mIntent = null;
 
-        public SelectPlaylistDialogFragment(final String title,
-                final Intent serviceIntent) {
+        public SelectPlaylistDialogFragment(final String title, final Intent serviceIntent) {
             this.mTitle = title;
             this.mIntent = serviceIntent;
         }
@@ -263,15 +261,13 @@ public class AlbumInfoActivity extends ActionBarActivity implements
         }
     }
 
-    public class CreatePlaylistDialogFragment extends DialogFragment implements
-            DialogInterface.OnClickListener {
+    public class CreatePlaylistDialogFragment extends DialogFragment implements DialogInterface.OnClickListener {
 
         private String mTitle = null;
         private Intent mIntent = null;
         private EditText mTitleView = null;
 
-        public CreatePlaylistDialogFragment(final String title,
-                final Intent serviceIntent) {
+        public CreatePlaylistDialogFragment(final String title, final Intent serviceIntent) {
             this.mTitle = title;
             this.mIntent = serviceIntent;
         }
