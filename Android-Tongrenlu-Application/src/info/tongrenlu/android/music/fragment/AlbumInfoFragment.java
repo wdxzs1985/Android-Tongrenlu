@@ -172,17 +172,26 @@ public class AlbumInfoFragment extends Fragment implements ActionSlideExpandable
 
         final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(application);
         if (sharedPreferences.getBoolean(SettingsActivity.PREF_KEY_BACKGROUND_RENDER,
-                                         Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)) {
+                                         Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1)) {
             final String backgroundUrl = HttpConstants.getCoverUrl(application,
+<<<<<<< HEAD
                                                                    articleId,
                                                                    HttpConstants.L_COVER);
+=======
+                                                                   this.mArticleId,
+                                                                   HttpConstants.M_COVER);
+>>>>>>> refs/remotes/origin/master
             new LoadBlurImageTask() {
 
                 @Override
                 protected void onPostExecute(final Drawable result) {
                     super.onPostExecute(result);
                     if (!this.isCancelled() && result != null) {
-                        view.setBackground(result);
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                            view.setBackground(result);
+                        } else {
+                            view.setBackgroundDrawable(result);
+                        }
                     }
                 }
 

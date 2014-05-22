@@ -13,6 +13,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.util.DisplayMetrics;
 
 public class LoadBlurImageTask extends AsyncTask<Object, Object, Drawable> {
@@ -20,7 +21,7 @@ public class LoadBlurImageTask extends AsyncTask<Object, Object, Drawable> {
     public static final int BLUR_RADIUS = 10;
 
     @Override
-    protected Drawable doInBackground(Object... params) {
+    protected Drawable doInBackground(final Object... params) {
         final BitmapLruCache bitmapCache = (BitmapLruCache) params[0];
         final String url = (String) params[1];
         final HttpHelper http = (HttpHelper) params[2];
@@ -29,9 +30,9 @@ public class LoadBlurImageTask extends AsyncTask<Object, Object, Drawable> {
         CacheableBitmapDrawable wrapper = bitmapCache.get(url);
         if (wrapper == null) {
             try {
-                byte[] data = http.getByteArray(url);
+                final byte[] data = http.getByteArray(url);
                 wrapper = bitmapCache.put(url, new ByteArrayInputStream(data));
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 e.printStackTrace();
             }
         }
@@ -41,17 +42,26 @@ public class LoadBlurImageTask extends AsyncTask<Object, Object, Drawable> {
         }
 
         Bitmap blurBitmap = wrapper.getBitmap();
-        blurBitmap = Blur.fastblur(context, blurBitmap, BLUR_RADIUS);
-        Resources resource = context.getResources();
-        DisplayMetrics metrics = resource.getDisplayMetrics();
-        float screenWidth = metrics.widthPixels;
-        float screenHeight = metrics.heightPixels;
-        float screenRatio = screenWidth / screenHeight;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            blurBitmap = RenderScriptBlur.fastblur(context,
+                                                   blurBitmap,
+                                                   LoadBlurImageTask.BLUR_RADIUS);
+        } else {
+            blurBitmap = StackBlur.fastblur(context,
+                                            blurBitmap,
+                                            LoadBlurImageTask.BLUR_RADIUS);
+        }
 
-        int targetWidth = (int) (blurBitmap.getWidth() * screenRatio);
-        int targetHeight = blurBitmap.getHeight();
+        final Resources resource = context.getResources();
+        final DisplayMetrics metrics = resource.getDisplayMetrics();
+        final float screenWidth = metrics.widthPixels;
+        final float screenHeight = metrics.heightPixels;
+        final float screenRatio = screenWidth / screenHeight;
 
-        int x = (blurBitmap.getWidth() - targetWidth) / 2;
+        final int targetWidth = (int) (blurBitmap.getWidth() * screenRatio);
+        final int targetHeight = blurBitmap.getHeight();
+
+        final int x = (blurBitmap.getWidth() - targetWidth) / 2;
 
         blurBitmap = Bitmap.createBitmap(blurBitmap,
                                          x,
