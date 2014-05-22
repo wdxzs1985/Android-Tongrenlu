@@ -8,6 +8,7 @@ import info.tongrenlu.android.player.MusicFocusable;
 import info.tongrenlu.android.provider.HttpHelper;
 import info.tongrenlu.app.HttpConstants;
 import info.tongrenlu.domain.TrackBean;
+import info.tongrenlu.support.ApplicationSupport;
 
 import java.io.File;
 import java.io.IOException;
@@ -41,7 +42,6 @@ import android.media.MediaPlayer.OnSeekCompleteListener;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiManager.WifiLock;
-import android.os.Build;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
@@ -157,7 +157,7 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
 
     private void createAudioFocusHelper() {
         final Context context = this.getApplicationContext();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO) {
+        if (ApplicationSupport.canUseAudioFocusHelper()) {
             this.mAudioFocusHelper = new AudioFocusHelper(context, this);
         } else {
             this.mAudioFocus = AudioFocus.Focused;

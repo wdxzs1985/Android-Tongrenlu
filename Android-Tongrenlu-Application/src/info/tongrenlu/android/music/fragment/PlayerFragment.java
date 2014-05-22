@@ -9,6 +9,7 @@ import info.tongrenlu.android.music.TongrenluApplication;
 import info.tongrenlu.android.provider.HttpHelper;
 import info.tongrenlu.app.HttpConstants;
 import info.tongrenlu.domain.TrackBean;
+import info.tongrenlu.support.ApplicationSupport;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -23,7 +24,6 @@ import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.TransitionDrawable;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -308,7 +308,17 @@ public class PlayerFragment extends Fragment implements OnClickListener, OnSeekB
         }.execute(bitmapCache, url, http);
 
         if (this.mSharedPreferences.getBoolean(SettingsActivity.PREF_KEY_BACKGROUND_RENDER,
-                                               Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)) {
+                                               ApplicationSupport.canUseRenderScript())) {
+            String backgroundUrl = null;
+            if (ApplicationSupport.canUseLargeHeap()) {
+                backgroundUrl = HttpConstants.getCoverUrl(application,
+                                                          articleId,
+                                                          HttpConstants.L_COVER);
+            } else {
+                backgroundUrl = HttpConstants.getCoverUrl(application,
+                                                          articleId,
+                                                          HttpConstants.M_COVER);
+            }
             new LoadBlurImageTask() {
 
                 @Override
@@ -316,12 +326,12 @@ public class PlayerFragment extends Fragment implements OnClickListener, OnSeekB
                     super.onPostExecute(result);
                     if (!this.isCancelled() && result != null) {
                         PlayerFragment.this.getActivity()
-                                                .getWindow()
-                                                .setBackgroundDrawable(result);
+                                           .getWindow()
+                                           .setBackgroundDrawable(result);
                     }
                 }
 
-            }.execute(bitmapCache, url, http, application);
+            }.execute(bitmapCache, backgroundUrl, http, application);
         }
     }
 

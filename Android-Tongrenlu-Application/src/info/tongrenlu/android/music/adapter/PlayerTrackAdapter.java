@@ -6,6 +6,7 @@ import info.tongrenlu.android.music.TongrenluApplication;
 import info.tongrenlu.android.provider.HttpHelper;
 import info.tongrenlu.app.HttpConstants;
 import info.tongrenlu.domain.TrackBean;
+import info.tongrenlu.support.ApplicationSupport;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -150,7 +151,7 @@ public class PlayerTrackAdapter extends BaseAdapter {
                 break;
             }
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            if (ApplicationSupport.canUseThreadPoolExecutor()) {
                 this.task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
                                             bitmapCache,
                                             url,

@@ -6,6 +6,7 @@ import info.tongrenlu.android.music.TongrenluApplication;
 import info.tongrenlu.android.provider.HttpHelper;
 import info.tongrenlu.app.HttpConstants;
 import info.tongrenlu.domain.TrackBean;
+import info.tongrenlu.support.ApplicationSupport;
 import uk.co.senab.bitmapcache.BitmapLruCache;
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -122,7 +123,7 @@ public class PlaylistTrackListAdapter extends CursorAdapter {
                 break;
             }
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            if (ApplicationSupport.canUseThreadPoolExecutor()) {
                 this.task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
                                             bitmapCache,
                                             url,

@@ -6,6 +6,7 @@ import info.tongrenlu.android.music.TongrenluApplication;
 import info.tongrenlu.android.provider.HttpHelper;
 import info.tongrenlu.app.HttpConstants;
 import info.tongrenlu.domain.ArticleBean;
+import info.tongrenlu.support.ApplicationSupport;
 import uk.co.senab.bitmapcache.BitmapLruCache;
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -29,9 +30,7 @@ public class AlbumGridAdapter extends CursorAdapter {
     }
 
     @Override
-    public View newView(final Context context,
-                        final Cursor c,
-                        final ViewGroup parent) {
+    public View newView(final Context context, final Cursor c, final ViewGroup parent) {
         final View view = View.inflate(context, R.layout.list_item_album, null);
         final ViewHolder holder = new ViewHolder();
         holder.coverView = (ImageView) view.findViewById(R.id.article_cover);
@@ -90,7 +89,7 @@ public class AlbumGridAdapter extends CursorAdapter {
                     if (!this.isCancelled() && result != null) {
                         final Drawable emptyDrawable = new ShapeDrawable();
                         final TransitionDrawable fadeInDrawable = new TransitionDrawable(new Drawable[] { emptyDrawable,
-                                                                                                         result });
+                                result });
                         ViewHolder.this.coverView.setImageDrawable(fadeInDrawable);
                         fadeInDrawable.startTransition(LoadImageTask.TIME_SHORT);
                     }
@@ -118,7 +117,7 @@ public class AlbumGridAdapter extends CursorAdapter {
                 break;
             }
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            if (ApplicationSupport.canUseThreadPoolExecutor()) {
                 this.task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
                                             bitmapCache,
                                             url,

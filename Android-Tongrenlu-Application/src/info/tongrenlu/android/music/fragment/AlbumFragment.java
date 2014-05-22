@@ -7,6 +7,7 @@ import info.tongrenlu.android.music.R;
 import info.tongrenlu.android.music.adapter.AlbumGridAdapter;
 import info.tongrenlu.android.music.provider.TongrenluContentProvider;
 import android.app.Activity;
+import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.database.ContentObserver;
@@ -135,8 +136,8 @@ public class AlbumFragment extends TitleFragment implements OnItemClickListener 
             String selection = null;
             String[] selectionArgs = null;
 
-            if (args != null && args.containsKey("query")) {
-                String query = args.getString("query");
+            if (args != null && args.containsKey(SearchManager.QUERY)) {
+                String query = args.getString(SearchManager.QUERY);
                 selection = "title LIKE ?";
                 selectionArgs = new String[] { "%" + query + "%" };
             }

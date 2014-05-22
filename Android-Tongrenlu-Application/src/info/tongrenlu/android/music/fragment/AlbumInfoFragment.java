@@ -12,6 +12,7 @@ import info.tongrenlu.android.provider.HttpHelper;
 import info.tongrenlu.app.HttpConstants;
 import info.tongrenlu.domain.ArticleBean;
 import info.tongrenlu.domain.TrackBean;
+import info.tongrenlu.support.ApplicationSupport;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -34,7 +35,6 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -118,6 +118,36 @@ public class AlbumInfoFragment extends Fragment implements ActionSlideExpandable
                                            null,
                                            false);
 
+        final TextView articleTitle = (TextView) view.findViewById(R.id.article_title);
+        articleTitle.setText(this.mArticleBean.getTitle());
+
+        this.mAdapter = new AlbumTrackListAdapter(this.getActivity());
+
+        this.mEmpty = view.findViewById(android.R.id.empty);
+        this.mEmpty.setVisibility(View.GONE);
+
+        this.mListView = (ActionSlideExpandableListView) view.findViewById(android.R.id.list);
+        this.mListView.setAdapter(this.mAdapter);
+        this.mListView.setItemActionListener(this,
+                                             R.id.item,
+                                             R.id.action_play,
+                                             R.id.action_download);
+        this.mListView.setVisibility(View.GONE);
+
+        this.mProgressContainer = view.findViewById(R.id.progressContainer);
+
+        final Button playAllButton = (Button) view.findViewById(R.id.action_play_all);
+        playAllButton.setOnClickListener(this);
+        final Button downloadAllButton = (Button) view.findViewById(R.id.action_download_all);
+        downloadAllButton.setOnClickListener(this);
+
+        return view;
+    }
+
+    @Override
+    public void onViewCreated(final View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
         final TongrenluApplication application = (TongrenluApplication) this.getActivity()
                                                                             .getApplication();
         final BitmapLruCache bitmapCache = application.getBitmapCache();
@@ -172,22 +202,25 @@ public class AlbumInfoFragment extends Fragment implements ActionSlideExpandable
 
         final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(application);
         if (sharedPreferences.getBoolean(SettingsActivity.PREF_KEY_BACKGROUND_RENDER,
-                                         Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1)) {
-            final String backgroundUrl = HttpConstants.getCoverUrl(application,
-<<<<<<< HEAD
-                                                                   articleId,
-                                                                   HttpConstants.L_COVER);
-=======
-                                                                   this.mArticleId,
-                                                                   HttpConstants.M_COVER);
->>>>>>> refs/remotes/origin/master
+                                         ApplicationSupport.canUseRenderScript())) {
+            String backgroundUrl = null;
+            if (ApplicationSupport.canUseLargeHeap()) {
+                backgroundUrl = HttpConstants.getCoverUrl(application,
+                                                          articleId,
+                                                          HttpConstants.L_COVER);
+            } else {
+                backgroundUrl = HttpConstants.getCoverUrl(application,
+                                                          articleId,
+                                                          HttpConstants.M_COVER);
+            }
             new LoadBlurImageTask() {
 
+                @SuppressWarnings("deprecation")
                 @Override
                 protected void onPostExecute(final Drawable result) {
                     super.onPostExecute(result);
                     if (!this.isCancelled() && result != null) {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                        if (ApplicationSupport.canUseViewBackground()) {
                             view.setBackground(result);
                         } else {
                             view.setBackgroundDrawable(result);
@@ -197,31 +230,6 @@ public class AlbumInfoFragment extends Fragment implements ActionSlideExpandable
 
             }.execute(bitmapCache, backgroundUrl, http, application);
         }
-
-        final TextView articleTitle = (TextView) view.findViewById(R.id.article_title);
-        articleTitle.setText(this.mArticleBean.getTitle());
-
-        this.mAdapter = new AlbumTrackListAdapter(this.getActivity());
-
-        this.mEmpty = view.findViewById(android.R.id.empty);
-        this.mEmpty.setVisibility(View.GONE);
-
-        this.mListView = (ActionSlideExpandableListView) view.findViewById(android.R.id.list);
-        this.mListView.setAdapter(this.mAdapter);
-        this.mListView.setItemActionListener(this,
-                                             R.id.item,
-                                             R.id.action_play,
-                                             R.id.action_download);
-        this.mListView.setVisibility(View.GONE);
-
-        this.mProgressContainer = view.findViewById(R.id.progressContainer);
-
-        final Button playAllButton = (Button) view.findViewById(R.id.action_play_all);
-        playAllButton.setOnClickListener(this);
-        final Button downloadAllButton = (Button) view.findViewById(R.id.action_download_all);
-        downloadAllButton.setOnClickListener(this);
-
-        return view;
     }
 
     @Override

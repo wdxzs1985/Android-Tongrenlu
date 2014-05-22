@@ -1,0 +1,12 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+    
+    
+    <fragment android:id="@+id/player"
+         class="info.tongrenlu.android.music.fragment.PlayerFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+    
+</FrameLayout>

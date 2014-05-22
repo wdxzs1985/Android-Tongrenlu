@@ -4,7 +4,6 @@ import info.tongrenlu.android.music.fragment.AlbumFragment;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -48,7 +47,7 @@ public class SearchActivity extends ActionBarActivity {
         final FragmentTransaction transaction = fragmentManager.beginTransaction();
 
         final Bundle args = new Bundle();
-        args.putString("query", query);
+        args.putString(SearchManager.QUERY, query);
 
         final Fragment fragment = new AlbumFragment();
         fragment.setArguments(args);
@@ -62,17 +61,15 @@ public class SearchActivity extends ActionBarActivity {
     public boolean onCreateOptionsMenu(final Menu menu) {
         this.getMenuInflater().inflate(R.menu.activity_search, menu);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            final SearchManager searchManager = (SearchManager) this.getSystemService(Context.SEARCH_SERVICE);
-            final MenuItem searchItem = menu.findItem(R.id.action_search);
-            final SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
-            searchView.setSearchableInfo(searchManager.getSearchableInfo(this.getComponentName()));
-            searchView.setIconifiedByDefault(false);
+        final SearchManager searchManager = (SearchManager) this.getSystemService(Context.SEARCH_SERVICE);
+        final MenuItem searchItem = menu.findItem(R.id.action_search);
+        final SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(this.getComponentName()));
+        searchView.setIconifiedByDefault(false);
 
-            final String query = this.getIntent()
-                                     .getStringExtra(SearchManager.QUERY);
-            searchView.setQuery(query, false);
-        }
+        final String query = this.getIntent()
+                                 .getStringExtra(SearchManager.QUERY);
+        searchView.setQuery(query, false);
         return true;
     }
 }

@@ -1,6 +1,7 @@
 package info.tongrenlu.android.image;
 
 import info.tongrenlu.android.provider.HttpHelper;
+import info.tongrenlu.support.ApplicationSupport;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -13,7 +14,6 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.util.DisplayMetrics;
 
 public class LoadBlurImageTask extends AsyncTask<Object, Object, Drawable> {
@@ -42,7 +42,7 @@ public class LoadBlurImageTask extends AsyncTask<Object, Object, Drawable> {
         }
 
         Bitmap blurBitmap = wrapper.getBitmap();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+        if (ApplicationSupport.canUseRenderScript()) {
             blurBitmap = RenderScriptBlur.fastblur(context,
                                                    blurBitmap,
                                                    LoadBlurImageTask.BLUR_RADIUS);

@@ -10,7 +10,6 @@ import info.tongrenlu.app.CommonConstants;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -109,13 +108,11 @@ public class MainActivity extends ActionBarActivity {
     public boolean onCreateOptionsMenu(final Menu menu) {
         this.getMenuInflater().inflate(R.menu.activity_main, menu);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            final SearchManager searchManager = (SearchManager) this.getSystemService(Context.SEARCH_SERVICE);
-            final MenuItem searchItem = menu.findItem(R.id.action_search);
-            final SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
-            searchView.setSearchableInfo(searchManager.getSearchableInfo(this.getComponentName()));
-            searchView.setIconifiedByDefault(false);
-        }
+        final SearchManager searchManager = (SearchManager) this.getSystemService(Context.SEARCH_SERVICE);
+        final MenuItem searchItem = menu.findItem(R.id.action_search);
+        final SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(this.getComponentName()));
+        searchView.setIconifiedByDefault(false);
         return true;
     }
 
@@ -126,9 +123,6 @@ public class MainActivity extends ActionBarActivity {
             this.showSetting();
             return true;
         case R.id.action_search:
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
-                this.onSearchRequested();
-            }
             return true;
         default:
             return super.onOptionsItemSelected(item);
