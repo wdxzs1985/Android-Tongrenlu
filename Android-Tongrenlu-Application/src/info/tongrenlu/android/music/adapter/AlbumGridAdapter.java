@@ -78,7 +78,7 @@ public class AlbumGridAdapter extends CursorAdapter {
                     Drawable result = super.doInBackground(params);
                     if (result == null) {
                         result = context.getResources()
-                                        .getDrawable(R.drawable.default_180);
+                                        .getDrawable(R.drawable.default_cover);
                     }
                     return result;
                 }

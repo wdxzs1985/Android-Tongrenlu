@@ -39,6 +39,7 @@
     <string name="player_next">下一首</string>
     <string name="player_play">播放</string>
     <string name="player_stop">停止</string>
+    <string name="player_list">正在播放</string>
     
     <string name="err_network">网络连接失败</string>
     
@@ -63,6 +64,7 @@
     <string name="action_update_later">以后再说</string>
     <string name="action_update_never">永不更新</string>
     <string name="action_search">搜搜</string>
+    <string name="action_close">关闭</string>
     
     <string name="prefs_title_player">播放器设置</string>
     <string name="prefs_summary_player">播放器设置</string>

@@ -181,7 +181,7 @@ public class AlbumInfoFragment extends Fragment implements ActionSlideExpandable
                 Drawable result = super.doInBackground(params);
                 if (result == null) {
                     result = AlbumInfoFragment.this.getResources()
-                                                   .getDrawable(R.drawable.default_120);
+                                                   .getDrawable(R.drawable.default_cover);
                 }
                 return result;
             }

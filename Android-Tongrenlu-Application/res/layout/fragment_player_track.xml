@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout  xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" 
+    android:background="#CC000000">
+    <TextView android:id="@+id/label_player_list"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_toLeftOf="@+id/action_close"
+        android:layout_alignBottom="@+id/action_close"
+        android:gravity="center_vertical"
+        android:text="@string/player_list"
+        android:textSize="24sp"
+        android:paddingLeft="16dp"
+        />
+    <ImageButton android:id="@+id/action_close"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:src="@android:drawable/ic_menu_close_clear_cancel"
+        android:contentDescription="@string/action_close"
+        style="@style/transparentButton"
+        />
+    "
+    <ListView android:id="@android:id/list"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/action_close"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        />
+</RelativeLayout>

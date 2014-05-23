@@ -53,8 +53,7 @@ public class AlbumInfoActivity extends ActionBarActivity implements AlbumInfoFra
         actionBar.setDisplayHomeAsUpEnabled(true);
 
         final FragmentManager fm = this.getSupportFragmentManager();
-        final CursorFragmentAdapter adapter = new CursorFragmentAdapter(fm,
-                                                                        null) {
+        this.mAdapter = new CursorFragmentAdapter(fm, null) {
 
             @Override
             protected Fragment newFragment(final Cursor c) {
@@ -69,16 +68,7 @@ public class AlbumInfoActivity extends ActionBarActivity implements AlbumInfoFra
                 return fragment;
             }
 
-            @Override
-            public CharSequence getPageTitle(final int position) {
-                final Cursor c = this.getCursor();
-                c.moveToPosition(position);
-                return c.getString(c.getColumnIndex("title"));
-            }
-
         };
-        this.mAdapter = adapter;
-
         this.mPager = (ViewPager) this.findViewById(R.id.pager);
         this.mPager.setAdapter(this.mAdapter);
         this.mPager.setPageTransformer(true, new DepthPageTransformer());

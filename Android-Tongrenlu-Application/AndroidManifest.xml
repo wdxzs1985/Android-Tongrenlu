@@ -4,7 +4,7 @@
     android:versionCode="5"
     android:versionName="Tongrenlu / 2" >
 
-    <uses-sdk android:minSdkVersion="7" android:targetSdkVersion="10" />
+    <uses-sdk android:minSdkVersion="7" android:targetSdkVersion="19" />
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
@@ -69,7 +69,7 @@
         
         <service android:name="MusicService" android:exported="false">
             <intent-filter>
-                <action android:name="info.tongrenlu.android.MusicService.action.STATE" />
+                <action android:name="info.tongrenlu.android.MusicService.action.QUERY" />
 	            <action android:name="info.tongrenlu.android.MusicService.action.TOGGLE_PLAYBACK" />
                 <action android:name="info.tongrenlu.android.MusicService.action.TOGGLE_LOOP" />
                 <action android:name="info.tongrenlu.android.MusicService.action.TOGGLE_SHUFFLE" />

@@ -10,5 +10,7 @@
     <dimen name="track_title_size">16sp</dimen>
     <dimen name="track_artist_size">12sp</dimen>
     
+    <dimen name="player_timetext_size">16sp</dimen>
+    
     <dimen name="player_button_height">44dp</dimen>
 </resources>
