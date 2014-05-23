@@ -162,7 +162,6 @@ public class MusicPlayerActivity extends FragmentActivity implements OnClickList
             this.initShuffleButtonImage();
             break;
         case R.id.article_cover:
-            System.out.println("click article_cover");
             this.showPlaylist();
             break;
         default:

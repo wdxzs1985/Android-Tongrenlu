@@ -98,22 +98,30 @@ public class PlayerTrackFragment extends Fragment implements OnItemClickListener
     }
 
     protected void onMusicPlayerUpdate(final Intent intent) {
+
         final ArrayList<TrackBean> playlist = intent.getParcelableArrayListExtra("playlist");
         final int position = intent.getIntExtra("position", 0);
         if (CollectionUtils.isNotEmpty(playlist)) {
             this.mAdapter.setPlaylist(playlist);
+            this.mAdapter.setActivePosition(position);
             this.mAdapter.notifyDataSetChanged();
-            this.mListView.setItemChecked(position, true);
+            System.out.println("notifyDataSetChanged");
         }
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
+        this.mLocalBroadcastManager.unregisterReceiver(this.mMusicUpdateReceiver);
     }
 
     @Override
     public void onItemClick(final AdapterView<?> listView, final View itemView, final int position, final long itemId) {
+        if (position == ListView.INVALID_POSITION) {
+            return;
+        }
+        this.mListView.setItemChecked(position, true);
+
         Context context = this.getActivity().getApplicationContext();
         final Intent playAction = new Intent(context, MusicService.class);
         playAction.setAction(MusicService.ACTION_ADD);

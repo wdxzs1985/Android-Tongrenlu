@@ -454,7 +454,6 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
             Collections.shuffle(this.mPlayList);
         }
         this.mPosition = this.mPlayList.indexOf(this.mNowPlaying);
-        this.progressQueryStateRequest(true);
     }
 
     protected void actionReset() {
@@ -462,10 +461,11 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
         this.mDuration = 0;
         this.mPercent = 0;
         this.sendNotification(this.mNowPlaying);
+        this.progressQueryStateRequest(true);
 
+        Uri data = null;
         final String articleId = this.mNowPlaying.getArticleId();
         final String fileId = this.mNowPlaying.getFileId();
-        Uri data = null;
         final File source = HttpConstants.getMp3(this, articleId, fileId);
         if (source.exists()) {
             data = Uri.fromFile(source);
@@ -627,6 +627,7 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
         final String[] entries = res.getStringArray(R.array.pref_entries_shuffle_play);
         this.showToast(entries[flag], Toast.LENGTH_LONG);
         this.actionInitPlaylist();
+        this.progressQueryStateRequest(true);
     }
 
     public int getShuffleFlag() {

@@ -24,12 +24,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 
 public class PlayerTrackAdapter extends BaseAdapter {
 
     private List<TrackBean> mPlaylist = new LinkedList<TrackBean>();
-    private int mActivePosition = 0;
+    private int mActivePosition = ListView.INVALID_POSITION;
 
     @Override
     public int getCount() {
@@ -54,7 +55,10 @@ public class PlayerTrackAdapter extends BaseAdapter {
         if (view == null) {
             view = this.newView(context, trackBean, parent);
         }
-        this.bindView(view, context, trackBean);
+        this.bindView(view,
+                      context,
+                      trackBean,
+                      this.mActivePosition == position);
         return view;
     }
 
@@ -70,7 +74,9 @@ public class PlayerTrackAdapter extends BaseAdapter {
         return view;
     }
 
-    public void bindView(final View view, final Context context, final TrackBean trackBean) {
+    public void bindView(final View view, final Context context, final TrackBean trackBean, boolean isActive) {
+        view.setAlpha(isActive ? 1f : .6f);
+
         final ViewHolder holder = (ViewHolder) view.getTag();
         holder.update(context, trackBean);
     }
