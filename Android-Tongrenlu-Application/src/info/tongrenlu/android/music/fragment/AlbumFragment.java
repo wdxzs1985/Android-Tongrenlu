@@ -19,6 +19,7 @@ import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.CursorAdapter;
+import android.support.v7.widget.SearchView;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -111,8 +112,20 @@ public class AlbumFragment extends TitleFragment implements OnItemClickListener 
 
     @Override
     public void onCreateOptionsMenu(final Menu menu, final MenuInflater inflater) {
-        inflater.inflate(R.menu.fragment_music_grid, menu);
+        inflater.inflate(R.menu.fragment_album, menu);
 
+        Activity activity = this.getActivity();
+        final SearchManager searchManager = (SearchManager) activity.getSystemService(Context.SEARCH_SERVICE);
+        final MenuItem searchItem = menu.findItem(R.id.action_search);
+        final SearchView searchView = (SearchView) searchItem.getActionView();
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(activity.getComponentName()));
+        searchView.setIconifiedByDefault(false);
+
+        if (this.getArguments() != null) {
+            final String query = this.getArguments()
+                                     .getString(SearchManager.QUERY);
+            searchView.setQuery(query, false);
+        }
     }
 
     @Override
