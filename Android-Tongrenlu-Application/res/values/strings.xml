@@ -19,14 +19,8 @@
     <string name="press_back_hit_1">1 HIT!</string>
     <string name="press_back_hit_2">2 HIT! 退出!</string>
     
-    <string name="dial_info">提示</string>
-    <string name="dial_message_download_confirm_1">当前歌曲尚未下载完成，是否继续下载？</string>
-    <string name="dial_message_download_confirm_2">找不到歌曲文件，是否重新下载？</string>
-    <string name="dial_info_new_version">发现新版本</string>
-    <string name="dial_update">自动更新</string>
-    <string name="it_is_new">已经是最新版本</string>
-    <string name="dial_create_playlist">新建歌单</string>
-    <string name="dial_select_playlist">选择要加入的歌单</string>
+    <string name="title_new_playlist">新建歌单</string>
+    <string name="title_select_playlist">选择要加入的歌单</string>
     
     <string name="article">专辑</string>
     <string name="article_cover">专辑封面</string>
@@ -50,21 +44,23 @@
     <string name="download_waiting">还有%d首正在等待</string>
     <string name="download_finish">下载完成</string>
     
-    <string name="action_play">播放</string>
-    <string name="action_play_all">全部播放</string>
+    <string name="action_cancel">取消</string>
+    <string name="action_create">创建</string>
+    <string name="action_close">关闭</string>
+    <string name="action_delete">删除</string>
     <string name="action_download">下载</string>
     <string name="action_download_all">全部下载</string>
-    <string name="action_delete">删除</string>
-    <string name="action_delete_playlist">删除这个歌单</string>
-    <string name="action_create">创建</string>
+    <string name="action_add_playlist">删除歌单</string>
+    <string name="action_delete_playlist">删除歌单</string>
+    <string name="action_edit_playlist">编辑歌单</string>
     <string name="action_new_playlist">加到新歌单</string>
-    <string name="action_cancel">取消</string>
-    <string name="action_refresh">更新专辑列表</string>
+    <string name="action_play">播放</string>
+    <string name="action_play_all">全部播放</string>
+    <string name="action_refresh_album">更新专辑列表</string>
+    <string name="action_search">搜搜</string>
     <string name="action_update_now">马上更新</string>
     <string name="action_update_later">以后再说</string>
     <string name="action_update_never">永不更新</string>
-    <string name="action_search">搜搜</string>
-    <string name="action_close">关闭</string>
     
     <string name="prefs_title_player">播放器设置</string>
     <string name="prefs_summary_player">播放器设置</string>

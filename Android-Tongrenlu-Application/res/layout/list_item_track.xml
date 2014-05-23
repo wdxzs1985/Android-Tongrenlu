@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:slideexpandable="http://schemas.android.com/apk/res-auto"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:orientation="vertical">
+    <RelativeLayout android:id="@+id/item"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/album_icon_size">
+        <ImageView android:id="@+id/article_cover"
+                android:src="@drawable/default_cover"
+                android:contentDescription="@string/article_cover"
+                android:layout_width="@dimen/album_icon_size"
+                android:layout_height="@dimen/album_icon_size"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:scaleType="centerCrop" />
+        <TextView android:id="@+id/track_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@+id/article_cover"
+                android:layout_toLeftOf="@+id/expandable_toggle_button"
+                android:layout_alignParentTop="true"
+                android:singleLine="true"
+                android:ellipsize="marquee"
+                android:text="@string/track_title"
+                android:textSize="@dimen/track_title_size"
+                android:paddingLeft="16dp"
+                android:paddingTop="8dp"/>
+        <TextView android:id="@+id/track_artist"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/track_title"
+                android:layout_toRightOf="@+id/article_cover"
+                android:layout_toLeftOf="@+id/expandable_toggle_button"
+                android:singleLine="true"
+                android:ellipsize="marquee"
+                android:text="@string/track_artist"
+                android:textSize="@dimen/track_artist_size"
+                android:paddingLeft="16dp"
+                android:paddingTop="8dp"/>
+        <ImageButton android:id="@+id/expandable_toggle_button"
+                android:src="@android:drawable/ic_menu_more"
+                android:contentDescription="@string/label_more"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentRight="true"
+                android:padding="16dp"
+                style="@style/transparentButton"
+                />
+    </RelativeLayout>
+    
+    <LinearLayout android:id="@+id/expandable"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <Button android:id="@+id/action_add_playlist" 
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="@string/action_add_playlist"
+                style="@style/transparentButton"
+                />
+            <Button android:id="@+id/action_delete" 
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="@string/action_delete"
+                style="@style/transparentButton"
+                />
+    </LinearLayout>
+</LinearLayout>

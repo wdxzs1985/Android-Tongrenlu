@@ -22,17 +22,15 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public class PlaylistTrackListAdapter extends CursorAdapter {
+public class TrackListAdapter extends CursorAdapter {
 
-    public PlaylistTrackListAdapter(final Context context) {
+    public TrackListAdapter(final Context context) {
         super(context, null, false);
     }
 
     @Override
     public View newView(final Context context, final Cursor c, final ViewGroup viewGroup) {
-        final View view = View.inflate(context,
-                                       R.layout.list_item_playlist_track,
-                                       null);
+        final View view = View.inflate(context, R.layout.list_item_track, null);
         final ViewHolder holder = new ViewHolder();
         holder.coverView = (ImageView) view.findViewById(R.id.article_cover);
         holder.titleView = (TextView) view.findViewById(R.id.track_title);

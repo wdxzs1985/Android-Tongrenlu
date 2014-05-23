@@ -5,7 +5,7 @@ import info.tongrenlu.android.music.MainActivity;
 import info.tongrenlu.android.music.MusicPlayerActivity;
 import info.tongrenlu.android.music.MusicService;
 import info.tongrenlu.android.music.R;
-import info.tongrenlu.android.music.adapter.PlaylistTrackListAdapter;
+import info.tongrenlu.android.music.adapter.TrackListAdapter;
 import info.tongrenlu.android.music.provider.TongrenluContentProvider;
 import info.tongrenlu.app.HttpConstants;
 import info.tongrenlu.domain.TrackBean;
@@ -76,7 +76,7 @@ public class TrackFragment extends TitleFragment implements ActionSlideExpandabl
         final View view = inflater.inflate(R.layout.fragment_expandable_list_view,
                                            null,
                                            false);
-        this.mAdapter = new PlaylistTrackListAdapter(this.getActivity());
+        this.mAdapter = new TrackListAdapter(this.getActivity());
         this.mEmpty = view.findViewById(android.R.id.empty);
         this.mListView = (ActionSlideExpandableListView) view.findViewById(android.R.id.list);
         this.mListView.setAdapter(this.mAdapter);
@@ -145,7 +145,6 @@ public class TrackFragment extends TitleFragment implements ActionSlideExpandabl
     public boolean onOptionsItemSelected(final MenuItem item) {
         switch (item.getItemId()) {
         case R.id.action_play_all:
-            // this.refreshAlbumList();
             this.playTrack(0);
             break;
         default:
@@ -159,8 +158,11 @@ public class TrackFragment extends TitleFragment implements ActionSlideExpandabl
 
         switch (clickedView.getId()) {
         case R.id.item:
-        case R.id.action_play:
             this.playTrack(position);
+            break;
+        case R.id.action_add_playlist:
+            // TODO
+            // this.addPlaylist(position);
             break;
         case R.id.action_delete:
             this.deleteTrack(position);

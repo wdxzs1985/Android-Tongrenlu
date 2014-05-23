@@ -9,6 +9,6 @@
           tongrenlu:actionViewClass="android.support.v7.widget.SearchView" />
     
     <item android:id="@+id/action_refresh"
-        android:title="@string/action_refresh"
+        android:title="@string/action_refresh_album"
         android:icon="@android:drawable/ic_popup_sync"></item>
 </menu>

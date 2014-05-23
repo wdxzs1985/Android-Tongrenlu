@@ -5,8 +5,6 @@ import android.app.SearchManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 
@@ -15,7 +13,7 @@ public class SearchActivity extends ActionBarActivity {
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        this.setContentView(R.layout.activity_search);
+        this.setContentView(R.layout.activity_fragment_container);
 
         final ActionBar actionBar = this.getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
@@ -38,17 +36,16 @@ public class SearchActivity extends ActionBarActivity {
     }
 
     private void doMySearch(final String query) {
-        final FragmentManager fragmentManager = this.getSupportFragmentManager();
-        final FragmentTransaction transaction = fragmentManager.beginTransaction();
-
         final Bundle args = new Bundle();
         args.putString(SearchManager.QUERY, query);
 
         final Fragment fragment = new AlbumFragment();
         fragment.setArguments(args);
 
-        transaction.replace(R.id.fragment_container, fragment);
-        transaction.commit();
+        this.getSupportFragmentManager()
+            .beginTransaction()
+            .replace(R.id.fragment_container, fragment)
+            .commit();
 
     }
 }

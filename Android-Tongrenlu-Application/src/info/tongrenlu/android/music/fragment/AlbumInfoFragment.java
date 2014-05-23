@@ -253,9 +253,6 @@ public class AlbumInfoFragment extends Fragment implements ActionSlideExpandable
     @Override
     public void onDestroy() {
         super.onDestroy();
-
-        this.mListener = null;
-
         final FragmentActivity activity = this.getActivity();
         activity.getContentResolver()
                 .unregisterContentObserver(this.contentObserver);
@@ -263,6 +260,12 @@ public class AlbumInfoFragment extends Fragment implements ActionSlideExpandable
                 .destroyLoader(this.albumTrackCursorLoaderId);
         activity.getSupportLoaderManager()
                 .destroyLoader(this.albumTrackJsonLoaderId);
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        this.mListener = null;
     }
 
     class AlbumTrackCursorLoaderCallback implements LoaderCallbacks<Cursor> {
@@ -435,7 +438,7 @@ public class AlbumInfoFragment extends Fragment implements ActionSlideExpandable
         switch (clickedView.getId()) {
         case R.id.item:
         case R.id.action_play:
-            this.mListener.onPlayAll(this.getTrackBeans(), position);
+            this.mListener.onPlay(this.getTrackBeans(), position);
             break;
         case R.id.action_download:
             this.mListener.onDownload(this.mArticleBean.getTitle(),
@@ -451,7 +454,7 @@ public class AlbumInfoFragment extends Fragment implements ActionSlideExpandable
         if (!this.mAdapter.isEmpty()) {
             switch (v.getId()) {
             case R.id.action_play_all:
-                this.mListener.onPlayAll(this.getTrackBeans(), 0);
+                this.mListener.onPlay(this.getTrackBeans(), 0);
                 break;
             case R.id.action_download_all:
                 this.mListener.onDownloadAll(this.mArticleBean.getTitle(),
@@ -495,9 +498,9 @@ public class AlbumInfoFragment extends Fragment implements ActionSlideExpandable
 
     public interface AlbumInfoFragmentListener {
 
-        void onDownload(String title, TrackBean trackBean);
+        void onPlay(ArrayList<TrackBean> trackBeanList, int position);
 
-        void onPlayAll(ArrayList<TrackBean> trackBeanList, int position);
+        void onDownload(String title, TrackBean trackBean);
 
         void onDownloadAll(String title, ArrayList<TrackBean> trackBeanList);
 

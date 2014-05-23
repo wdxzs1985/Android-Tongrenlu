@@ -42,20 +42,6 @@ public class PlaylistFragment extends TitleFragment implements OnItemClickListen
         String title = activity.getString(R.string.label_playlist);
         this.setTitle(title);
 
-        this.contentObserver = new ContentObserver(new Handler()) {
-            @Override
-            public void onChange(final boolean selfChange) {
-                super.onChange(selfChange);
-                activity.getSupportLoaderManager()
-                        .getLoader(MainActivity.PLAYLIST_LOADER)
-                        .onContentChanged();
-            }
-        };
-        activity.getContentResolver()
-                .registerContentObserver(TongrenluContentProvider.PLAYLIST_URI,
-                                         true,
-                                         this.contentObserver);
-
     }
 
     @Override
@@ -71,7 +57,7 @@ public class PlaylistFragment extends TitleFragment implements OnItemClickListen
 
     @Override
     public View onCreateView(final LayoutInflater inflater, final ViewGroup container, final Bundle savedInstanceState) {
-        final View view = inflater.inflate(R.layout.fragment_playlist,
+        final View view = inflater.inflate(R.layout.fragment_common_list_view,
                                            null,
                                            false);
         this.mAdapter = new SimpleCursorAdapter(this.getActivity(),
@@ -93,7 +79,22 @@ public class PlaylistFragment extends TitleFragment implements OnItemClickListen
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        FragmentActivity activity = this.getActivity();
+        final FragmentActivity activity = this.getActivity();
+
+        this.contentObserver = new ContentObserver(new Handler()) {
+            @Override
+            public void onChange(final boolean selfChange) {
+                super.onChange(selfChange);
+                activity.getSupportLoaderManager()
+                        .getLoader(MainActivity.PLAYLIST_LOADER)
+                        .onContentChanged();
+            }
+        };
+        activity.getContentResolver()
+                .registerContentObserver(TongrenluContentProvider.PLAYLIST_URI,
+                                         true,
+                                         this.contentObserver);
+
         activity.getSupportLoaderManager()
                 .initLoader(MainActivity.PLAYLIST_LOADER,
                             null,

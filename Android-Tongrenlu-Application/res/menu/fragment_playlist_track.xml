@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+<menu xmlns:android="http://schemas.android.com/apk/res/android" 
+     xmlns:tongrenlu="http://schemas.android.com/apk/res-auto" >
+    
+    <item android:id="@+id/action_play_all"
+        android:title="@string/action_play_all"
+        tongrenlu:showAsAction="ifRoom"/>
+        
     <item android:id="@+id/action_delete"
-        android:title="@string/action_delete"></item>
-    <item android:id="@+id/action_cancel"
-        android:title="@string/action_cancel"></item>
+        android:title="@string/action_delete_playlist"/>
+    
 </menu>
