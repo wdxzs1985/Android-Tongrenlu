@@ -112,8 +112,6 @@ public class MainActivity extends ActionBarActivity {
         case R.id.menu_settings:
             this.showSetting();
             return true;
-        case R.id.action_search:
-            return true;
         default:
             return super.onOptionsItemSelected(item);
         }

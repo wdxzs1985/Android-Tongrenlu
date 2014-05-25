@@ -6,6 +6,7 @@ import info.tongrenlu.android.music.MainActivity;
 import info.tongrenlu.android.music.R;
 import info.tongrenlu.android.music.adapter.AlbumGridAdapter;
 import info.tongrenlu.android.music.provider.TongrenluContentProvider;
+import info.tongrenlu.support.ApplicationSupport;
 import android.app.Activity;
 import android.app.SearchManager;
 import android.content.Context;
@@ -18,6 +19,7 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.CursorAdapter;
 import android.support.v7.widget.SearchView;
 import android.view.LayoutInflater;
@@ -45,7 +47,7 @@ public class AlbumFragment extends TitleFragment implements OnItemClickListener 
         this.setHasOptionsMenu(true);
 
         final FragmentActivity activity = this.getActivity();
-        String title = activity.getString(R.string.label_album);
+        final String title = activity.getString(R.string.label_album);
         this.setTitle(title);
 
         this.contentObserver = new ContentObserver(new Handler()) {
@@ -64,7 +66,9 @@ public class AlbumFragment extends TitleFragment implements OnItemClickListener 
     }
 
     @Override
-    public View onCreateView(final LayoutInflater inflater, final ViewGroup container, final Bundle savedInstanceState) {
+    public View onCreateView(final LayoutInflater inflater,
+                             final ViewGroup container,
+                             final Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.fragment_album, null, false);
         this.mAdapter = new AlbumGridAdapter(this.getActivity());
         this.mListView = (GridView) view.findViewById(android.R.id.list);
@@ -99,7 +103,10 @@ public class AlbumFragment extends TitleFragment implements OnItemClickListener 
     }
 
     @Override
-    public void onItemClick(final AdapterView<?> listView, final View itemView, final int position, final long itemId) {
+    public void onItemClick(final AdapterView<?> listView,
+                            final View itemView,
+                            final int position,
+                            final long itemId) {
         final Cursor c = (Cursor) listView.getItemAtPosition(position);
         final String articleId = c.getString(c.getColumnIndex("articleId"));
 
@@ -114,17 +121,19 @@ public class AlbumFragment extends TitleFragment implements OnItemClickListener 
     public void onCreateOptionsMenu(final Menu menu, final MenuInflater inflater) {
         inflater.inflate(R.menu.fragment_album, menu);
 
-        Activity activity = this.getActivity();
-        final SearchManager searchManager = (SearchManager) activity.getSystemService(Context.SEARCH_SERVICE);
-        final MenuItem searchItem = menu.findItem(R.id.action_search);
-        final SearchView searchView = (SearchView) searchItem.getActionView();
-        searchView.setSearchableInfo(searchManager.getSearchableInfo(activity.getComponentName()));
-        searchView.setIconifiedByDefault(false);
+        if (ApplicationSupport.canUseSearchView()) {
+            final Activity activity = this.getActivity();
+            final SearchManager searchManager = (SearchManager) activity.getSystemService(Context.SEARCH_SERVICE);
+            final MenuItem searchItem = menu.findItem(R.id.action_search);
+            final SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
+            searchView.setSearchableInfo(searchManager.getSearchableInfo(activity.getComponentName()));
+            searchView.setIconifiedByDefault(false);
 
-        if (this.getArguments() != null) {
-            final String query = this.getArguments()
-                                     .getString(SearchManager.QUERY);
-            searchView.setQuery(query, false);
+            if (this.getArguments() != null) {
+                final String query = this.getArguments()
+                                         .getString(SearchManager.QUERY);
+                searchView.setQuery(query, false);
+            }
         }
     }
 
@@ -144,13 +153,14 @@ public class AlbumFragment extends TitleFragment implements OnItemClickListener 
     private class AlbumCursorLoaderCallback implements LoaderCallbacks<Cursor> {
 
         @Override
-        public Loader<Cursor> onCreateLoader(final int loaderId, final Bundle args) {
+        public Loader<Cursor> onCreateLoader(final int loaderId,
+                                             final Bundle args) {
             final Context context = AlbumFragment.this.getActivity();
             String selection = null;
             String[] selectionArgs = null;
 
             if (args != null && args.containsKey(SearchManager.QUERY)) {
-                String query = args.getString(SearchManager.QUERY);
+                final String query = args.getString(SearchManager.QUERY);
                 selection = "title LIKE ?";
                 selectionArgs = new String[] { "%" + query + "%" };
             }
@@ -171,7 +181,7 @@ public class AlbumFragment extends TitleFragment implements OnItemClickListener 
                 AlbumFragment.this.mEmpty.setVisibility(View.VISIBLE);
                 AlbumFragment.this.mListView.setVisibility(View.GONE);
 
-                Activity activity = AlbumFragment.this.getActivity();
+                final Activity activity = AlbumFragment.this.getActivity();
                 if (activity instanceof MainActivity) {
                     ((MainActivity) AlbumFragment.this.getActivity()).dispatchUpdateAlbum();
                 } else {

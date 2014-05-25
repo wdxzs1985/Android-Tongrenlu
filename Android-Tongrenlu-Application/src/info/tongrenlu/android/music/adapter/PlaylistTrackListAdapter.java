@@ -29,7 +29,9 @@ public class PlaylistTrackListAdapter extends CursorAdapter {
     }
 
     @Override
-    public View newView(final Context context, final Cursor c, final ViewGroup viewGroup) {
+    public View newView(final Context context,
+                        final Cursor c,
+                        final ViewGroup viewGroup) {
         final View view = View.inflate(context,
                                        R.layout.list_item_playlist_track,
                                        null);
@@ -88,17 +90,21 @@ public class PlaylistTrackListAdapter extends CursorAdapter {
                 protected void onPostExecute(final Drawable result) {
                     super.onPostExecute(result);
                     if (!this.isCancelled() && result != null) {
-                        final Drawable emptyDrawable = new ShapeDrawable();
-                        final TransitionDrawable fadeInDrawable = new TransitionDrawable(new Drawable[] { emptyDrawable,
-                                result });
-                        ViewHolder.this.coverView.setImageDrawable(fadeInDrawable);
-                        fadeInDrawable.startTransition(LoadImageTask.TIME_SHORT);
+                        if (ApplicationSupport.canUseLargeHeap()) {
+                            final Drawable emptyDrawable = new ShapeDrawable();
+                            final TransitionDrawable fadeInDrawable = new TransitionDrawable(new Drawable[] { emptyDrawable,
+                                                                                                             result });
+                            ViewHolder.this.coverView.setImageDrawable(fadeInDrawable);
+                            fadeInDrawable.startTransition(LoadImageTask.TIME_SHORT);
+                        } else {
+                            ViewHolder.this.coverView.setImageDrawable(result);
+                        }
                     }
                 }
             };
             final TongrenluApplication application = (TongrenluApplication) context.getApplicationContext();
             final BitmapLruCache bitmapCache = application.getBitmapCache();
-            HttpHelper http = application.getHttpHelper();
+            final HttpHelper http = application.getHttpHelper();
 
             String url;
             switch (application.getResources().getDisplayMetrics().densityDpi) {

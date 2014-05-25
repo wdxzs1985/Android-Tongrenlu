@@ -61,6 +61,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/action_add_playlist"
                 style="@style/transparentButton"
+                android:visibility="gone"
                 />
             <Button android:id="@+id/action_delete" 
                 android:layout_width="0dp"

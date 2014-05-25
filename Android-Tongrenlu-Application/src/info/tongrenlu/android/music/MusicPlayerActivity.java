@@ -35,7 +35,8 @@ import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 
-public class MusicPlayerActivity extends FragmentActivity implements OnClickListener, OnSeekBarChangeListener {
+public class MusicPlayerActivity extends FragmentActivity implements
+        OnClickListener, OnSeekBarChangeListener {
 
     private LocalBroadcastManager mLocalBroadcastManager = null;
     private BroadcastReceiver mMusicReceiver = null;
@@ -239,7 +240,9 @@ public class MusicPlayerActivity extends FragmentActivity implements OnClickList
     }
 
     @Override
-    public void onProgressChanged(final SeekBar seekBar, final int progress, final boolean fromUser) {
+    public void onProgressChanged(final SeekBar seekBar,
+                                  final int progress,
+                                  final boolean fromUser) {
         if (fromUser) {
             this.updateCurrentTime(progress);
         }
@@ -323,11 +326,15 @@ public class MusicPlayerActivity extends FragmentActivity implements OnClickList
             protected void onPostExecute(final Drawable result) {
                 super.onPostExecute(result);
                 if (!this.isCancelled() && result != null) {
-                    final Drawable emptyDrawable = new ShapeDrawable();
-                    final TransitionDrawable fadeInDrawable = new TransitionDrawable(new Drawable[] { emptyDrawable,
-                            result });
-                    MusicPlayerActivity.this.mCoverView.setImageDrawable(result);
-                    fadeInDrawable.startTransition(LoadImageTask.TIME_SHORT);
+                    if (ApplicationSupport.canUseLargeHeap()) {
+                        final Drawable emptyDrawable = new ShapeDrawable();
+                        final TransitionDrawable fadeInDrawable = new TransitionDrawable(new Drawable[] { emptyDrawable,
+                                                                                                         result });
+                        MusicPlayerActivity.this.mCoverView.setImageDrawable(fadeInDrawable);
+                        fadeInDrawable.startTransition(LoadImageTask.TIME_SHORT);
+                    } else {
+                        MusicPlayerActivity.this.mCoverView.setImageDrawable(result);
+                    }
                 }
             }
 

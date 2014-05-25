@@ -22,6 +22,7 @@ import android.os.Build;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -38,19 +39,21 @@ public class PlayerTrackAdapter extends BaseAdapter {
     }
 
     @Override
-    public TrackBean getItem(int position) {
+    public TrackBean getItem(final int position) {
         return this.mPlaylist.get(position);
     }
 
     @Override
-    public long getItemId(int position) {
+    public long getItemId(final int position) {
         return position;
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        Context context = parent.getContext();
-        TrackBean trackBean = this.getItem(position);
+    public View getView(final int position,
+                        final View convertView,
+                        final ViewGroup parent) {
+        final Context context = parent.getContext();
+        final TrackBean trackBean = this.getItem(position);
         View view = convertView;
         if (view == null) {
             view = this.newView(context, trackBean, parent);
@@ -62,7 +65,9 @@ public class PlayerTrackAdapter extends BaseAdapter {
         return view;
     }
 
-    public View newView(final Context context, TrackBean trackBean, final ViewGroup parent) {
+    public View newView(final Context context,
+                        final TrackBean trackBean,
+                        final ViewGroup parent) {
         final View view = View.inflate(context,
                                        R.layout.list_item_player_track,
                                        null);
@@ -74,14 +79,27 @@ public class PlayerTrackAdapter extends BaseAdapter {
         return view;
     }
 
-    public void bindView(final View view, final Context context, final TrackBean trackBean, boolean isActive) {
-        view.setAlpha(isActive ? 1f : .6f);
+    public void bindView(final View view,
+                         final Context context,
+                         final TrackBean trackBean,
+                         final boolean isActive) {
+        final float alphaValue = isActive ? 1f : .6f;
+        if (ApplicationSupport.canSetViewAlpha()) {
+            view.setAlpha(alphaValue);
+        } else {
+            final AlphaAnimation alpha = new AlphaAnimation(alphaValue,
+                                                            alphaValue);
+            alpha.setDuration(0); // Make animation instant
+            alpha.setFillAfter(true); // Tell it to persist after the animation
+                                      // ends
+            view.startAnimation(alpha);
+        }
 
         final ViewHolder holder = (ViewHolder) view.getTag();
         holder.update(context, trackBean);
     }
 
-    public void setPlaylist(List<TrackBean> playlist) {
+    public void setPlaylist(final List<TrackBean> playlist) {
         this.mPlaylist = playlist;
     }
 
@@ -89,7 +107,7 @@ public class PlayerTrackAdapter extends BaseAdapter {
         return this.mActivePosition;
     }
 
-    public void setActivePosition(int activePosition) {
+    public void setActivePosition(final int activePosition) {
         this.mActivePosition = activePosition;
     }
 
@@ -123,17 +141,21 @@ public class PlayerTrackAdapter extends BaseAdapter {
                 protected void onPostExecute(final Drawable result) {
                     super.onPostExecute(result);
                     if (!this.isCancelled() && result != null) {
-                        final Drawable emptyDrawable = new ShapeDrawable();
-                        final TransitionDrawable fadeInDrawable = new TransitionDrawable(new Drawable[] { emptyDrawable,
-                                result });
-                        ViewHolder.this.coverView.setImageDrawable(fadeInDrawable);
-                        fadeInDrawable.startTransition(LoadImageTask.TIME_SHORT);
+                        if (ApplicationSupport.canUseLargeHeap()) {
+                            final Drawable emptyDrawable = new ShapeDrawable();
+                            final TransitionDrawable fadeInDrawable = new TransitionDrawable(new Drawable[] { emptyDrawable,
+                                                                                                             result });
+                            ViewHolder.this.coverView.setImageDrawable(fadeInDrawable);
+                            fadeInDrawable.startTransition(LoadImageTask.TIME_SHORT);
+                        } else {
+                            ViewHolder.this.coverView.setImageDrawable(result);
+                        }
                     }
                 }
             };
             final TongrenluApplication application = (TongrenluApplication) context.getApplicationContext();
             final BitmapLruCache bitmapCache = application.getBitmapCache();
-            HttpHelper http = application.getHttpHelper();
+            final HttpHelper http = application.getHttpHelper();
 
             String url;
             switch (application.getResources().getDisplayMetrics().densityDpi) {

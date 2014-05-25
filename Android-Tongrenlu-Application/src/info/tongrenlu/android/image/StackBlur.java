@@ -238,7 +238,7 @@ public class StackBlur {
             }
         }
 
-        Log.e("pix", w + " " + h + " " + pix.length);
+        System.out.println(w + " " + h + " " + pix.length);
         bitmap.setPixels(pix, 0, w, 0, 0, w, h);
         return bitmap;
     }

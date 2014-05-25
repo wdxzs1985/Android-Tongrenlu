@@ -4,6 +4,7 @@ import info.tongrenlu.android.music.MusicService;
 import info.tongrenlu.android.music.R;
 import info.tongrenlu.android.music.adapter.PlayerTrackAdapter;
 import info.tongrenlu.domain.TrackBean;
+import info.tongrenlu.support.ApplicationSupport;
 
 import java.util.ArrayList;
 
@@ -21,12 +22,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ImageButton;
 import android.widget.ListView;
 
-public class PlayerTrackFragment extends Fragment implements OnItemClickListener, OnClickListener {
+public class PlayerTrackFragment extends Fragment implements
+        OnItemClickListener, OnClickListener {
 
     private LocalBroadcastManager mLocalBroadcastManager = null;
     private BroadcastReceiver mMusicUpdateReceiver = null;
@@ -36,12 +39,14 @@ public class PlayerTrackFragment extends Fragment implements OnItemClickListener
     private PlayerTrackAdapter mAdapter = null;
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
     }
 
     @Override
-    public View onCreateView(final LayoutInflater inflater, final ViewGroup container, final Bundle savedInstanceState) {
+    public View onCreateView(final LayoutInflater inflater,
+                             final ViewGroup container,
+                             final Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.fragment_player_track,
                                            null,
                                            false);
@@ -49,26 +54,26 @@ public class PlayerTrackFragment extends Fragment implements OnItemClickListener
     }
 
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
+    public void onViewCreated(final View view, final Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         this.mAdapter = new PlayerTrackAdapter();
         this.mListView = (ListView) view.findViewById(android.R.id.list);
-        this.mListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+        this.mListView.setChoiceMode(AbsListView.CHOICE_MODE_SINGLE);
         this.mListView.setOnItemClickListener(this);
         this.mListView.setVisibility(View.VISIBLE);
         this.mListView.setAdapter(this.mAdapter);
 
-        ImageButton closeButton = (ImageButton) view.findViewById(R.id.action_close);
+        final ImageButton closeButton = (ImageButton) view.findViewById(R.id.action_close);
         closeButton.setOnClickListener(this);
     }
 
     @Override
-    public void onClick(View v) {
+    public void onClick(final View v) {
         this.getFragmentManager().popBackStack();
     }
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
+    public void onActivityCreated(final Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         this.initReceiver();
     }
@@ -80,7 +85,7 @@ public class PlayerTrackFragment extends Fragment implements OnItemClickListener
     }
 
     private void initReceiver() {
-        Context context = this.getActivity();
+        final Context context = this.getActivity();
         this.mLocalBroadcastManager = LocalBroadcastManager.getInstance(context);
         this.mMusicUpdateReceiver = new BroadcastReceiver() {
             @Override
@@ -105,7 +110,11 @@ public class PlayerTrackFragment extends Fragment implements OnItemClickListener
             this.mAdapter.setPlaylist(playlist);
             this.mAdapter.setActivePosition(position);
             this.mAdapter.notifyDataSetChanged();
-            System.out.println("notifyDataSetChanged");
+            if (ApplicationSupport.canUseSmoothScroll()) {
+                this.mListView.smoothScrollToPosition(position);
+            } else {
+                this.mListView.setSelection(position);
+            }
         }
     }
 
@@ -116,13 +125,14 @@ public class PlayerTrackFragment extends Fragment implements OnItemClickListener
     }
 
     @Override
-    public void onItemClick(final AdapterView<?> listView, final View itemView, final int position, final long itemId) {
-        if (position == ListView.INVALID_POSITION) {
+    public void onItemClick(final AdapterView<?> listView,
+                            final View itemView,
+                            final int position,
+                            final long itemId) {
+        if (position == AdapterView.INVALID_POSITION) {
             return;
         }
-        this.mListView.setItemChecked(position, true);
-
-        Context context = this.getActivity().getApplicationContext();
+        final Context context = this.getActivity().getApplicationContext();
         final Intent playAction = new Intent(context, MusicService.class);
         playAction.setAction(MusicService.ACTION_ADD);
         playAction.putExtra("position", position);
@@ -130,7 +140,7 @@ public class PlayerTrackFragment extends Fragment implements OnItemClickListener
     }
 
     protected void performUpdateUI() {
-        Context context = this.getActivity().getApplicationContext();
+        final Context context = this.getActivity().getApplicationContext();
         final Intent updateAction = new Intent(context, MusicService.class);
         updateAction.setAction(MusicService.ACTION_QUERY);
         updateAction.putExtra("includePlaylist", true);

@@ -8,19 +8,31 @@ public class ApplicationSupport {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1;
     }
 
+    public static boolean canUseViewBackground() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN;
+    }
+
     public static boolean canUseLargeHeap() {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
     }
 
-    public static boolean canUseViewBackground() {
-        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN;
+    public static boolean canUseThreadPoolExecutor() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
+    }
+
+    public static boolean canUseSearchView() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
+    }
+
+    public static boolean canSetViewAlpha() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
     }
 
     public static boolean canUseAudioFocusHelper() {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO;
     }
 
-    public static boolean canUseThreadPoolExecutor() {
-        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
+    public static boolean canUseSmoothScroll() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO;
     }
 }
