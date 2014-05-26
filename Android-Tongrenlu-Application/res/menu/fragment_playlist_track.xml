@@ -6,6 +6,9 @@
         android:title="@string/action_play_all"
         tongrenlu:showAsAction="ifRoom"/>
         
+    <item android:id="@+id/action_add_track"
+        android:title="@string/action_add_track"/>
+    
     <item android:id="@+id/action_delete"
         android:title="@string/action_delete_playlist"/>
     

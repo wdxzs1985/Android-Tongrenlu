@@ -28,8 +28,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ImageButton;
 import android.widget.ListView;
 
-public class PlayerTrackFragment extends Fragment implements
-        OnItemClickListener, OnClickListener {
+public class PlayerTrackFragment extends Fragment implements OnItemClickListener, OnClickListener {
 
     private LocalBroadcastManager mLocalBroadcastManager = null;
     private BroadcastReceiver mMusicUpdateReceiver = null;
@@ -44,9 +43,7 @@ public class PlayerTrackFragment extends Fragment implements
     }
 
     @Override
-    public View onCreateView(final LayoutInflater inflater,
-                             final ViewGroup container,
-                             final Bundle savedInstanceState) {
+    public View onCreateView(final LayoutInflater inflater, final ViewGroup container, final Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.fragment_player_track,
                                            null,
                                            false);
@@ -125,10 +122,7 @@ public class PlayerTrackFragment extends Fragment implements
     }
 
     @Override
-    public void onItemClick(final AdapterView<?> listView,
-                            final View itemView,
-                            final int position,
-                            final long itemId) {
+    public void onItemClick(final AdapterView<?> listView, final View itemView, final int position, final long itemId) {
         if (position == AdapterView.INVALID_POSITION) {
             return;
         }

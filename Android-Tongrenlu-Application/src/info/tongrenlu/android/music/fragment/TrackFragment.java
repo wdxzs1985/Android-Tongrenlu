@@ -2,22 +2,14 @@ package info.tongrenlu.android.music.fragment;
 
 import info.tongrenlu.android.fragment.TitleFragment;
 import info.tongrenlu.android.music.MainActivity;
-import info.tongrenlu.android.music.MusicPlayerActivity;
-import info.tongrenlu.android.music.MusicService;
 import info.tongrenlu.android.music.R;
 import info.tongrenlu.android.music.adapter.TrackListAdapter;
 import info.tongrenlu.android.music.provider.TongrenluContentProvider;
-import info.tongrenlu.app.HttpConstants;
 import info.tongrenlu.domain.TrackBean;
 
-import java.io.File;
 import java.util.ArrayList;
 
-import org.apache.commons.io.FileUtils;
-
-import android.content.ContentResolver;
-import android.content.ContentValues;
-import android.content.Intent;
+import android.app.Activity;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -44,6 +36,15 @@ public class TrackFragment extends TitleFragment implements ActionSlideExpandabl
     private CursorAdapter mAdapter = null;
 
     private ContentObserver contentObserver = null;
+    private TrackFragmentListener mListener = null;
+
+    @Override
+    public void onAttach(final Activity activity) {
+        super.onAttach(activity);
+        if (activity instanceof TrackFragmentListener) {
+            this.mListener = (TrackFragmentListener) activity;
+        }
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -82,7 +83,7 @@ public class TrackFragment extends TitleFragment implements ActionSlideExpandabl
         this.mListView.setAdapter(this.mAdapter);
         this.mListView.setItemActionListener(this,
                                              R.id.item,
-                                             R.id.action_play,
+                                             R.id.action_add_to_playlist,
                                              R.id.action_delete);
         this.mProgressContainer = view.findViewById(R.id.progressContainer);
         this.mProgressContainer.setVisibility(View.VISIBLE);
@@ -104,8 +105,24 @@ public class TrackFragment extends TitleFragment implements ActionSlideExpandabl
         loader.setUri(TongrenluContentProvider.TRACK_URI);
         loader.setSelection("downloadFlg = ?");
         loader.setSelectionArgs(new String[] { "1" });
-        loader.setSortOrder("_id asc");
+        loader.setSortOrder("articleId desc, trackNumber asc");
         return loader;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        final FragmentActivity activity = this.getActivity();
+        activity.getContentResolver()
+                .unregisterContentObserver(this.contentObserver);
+        activity.getSupportLoaderManager()
+                .destroyLoader(MainActivity.TRACK_LOADER);
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        this.mListener = null;
     }
 
     @Override
@@ -124,16 +141,6 @@ public class TrackFragment extends TitleFragment implements ActionSlideExpandabl
     @Override
     public void onLoaderReset(final Loader<Cursor> loader) {
         this.mAdapter.swapCursor(null);
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        final FragmentActivity activity = this.getActivity();
-        activity.getContentResolver()
-                .unregisterContentObserver(this.contentObserver);
-        activity.getSupportLoaderManager()
-                .destroyLoader(MainActivity.TRACK_LOADER);
     }
 
     @Override
@@ -160,9 +167,8 @@ public class TrackFragment extends TitleFragment implements ActionSlideExpandabl
         case R.id.item:
             this.playTrack(position);
             break;
-        case R.id.action_add_playlist:
-            // TODO
-            // this.addPlaylist(position);
+        case R.id.action_add_to_playlist:
+            this.addToPlaylist(position);
             break;
         case R.id.action_delete:
             this.deleteTrack(position);
@@ -186,58 +192,37 @@ public class TrackFragment extends TitleFragment implements ActionSlideExpandabl
                 c.moveToNext();
             }
 
-            final FragmentActivity activity = this.getActivity();
-            final Intent serviceIntent = new Intent(activity,
-                                                    MusicService.class);
-            serviceIntent.setAction(MusicService.ACTION_ADD);
-            serviceIntent.putParcelableArrayListExtra("trackBeanList",
-                                                      trackBeanList);
-            serviceIntent.putExtra("position", position);
-            activity.startService(serviceIntent);
-
-            final Intent activityIntent = new Intent(activity,
-                                                     MusicPlayerActivity.class);
-            this.startActivity(activityIntent);
+            this.mListener.onPlay(trackBeanList, position);
         }
+    }
+
+    private void addToPlaylist(int position) {
+        final Cursor c = (Cursor) this.mListView.getItemAtPosition(position);
+        TrackBean trackBean = new TrackBean();
+        trackBean.setArticleId(c.getString(c.getColumnIndex("articleId")));
+        trackBean.setFileId(c.getString(c.getColumnIndex("fileId")));
+        trackBean.setSongTitle(c.getString(c.getColumnIndex("songTitle")));
+        trackBean.setLeadArtist(c.getString(c.getColumnIndex("leadArtist")));
+        trackBean.setTrackNumber(0);
+
+        this.mListener.onAddToPlaylist(trackBean);
     }
 
     private void deleteTrack(int position) {
         final Cursor c = (Cursor) this.mListView.getItemAtPosition(position);
-        this.deleteFromTrack(c);
-        this.deleteFromPlaylistTrack(c);
-        this.deleteMp3File(c);
+        TrackBean trackBean = new TrackBean();
+        trackBean.setArticleId(c.getString(c.getColumnIndex("articleId")));
+        trackBean.setFileId(c.getString(c.getColumnIndex("fileId")));
+
+        this.mListener.onDeleteTrack(trackBean);
     }
 
-    private void deleteMp3File(Cursor c) {
-        String articleId = c.getString(c.getColumnIndex("articleId"));
-        String fileId = c.getString(c.getColumnIndex("fileId"));
+    public interface TrackFragmentListener {
 
-        final FragmentActivity activity = this.getActivity();
-        File file = HttpConstants.getMp3(activity, articleId, fileId);
-        FileUtils.deleteQuietly(file);
-    }
+        void onPlay(ArrayList<TrackBean> trackBeanList, int position);
 
-    private void deleteFromTrack(Cursor c) {
-        String articleId = c.getString(c.getColumnIndex("articleId"));
-        String fileId = c.getString(c.getColumnIndex("fileId"));
-        final FragmentActivity activity = this.getActivity();
-        ContentResolver contentResolver = activity.getContentResolver();
-        ContentValues values = new ContentValues();
-        values.put("downloadFlg", 0);
-        contentResolver.update(TongrenluContentProvider.TRACK_URI,
-                               values,
-                               "articleId = ? and fileId = ? and downloadFlg = 1",
-                               new String[] { articleId, fileId });
-        contentResolver.notifyChange(TongrenluContentProvider.TRACK_URI, null);
-    }
+        void onDeleteTrack(TrackBean trackBean);
 
-    private void deleteFromPlaylistTrack(Cursor c) {
-        String articleId = c.getString(c.getColumnIndex("articleId"));
-        String fileId = c.getString(c.getColumnIndex("fileId"));
-        final FragmentActivity activity = this.getActivity();
-        ContentResolver contentResolver = activity.getContentResolver();
-        contentResolver.delete(TongrenluContentProvider.PLAYLIST_TRACK_URI,
-                               "articleId = ? and fileId = ?",
-                               new String[] { articleId, fileId });
+        void onAddToPlaylist(TrackBean trackBean);
     }
 }

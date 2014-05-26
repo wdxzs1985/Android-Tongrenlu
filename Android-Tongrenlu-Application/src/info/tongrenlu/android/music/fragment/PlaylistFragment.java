@@ -57,7 +57,7 @@ public class PlaylistFragment extends TitleFragment implements OnItemClickListen
 
     @Override
     public View onCreateView(final LayoutInflater inflater, final ViewGroup container, final Bundle savedInstanceState) {
-        final View view = inflater.inflate(R.layout.fragment_common_list_view,
+        final View view = inflater.inflate(R.layout.fragment_simple_list_view,
                                            null,
                                            false);
         this.mAdapter = new SimpleCursorAdapter(this.getActivity(),

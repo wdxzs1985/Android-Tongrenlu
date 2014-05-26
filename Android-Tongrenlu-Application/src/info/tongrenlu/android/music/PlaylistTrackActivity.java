@@ -1,5 +1,7 @@
 package info.tongrenlu.android.music;
 
+import info.tongrenlu.android.music.fragment.PlaylistAddTrackFragment;
+import info.tongrenlu.android.music.fragment.PlaylistAddTrackFragment.PlaylistAddTrackFragmentListener;
 import info.tongrenlu.android.music.fragment.PlaylistTrackFragment;
 import info.tongrenlu.android.music.fragment.PlaylistTrackFragment.PlaylistTrackFragmentListener;
 import info.tongrenlu.android.music.provider.TongrenluContentProvider;
@@ -9,33 +11,37 @@ import java.util.ArrayList;
 
 import android.content.ContentResolver;
 import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBarActivity;
+import android.widget.Toast;
 
-public class PlaylistTrackActivity extends ActionBarActivity implements PlaylistTrackFragmentListener {
+public class PlaylistTrackActivity extends ActionBarActivity implements PlaylistTrackFragmentListener, PlaylistAddTrackFragmentListener {
 
     public static final int PLAYLIST_LOADER_ID = 0;
     public static final long BAD_ID = -1;
 
     public static final String PLAYLIST_ID = "playlistId";
 
+    private long mPlaylistId = BAD_ID;
+
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.setContentView(R.layout.activity_fragment_container);
 
-        final long playlistId = this.getIntent().getLongExtra("playlistId",
-                                                              BAD_ID);
-        if (playlistId == BAD_ID) {
+        this.mPlaylistId = this.getIntent().getLongExtra("playlistId", BAD_ID);
+        if (this.mPlaylistId == BAD_ID) {
             this.finish();
             return;
         }
 
         final Bundle args = new Bundle();
-        args.putLong(PLAYLIST_ID, playlistId);
+        args.putLong(PLAYLIST_ID, this.mPlaylistId);
 
         final Fragment fragment = new PlaylistTrackFragment();
         fragment.setArguments(args);
@@ -44,6 +50,7 @@ public class PlaylistTrackActivity extends ActionBarActivity implements Playlist
             .beginTransaction()
             .replace(R.id.fragment_container, fragment)
             .commit();
+
     }
 
     @Override
@@ -66,11 +73,25 @@ public class PlaylistTrackActivity extends ActionBarActivity implements Playlist
     }
 
     @Override
+    public void onSwapTrack(Uri trackUri, ArrayList<ContentValues> values) {
+        final ContentResolver contentResolver = this.getContentResolver();
+        for (ContentValues contentValues : values) {
+            Long id = contentValues.getAsLong("_id");
+            final Uri uri = ContentUris.withAppendedId(TongrenluContentProvider.PLAYLIST_TRACK_URI,
+                                                       id);
+            contentResolver.update(uri, contentValues, null, null);
+            System.out.println("update");
+        }
+        contentResolver.notifyChange(trackUri, null);
+    }
+
+    @Override
     public void onDeleteTrack(Uri trackUri, long id) {
         final Uri uri = ContentUris.withAppendedId(TongrenluContentProvider.PLAYLIST_TRACK_URI,
                                                    id);
         final ContentResolver contentResolver = this.getContentResolver();
         contentResolver.delete(uri, null, null);
+        // update track number
         contentResolver.update(trackUri, null, null, null);
         contentResolver.notifyChange(trackUri, null);
     }
@@ -86,4 +107,61 @@ public class PlaylistTrackActivity extends ActionBarActivity implements Playlist
                                      null);
         this.finish();
     }
+
+    @Override
+    public void onStartAddTrack() {
+        Fragment fragment = new PlaylistAddTrackFragment();
+        this.getSupportFragmentManager()
+            .beginTransaction()
+            .replace(R.id.fragment_container, fragment)
+            .addToBackStack(null)
+            .commit();
+    }
+
+    @Override
+    public void onAddTrack(TrackBean trackBean) {
+        final ContentResolver contentResolver = this.getContentResolver();
+        final ContentValues values = new ContentValues();
+        values.put("articleId", trackBean.getArticleId());
+        values.put("fileId", trackBean.getFileId());
+        values.put("album", trackBean.getAlbum());
+        values.put("songTitle", trackBean.getSongTitle());
+        values.put("leadArtist", trackBean.getLeadArtist());
+
+        final Uri contentUri = Uri.withAppendedPath(TongrenluContentProvider.PLAYLIST_URI,
+                                                    this.mPlaylistId + "/track");
+
+        if (trackBean.getTrackNumber() == 0) {
+            Cursor cursor = null;
+            try {
+                cursor = contentResolver.query(contentUri,
+                                               null,
+                                               null,
+                                               null,
+                                               null);
+                values.put("trackNumber", cursor.getCount() + 1);
+            } finally {
+                if (cursor != null) {
+                    cursor.close();
+                }
+            }
+        } else {
+            values.put("trackNumber", trackBean.getTrackNumber());
+        }
+
+        contentResolver.insert(contentUri, values);
+        contentResolver.notifyChange(contentUri, null);
+
+        String msg = this.getString(R.string.message_add_track_to_playlist,
+                                    trackBean.getSongTitle());
+        Toast.makeText(this.getApplicationContext(), msg, Toast.LENGTH_SHORT)
+             .show();
+
+    }
+
+    @Override
+    public void onAddTrackFinish() {
+        this.getSupportFragmentManager().popBackStack();
+    }
+
 }

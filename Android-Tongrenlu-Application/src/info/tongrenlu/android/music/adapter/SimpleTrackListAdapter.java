@@ -22,18 +22,16 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public class PlaylistTrackListAdapter extends CursorAdapter {
+public class SimpleTrackListAdapter extends CursorAdapter {
 
-    public PlaylistTrackListAdapter(final Context context) {
+    public SimpleTrackListAdapter(final Context context) {
         super(context, null, false);
     }
 
     @Override
-    public View newView(final Context context,
-                        final Cursor c,
-                        final ViewGroup viewGroup) {
+    public View newView(final Context context, final Cursor c, final ViewGroup viewGroup) {
         final View view = View.inflate(context,
-                                       R.layout.list_item_playlist_track,
+                                       R.layout.list_item_simple_track,
                                        null);
         final ViewHolder holder = new ViewHolder();
         holder.coverView = (ImageView) view.findViewById(R.id.article_cover);
@@ -93,7 +91,7 @@ public class PlaylistTrackListAdapter extends CursorAdapter {
                         if (ApplicationSupport.canUseLargeHeap()) {
                             final Drawable emptyDrawable = new ShapeDrawable();
                             final TransitionDrawable fadeInDrawable = new TransitionDrawable(new Drawable[] { emptyDrawable,
-                                                                                                             result });
+                                    result });
                             ViewHolder.this.coverView.setImageDrawable(fadeInDrawable);
                             fadeInDrawable.startTransition(LoadImageTask.TIME_SHORT);
                         } else {

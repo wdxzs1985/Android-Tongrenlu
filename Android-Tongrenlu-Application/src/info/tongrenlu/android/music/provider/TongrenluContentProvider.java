@@ -76,7 +76,7 @@ public class TongrenluContentProvider extends ContentProvider {
      * <li>update</li>
      * </ul>
      */
-    private static final int D_PLAYLIST_TRACK_SINGLE = 0x00115;
+    private static final int UD_PLAYLIST_TRACK_SINGLE = 0x00115;
 
     public static final String AUTHORITY = "info.tongrenlu.android.music";
     public static final Uri ALBUM_URI = Uri.parse("content://" + TongrenluContentProvider.AUTHORITY
@@ -127,7 +127,7 @@ public class TongrenluContentProvider extends ContentProvider {
 
         this.mUriMatcher.addURI(TongrenluContentProvider.AUTHORITY,
                                 "playlist/track/#",
-                                TongrenluContentProvider.D_PLAYLIST_TRACK_SINGLE);
+                                TongrenluContentProvider.UD_PLAYLIST_TRACK_SINGLE);
         return true;
     }
 
@@ -306,6 +306,8 @@ public class TongrenluContentProvider extends ContentProvider {
             return this.updatePlaylist(uri, values);
         case QIUD_PLAYLIST_TRACK:
             return this.updatePlaylistTrack(uri);
+        case UD_PLAYLIST_TRACK_SINGLE:
+            return this.updatePlaylistTrackById(uri, values);
         }
         return 0;
     }
@@ -362,6 +364,16 @@ public class TongrenluContentProvider extends ContentProvider {
         return length;
     }
 
+    private int updatePlaylistTrackById(Uri uri, final ContentValues values) {
+        final String _id = uri.getLastPathSegment();
+        final String selection = "_id = ?";
+        final String[] selectionArgs = new String[] { _id };
+        return this.mDbHelper.update("tb_playlist_track",
+                                     values,
+                                     selection,
+                                     selectionArgs);
+    }
+
     @Override
     public int delete(final Uri uri, final String selection, final String[] selectionArgs) {
         switch (this.mUriMatcher.match(uri)) {
@@ -369,7 +381,7 @@ public class TongrenluContentProvider extends ContentProvider {
             return this.deletePlaylist(uri);
         case QIUD_PLAYLIST_TRACK:
             return this.deletePlaylistTrackByPlaylistId(uri);
-        case D_PLAYLIST_TRACK_SINGLE:
+        case UD_PLAYLIST_TRACK_SINGLE:
             return this.deletePlaylistTrackById(uri);
         case D_PLAYLIST_TRACK:
             return this.deletePlaylistTrack(selection, selectionArgs);

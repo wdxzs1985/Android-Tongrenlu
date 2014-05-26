@@ -217,15 +217,11 @@ public class AlbumInfoActivity extends ActionBarActivity implements AlbumInfoFra
         long playlistId = ContentUris.parseId(uri);
         extras.putLong("playlistId", playlistId);
 
-        this.startDownload(extras);
+        this.onSelectPlaylist(extras);
     }
 
     @Override
     public void onSelectPlaylist(Bundle extras) {
-        this.startDownload(extras);
-    }
-
-    public void startDownload(Bundle extras) {
         Intent intent = new Intent(this, DownloadService.class);
         intent.setAction(DownloadService.ACTION_ADD);
         intent.putExtras(extras);
