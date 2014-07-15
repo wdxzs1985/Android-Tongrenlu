@@ -15,13 +15,17 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.CursorAdapter;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 
-public class PlaylistAddTrackFragment extends Fragment implements LoaderCallbacks<Cursor>, OnItemClickListener {
+public class PlaylistAddTrackFragment extends Fragment implements
+        LoaderCallbacks<Cursor>, OnItemClickListener {
 
     private View mProgressContainer = null;
     private View mEmpty = null;
@@ -41,6 +45,8 @@ public class PlaylistAddTrackFragment extends Fragment implements LoaderCallback
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        this.setHasOptionsMenu(true);
     }
 
     @Override
@@ -131,6 +137,23 @@ public class PlaylistAddTrackFragment extends Fragment implements LoaderCallback
         trackBean.setArtist(c.getString(c.getColumnIndex("artist")));
         trackBean.setTrackNumber(0);
         this.mListener.onAddTrack(trackBean);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(final Menu menu, final MenuInflater inflater) {
+        inflater.inflate(R.menu.fragment_playlist_add_track, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(final MenuItem item) {
+        switch (item.getItemId()) {
+        case R.id.action_close:
+            this.mListener.onAddTrackFinish();
+            break;
+        default:
+            break;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     public interface PlaylistAddTrackFragmentListener {
