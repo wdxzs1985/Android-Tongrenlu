@@ -7,7 +7,7 @@
     <FrameLayout android:id="@+id/listContainer"
         android:layout_width="match_parent" 
         android:layout_height="match_parent"
-        android:background="#99000000">
+        android:background="#80000000">
         <com.mobeta.android.dslv.DragSortListView
             android:id="@android:id/list"
             android:layout_width="fill_parent"

@@ -44,17 +44,12 @@ public class TrackListAdapter extends CursorAdapter {
     @Override
     public void bindView(final View view, final Context context, final Cursor c) {
         final ViewHolder holder = (ViewHolder) view.getTag();
-        final String articleId = c.getString(c.getColumnIndex("articleId"));
-        final String fileId = c.getString(c.getColumnIndex("fileId"));
-        final String songTitle = c.getString(c.getColumnIndex("songTitle"));
-        final String leadArtist = c.getString(c.getColumnIndex("leadArtist"));
-        final int trackNumber = c.getInt(c.getColumnIndex("trackNumber"));
         final TrackBean trackBean = new TrackBean();
-        trackBean.setArticleId(articleId);
-        trackBean.setFileId(fileId);
-        trackBean.setSongTitle(songTitle);
-        trackBean.setLeadArtist(leadArtist);
-        trackBean.setTrackNumber(trackNumber);
+        trackBean.setArticleId(c.getString(c.getColumnIndex("articleId")));
+        trackBean.setFileId(c.getString(c.getColumnIndex("fileId")));
+        trackBean.setName(c.getString(c.getColumnIndex("name")));
+        trackBean.setArtist(c.getString(c.getColumnIndex("artist")));
+        trackBean.setTrackNumber(c.getInt(c.getColumnIndex("trackNumber")));
         holder.update(context, trackBean);
     }
 
@@ -74,8 +69,8 @@ public class TrackListAdapter extends CursorAdapter {
             }
             this.trackBean = trackBean;
 
-            this.titleView.setText(trackBean.getSongTitle());
-            this.artistView.setText(trackBean.getLeadArtist());
+            this.titleView.setText(trackBean.getName());
+            this.artistView.setText(trackBean.getArtist());
 
             this.task = new LoadImageTask() {
                 @Override
@@ -91,7 +86,7 @@ public class TrackListAdapter extends CursorAdapter {
                         if (ApplicationSupport.canUseLargeHeap()) {
                             final Drawable emptyDrawable = new ShapeDrawable();
                             final TransitionDrawable fadeInDrawable = new TransitionDrawable(new Drawable[] { emptyDrawable,
-                                                                                                             result });
+                                    result });
                             ViewHolder.this.coverView.setImageDrawable(fadeInDrawable);
                             fadeInDrawable.startTransition(LoadImageTask.TIME_SHORT);
                         } else {
@@ -122,7 +117,7 @@ public class TrackListAdapter extends CursorAdapter {
             default:
                 url = HttpConstants.getCoverUrl(application,
                                                 trackBean.getArticleId(),
-                                                HttpConstants.XXS_COVER);
+                                                HttpConstants.XS_COVER);
                 break;
             }
 

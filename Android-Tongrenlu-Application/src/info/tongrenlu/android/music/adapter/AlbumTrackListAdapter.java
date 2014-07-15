@@ -27,7 +27,9 @@ public class AlbumTrackListAdapter extends CursorAdapter {
     }
 
     @Override
-    public View newView(final Context context, final Cursor c, final ViewGroup viewGroup) {
+    public View newView(final Context context,
+                        final Cursor c,
+                        final ViewGroup viewGroup) {
         final View view = View.inflate(context,
                                        R.layout.list_item_album_track,
                                        null);
@@ -42,21 +44,14 @@ public class AlbumTrackListAdapter extends CursorAdapter {
     @Override
     public void bindView(final View view, final Context context, final Cursor c) {
         final ViewHolder holder = (ViewHolder) view.getTag();
-        final String articleId = c.getString(c.getColumnIndex("articleId"));
-        final String fileId = c.getString(c.getColumnIndex("fileId"));
-        final String songTitle = c.getString(c.getColumnIndex("songTitle"));
-        final String leadArtist = c.getString(c.getColumnIndex("leadArtist"));
-        final String original = c.getString(c.getColumnIndex("original"));
-        final int trackNumber = c.getInt(c.getColumnIndex("trackNumber"));
-        final int downloadFlg = c.getInt(c.getColumnIndex("downloadFlg"));
         final TrackBean trackBean = new TrackBean();
-        trackBean.setArticleId(articleId);
-        trackBean.setFileId(fileId);
-        trackBean.setSongTitle(songTitle);
-        trackBean.setLeadArtist(leadArtist);
-        trackBean.setOriginal(original);
-        trackBean.setTrackNumber(trackNumber);
-        trackBean.setDownloadFlg(downloadFlg);
+        trackBean.setArticleId(c.getString(c.getColumnIndex("articleId")));
+        trackBean.setFileId(c.getString(c.getColumnIndex("fileId")));
+        trackBean.setName(c.getString(c.getColumnIndex("name")));
+        trackBean.setArtist(c.getString(c.getColumnIndex("artist")));
+        trackBean.setOriginal(c.getString(c.getColumnIndex("original")));
+        trackBean.setTrackNumber(c.getInt(c.getColumnIndex("trackNumber")));
+        // trackBean.setDownloadFlg(c.getColumnIndex("downloadFlg"));
         holder.update(context, trackBean);
     }
 
@@ -73,29 +68,29 @@ public class AlbumTrackListAdapter extends CursorAdapter {
             this.trackBean = trackBean;
             this.titleView.setText(String.format("%02d  %s",
                                                  trackBean.getTrackNumber(),
-                                                 trackBean.getSongTitle()));
+                                                 trackBean.getName()));
 
-            this.artistView.setText(trackBean.getLeadArtist());
+            this.artistView.setText(trackBean.getArtist());
 
-            String[] originals = StringUtils.split(trackBean.getOriginal(),
-                                                   System.getProperty("line.separator"));
-            List<Map<String, String>> data = new ArrayList<Map<String, String>>();
-            for (String original : originals) {
+            final String[] originals = StringUtils.split(trackBean.getOriginal(),
+                                                         System.getProperty("line.separator"));
+            final List<Map<String, String>> data = new ArrayList<Map<String, String>>();
+            for (final String original : originals) {
                 data.add(Collections.singletonMap("original",
                                                   StringUtils.strip(original)));
             }
 
-            SimpleAdapter adapter = new SimpleAdapter(context,
-                                                      data,
-                                                      R.layout.list_item_original,
-                                                      new String[] { "original" },
-                                                      new int[] { android.R.id.text1 });
+            final SimpleAdapter adapter = new SimpleAdapter(context,
+                                                            data,
+                                                            R.layout.list_item_original,
+                                                            new String[] { "original" },
+                                                            new int[] { android.R.id.text1 });
             this.originalList.setAdapter(adapter);
             this.setListViewHeightBasedOnChildren(this.originalList);
         }
 
-        public void setListViewHeightBasedOnChildren(ListView listView) {
-            ListAdapter listAdapter = listView.getAdapter();
+        public void setListViewHeightBasedOnChildren(final ListView listView) {
+            final ListAdapter listAdapter = listView.getAdapter();
             if (listAdapter == null) {
                 // pre-condition
                 return;
@@ -103,12 +98,12 @@ public class AlbumTrackListAdapter extends CursorAdapter {
 
             int totalHeight = 0;
             for (int i = 0; i < listAdapter.getCount(); i++) {
-                View listItem = listAdapter.getView(i, null, listView);
+                final View listItem = listAdapter.getView(i, null, listView);
                 listItem.measure(0, 0);
                 totalHeight += listItem.getMeasuredHeight();
             }
 
-            ViewGroup.LayoutParams params = listView.getLayoutParams();
+            final ViewGroup.LayoutParams params = listView.getLayoutParams();
             params.height = totalHeight + (listView.getDividerHeight() * (listAdapter.getCount() - 1));
             listView.setLayoutParams(params);
             listView.requestLayout();

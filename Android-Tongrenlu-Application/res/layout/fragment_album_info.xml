@@ -7,7 +7,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#99000000"
+        android:background="#80000000"
         android:paddingBottom="8dp"
         >
 	    <ImageView android:id="@+id/article_cover"

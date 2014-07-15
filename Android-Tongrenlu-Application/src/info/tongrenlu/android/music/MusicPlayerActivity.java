@@ -3,6 +3,7 @@ package info.tongrenlu.android.music;
 import info.tongrenlu.android.image.LoadBlurImageTask;
 import info.tongrenlu.android.image.LoadImageTask;
 import info.tongrenlu.android.music.fragment.PlayerTrackFragment;
+import info.tongrenlu.android.music.fragment.SettingFragment;
 import info.tongrenlu.android.provider.HttpHelper;
 import info.tongrenlu.app.HttpConstants;
 import info.tongrenlu.domain.TrackBean;
@@ -35,8 +36,7 @@ import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 
-public class MusicPlayerActivity extends FragmentActivity implements
-        OnClickListener, OnSeekBarChangeListener {
+public class MusicPlayerActivity extends FragmentActivity implements OnClickListener, OnSeekBarChangeListener {
 
     private LocalBroadcastManager mLocalBroadcastManager = null;
     private BroadcastReceiver mMusicReceiver = null;
@@ -179,8 +179,8 @@ public class MusicPlayerActivity extends FragmentActivity implements
     }
 
     private void initLoopButtonImage() {
-        final String value = this.mSharedPreferences.getString(SettingsActivity.PREF_KEY_LOOP_PLAY,
-                                                               SettingsActivity.PREF_DEFAULT_LOOP_PLAY);
+        final String value = this.mSharedPreferences.getString(SettingFragment.PREF_KEY_LOOP_PLAY,
+                                                               SettingFragment.PREF_DEFAULT_LOOP_PLAY);
         final Resources res = this.getResources();
         final String[] entryValues = res.getStringArray(R.array.pref_entry_values_loop_play);
         final int index = ArrayUtils.indexOf(entryValues, value);
@@ -198,21 +198,21 @@ public class MusicPlayerActivity extends FragmentActivity implements
     }
 
     public void actionLoop() {
-        final String value = this.mSharedPreferences.getString(SettingsActivity.PREF_KEY_LOOP_PLAY,
-                                                               SettingsActivity.PREF_DEFAULT_LOOP_PLAY);
+        final String value = this.mSharedPreferences.getString(SettingFragment.PREF_KEY_LOOP_PLAY,
+                                                               SettingFragment.PREF_DEFAULT_LOOP_PLAY);
         final Resources res = this.getResources();
         final String[] entryValues = res.getStringArray(R.array.pref_entry_values_loop_play);
         final int index = ArrayUtils.indexOf(entryValues, value);
         final int nextIndex = (index + 1) % entryValues.length;
         this.mSharedPreferences.edit()
-                               .putString(SettingsActivity.PREF_KEY_LOOP_PLAY,
+                               .putString(SettingFragment.PREF_KEY_LOOP_PLAY,
                                           entryValues[nextIndex])
                                .commit();
     }
 
     private void initShuffleButtonImage() {
-        final String value = this.mSharedPreferences.getString(SettingsActivity.PREF_KEY_SHUFFLE_PLAY,
-                                                               SettingsActivity.PREF_DEFAULT_SHUFFLE_PLAY);
+        final String value = this.mSharedPreferences.getString(SettingFragment.PREF_KEY_SHUFFLE_PLAY,
+                                                               SettingFragment.PREF_DEFAULT_SHUFFLE_PLAY);
         final Resources res = this.getResources();
         final String[] entryValues = res.getStringArray(R.array.pref_entry_values_shuffle_play);
         final int index = ArrayUtils.indexOf(entryValues, value);
@@ -227,14 +227,14 @@ public class MusicPlayerActivity extends FragmentActivity implements
     }
 
     public void actionShuffle() {
-        final String value = this.mSharedPreferences.getString(SettingsActivity.PREF_KEY_SHUFFLE_PLAY,
-                                                               SettingsActivity.PREF_DEFAULT_SHUFFLE_PLAY);
+        final String value = this.mSharedPreferences.getString(SettingFragment.PREF_KEY_SHUFFLE_PLAY,
+                                                               SettingFragment.PREF_DEFAULT_SHUFFLE_PLAY);
         final Resources res = this.getResources();
         final String[] entryValues = res.getStringArray(R.array.pref_entry_values_shuffle_play);
         final int index = ArrayUtils.indexOf(entryValues, value);
         final int nextIndex = (index + 1) % entryValues.length;
         this.mSharedPreferences.edit()
-                               .putString(SettingsActivity.PREF_KEY_SHUFFLE_PLAY,
+                               .putString(SettingFragment.PREF_KEY_SHUFFLE_PLAY,
                                           entryValues[nextIndex])
                                .commit();
     }
@@ -298,13 +298,13 @@ public class MusicPlayerActivity extends FragmentActivity implements
     }
 
     private void updateTitle() {
-        final String title = this.mTrackBean.getSongTitle();
+        final String title = this.mTrackBean.getName();
         final TextView titleView = (TextView) this.findViewById(R.id.track_title);
         titleView.setText(title);
     }
 
     private void updateArtist() {
-        final String artist = this.mTrackBean.getLeadArtist();
+        final String artist = this.mTrackBean.getArtist();
         final TextView artistView = (TextView) this.findViewById(R.id.track_artist);
         artistView.setText(artist);
     }
@@ -329,7 +329,7 @@ public class MusicPlayerActivity extends FragmentActivity implements
                     if (ApplicationSupport.canUseLargeHeap()) {
                         final Drawable emptyDrawable = new ShapeDrawable();
                         final TransitionDrawable fadeInDrawable = new TransitionDrawable(new Drawable[] { emptyDrawable,
-                                                                                                         result });
+                                result });
                         MusicPlayerActivity.this.mCoverView.setImageDrawable(fadeInDrawable);
                         fadeInDrawable.startTransition(LoadImageTask.TIME_SHORT);
                     } else {
@@ -340,7 +340,7 @@ public class MusicPlayerActivity extends FragmentActivity implements
 
         }.execute(bitmapCache, url, http);
 
-        if (this.mSharedPreferences.getBoolean(SettingsActivity.PREF_KEY_BACKGROUND_RENDER,
+        if (this.mSharedPreferences.getBoolean(SettingFragment.PREF_KEY_BACKGROUND_RENDER,
                                                ApplicationSupport.canUseRenderScript())) {
             String backgroundUrl = null;
             if (ApplicationSupport.canUseLargeHeap()) {

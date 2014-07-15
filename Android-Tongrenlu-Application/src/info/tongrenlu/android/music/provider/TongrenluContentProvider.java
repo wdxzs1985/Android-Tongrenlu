@@ -94,7 +94,7 @@ public class TongrenluContentProvider extends ContentProvider {
     @Override
     public boolean onCreate() {
         this.mDbHelper = new DatabaseHelper(this.getContext(),
-                                            new TongrenluDBV1());
+                                            new TongrenluDBV2());
         this.mUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 
         this.mUriMatcher.addURI(TongrenluContentProvider.AUTHORITY,
@@ -132,7 +132,11 @@ public class TongrenluContentProvider extends ContentProvider {
     }
 
     @Override
-    public Cursor query(final Uri uri, final String[] projection, final String selection, final String[] selectionArgs, final String sortOrder) {
+    public Cursor query(final Uri uri,
+                        final String[] projection,
+                        final String selection,
+                        final String[] selectionArgs,
+                        final String sortOrder) {
         switch (this.mUriMatcher.match(uri)) {
         case QI_ALBUM:
             return this.queryAlbums(selection, selectionArgs, sortOrder);
@@ -150,7 +154,9 @@ public class TongrenluContentProvider extends ContentProvider {
         return null;
     }
 
-    private Cursor queryAlbums(final String selection, final String[] selectionArgs, final String sortOrder) {
+    private Cursor queryAlbums(final String selection,
+                               final String[] selectionArgs,
+                               final String sortOrder) {
         return this.mDbHelper.query("tb_album",
                                     null,
                                     selection,
@@ -168,7 +174,9 @@ public class TongrenluContentProvider extends ContentProvider {
                                     sortOrder);
     }
 
-    private Cursor queryTracks(final String selection, final String[] selectionArgs, final String sortOrder) {
+    private Cursor queryTracks(final String selection,
+                               final String[] selectionArgs,
+                               final String sortOrder) {
         return this.mDbHelper.query("tb_track",
                                     null,
                                     selection,
@@ -176,7 +184,9 @@ public class TongrenluContentProvider extends ContentProvider {
                                     sortOrder);
     }
 
-    private Cursor queryPlaylists(final String selection, final String[] selectionArgs, final String sortOrder) {
+    private Cursor queryPlaylists(final String selection,
+                                  final String[] selectionArgs,
+                                  final String sortOrder) {
         return this.mDbHelper.query("tb_playlist",
                                     null,
                                     selection,
@@ -220,13 +230,12 @@ public class TongrenluContentProvider extends ContentProvider {
         final SQLiteDatabase sdb = this.mDbHelper.getWritableDatabase();
 
         sdb.beginTransaction();
-        final SQLiteStatement stmt = sdb.compileStatement("INSERT INTO tb_album (" + "articleId, "
-                + "title, "
-                + "collectFlg"
+        final SQLiteStatement stmt = sdb.compileStatement("INSERT INTO " + "tb_album ("
+                + "articleId, "
+                + "title "
                 + ") VALUES ("
                 + "?, "
-                + "?, "
-                + "0"
+                + "? "
                 + ");");
         final int length = values.length;
         for (int i = 0; i < length; i++) {
@@ -243,11 +252,12 @@ public class TongrenluContentProvider extends ContentProvider {
         final SQLiteDatabase sdb = this.mDbHelper.getWritableDatabase();
 
         sdb.beginTransaction();
-        final SQLiteStatement stmt = sdb.compileStatement("INSERT INTO tb_track (" + "articleId, "
+        final SQLiteStatement stmt = sdb.compileStatement("INSERT INTO " + "tb_track ("
+                + "articleId, "
                 + "fileId, "
                 + "album, "
-                + "songTitle, "
-                + "leadArtist, "
+                + "name, "
+                + "artist, "
                 + "original, "
                 + "trackNumber, "
                 + "downloadFlg"
@@ -266,8 +276,8 @@ public class TongrenluContentProvider extends ContentProvider {
             stmt.bindString(1, values[i].getAsString("articleId"));
             stmt.bindString(2, values[i].getAsString("fileId"));
             stmt.bindString(3, values[i].getAsString("album"));
-            stmt.bindString(4, values[i].getAsString("songTitle"));
-            stmt.bindString(5, values[i].getAsString("leadArtist"));
+            stmt.bindString(4, values[i].getAsString("name"));
+            stmt.bindString(5, values[i].getAsString("artist"));
             stmt.bindString(6, values[i].getAsString("original"));
             stmt.bindLong(7, values[i].getAsLong("trackNumber"));
             stmt.executeInsert();
@@ -288,7 +298,9 @@ public class TongrenluContentProvider extends ContentProvider {
         return this.insert(uri, "tb_playlist_track", values);
     }
 
-    private Uri insert(final Uri uri, final String table, final ContentValues values) {
+    private Uri insert(final Uri uri,
+                       final String table,
+                       final ContentValues values) {
         final long id = this.mDbHelper.insert(table, values);
         if (id != -1) {
             return ContentUris.withAppendedId(uri, id);
@@ -298,7 +310,10 @@ public class TongrenluContentProvider extends ContentProvider {
     }
 
     @Override
-    public int update(final Uri uri, final ContentValues values, final String selection, final String[] selectionArgs) {
+    public int update(final Uri uri,
+                      final ContentValues values,
+                      final String selection,
+                      final String[] selectionArgs) {
         switch (this.mUriMatcher.match(uri)) {
         case QIU_TRACK:
             return this.updateTrack(uri, values, selection, selectionArgs);
@@ -312,7 +327,10 @@ public class TongrenluContentProvider extends ContentProvider {
         return 0;
     }
 
-    private int updateTrack(final Uri uri, final ContentValues values, final String selection, final String[] selectionArgs) {
+    private int updateTrack(final Uri uri,
+                            final ContentValues values,
+                            final String selection,
+                            final String[] selectionArgs) {
         return this.mDbHelper.update("tb_track",
                                      values,
                                      selection,
@@ -327,9 +345,9 @@ public class TongrenluContentProvider extends ContentProvider {
                                      new String[] { _id });
     }
 
-    private int updatePlaylistTrack(Uri uri) {
+    private int updatePlaylistTrack(final Uri uri) {
         final List<String> segments = uri.getPathSegments();
-        String tableName = "tb_playlist_track";
+        final String tableName = "tb_playlist_track";
         final String playlistId = segments.get(1);
         final String selection = "playlistId = ?";
         final String[] selectionArgs = new String[] { playlistId };
@@ -344,11 +362,11 @@ public class TongrenluContentProvider extends ContentProvider {
             if (cursor.moveToFirst()) {
                 do {
                     length++;
-                    long _id = cursor.getLong(cursor.getColumnIndex("_id"));
-                    Uri contentUri = ContentUris.withAppendedId(PLAYLIST_TRACK_URI,
-                                                                _id);
-                    String id = contentUri.getLastPathSegment();
-                    ContentValues values = new ContentValues();
+                    final long _id = cursor.getLong(cursor.getColumnIndex("_id"));
+                    final Uri contentUri = ContentUris.withAppendedId(PLAYLIST_TRACK_URI,
+                                                                      _id);
+                    final String id = contentUri.getLastPathSegment();
+                    final ContentValues values = new ContentValues();
                     values.put("trackNumber", length);
                     this.mDbHelper.update(tableName,
                                           values,
@@ -364,7 +382,8 @@ public class TongrenluContentProvider extends ContentProvider {
         return length;
     }
 
-    private int updatePlaylistTrackById(Uri uri, final ContentValues values) {
+    private int updatePlaylistTrackById(final Uri uri,
+                                        final ContentValues values) {
         final String _id = uri.getLastPathSegment();
         final String selection = "_id = ?";
         final String[] selectionArgs = new String[] { _id };
@@ -375,7 +394,9 @@ public class TongrenluContentProvider extends ContentProvider {
     }
 
     @Override
-    public int delete(final Uri uri, final String selection, final String[] selectionArgs) {
+    public int delete(final Uri uri,
+                      final String selection,
+                      final String[] selectionArgs) {
         switch (this.mUriMatcher.match(uri)) {
         case UD_PLAYLIST_SINGLE:
             return this.deletePlaylist(uri);
@@ -396,7 +417,7 @@ public class TongrenluContentProvider extends ContentProvider {
         return this.mDbHelper.delete("tb_playlist", selection, selectionArgs);
     }
 
-    private int deletePlaylistTrackByPlaylistId(Uri uri) {
+    private int deletePlaylistTrackByPlaylistId(final Uri uri) {
         final List<String> segments = uri.getPathSegments();
         final String playlistId = segments.get(1);
         final String selection = "playlistId = ?";
@@ -411,7 +432,8 @@ public class TongrenluContentProvider extends ContentProvider {
         return this.deletePlaylistTrack(selection, selectionArgs);
     }
 
-    private int deletePlaylistTrack(String selection, String[] selectionArgs) {
+    private int deletePlaylistTrack(final String selection,
+                                    final String[] selectionArgs) {
         return this.mDbHelper.delete("tb_playlist_track",
                                      selection,
                                      selectionArgs);

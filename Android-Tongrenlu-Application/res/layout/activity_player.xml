@@ -12,7 +12,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:background="#99000000"
+            android:background="#80000000"
             >
     
             <TextView
@@ -54,7 +54,7 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:orientation="horizontal"
-            android:background="#99000000"
+            android:background="#80000000"
             >
             <TextView
                 android:id="@+id/player_current_time"
@@ -91,7 +91,7 @@
             android:layout_height="@dimen/player_button_height"
             android:gravity="center"
             android:orientation="horizontal"
-            android:background="#99000000"
+            android:background="#80000000"
             >
             <ImageButton
                 android:contentDescription="@string/player_previous"

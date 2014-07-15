@@ -4,7 +4,6 @@ import info.tongrenlu.android.image.LoadBlurImageTask;
 import info.tongrenlu.android.image.LoadImageTask;
 import info.tongrenlu.android.loader.BaseLoader;
 import info.tongrenlu.android.music.R;
-import info.tongrenlu.android.music.SettingsActivity;
 import info.tongrenlu.android.music.TongrenluApplication;
 import info.tongrenlu.android.music.adapter.AlbumTrackListAdapter;
 import info.tongrenlu.android.music.provider.TongrenluContentProvider;
@@ -56,8 +55,7 @@ import android.widget.Toast;
 
 import com.tjerkw.slideexpandable.library.ActionSlideExpandableListView;
 
-public class AlbumInfoFragment extends Fragment implements
-        ActionSlideExpandableListView.OnActionClickListener, OnClickListener {
+public class AlbumInfoFragment extends Fragment implements ActionSlideExpandableListView.OnActionClickListener, OnClickListener {
 
     public static final int ALBUM_TRACK_CURSOR_LOADER = 1;
     public static final int ALBUM_TRACK_JSON_LOADER = 2;
@@ -118,7 +116,7 @@ public class AlbumInfoFragment extends Fragment implements
                              final ViewGroup container,
                              final Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.fragment_album_info,
-                                           null,
+                                           container,
                                            false);
 
         final TextView articleTitle = (TextView) view.findViewById(R.id.article_title);
@@ -196,7 +194,7 @@ public class AlbumInfoFragment extends Fragment implements
                     if (ApplicationSupport.canUseLargeHeap()) {
                         final Drawable emptyDrawable = new ShapeDrawable();
                         final TransitionDrawable fadeInDrawable = new TransitionDrawable(new Drawable[] { emptyDrawable,
-                                                                                                         result });
+                                result });
                         coverView.setImageDrawable(fadeInDrawable);
                         fadeInDrawable.startTransition(LoadImageTask.TIME_SHORT);
                     } else {
@@ -208,7 +206,7 @@ public class AlbumInfoFragment extends Fragment implements
         }.execute(bitmapCache, url, http);
 
         final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(application);
-        if (sharedPreferences.getBoolean(SettingsActivity.PREF_KEY_BACKGROUND_RENDER,
+        if (sharedPreferences.getBoolean(SettingFragment.PREF_KEY_BACKGROUND_RENDER,
                                          ApplicationSupport.canUseRenderScript())) {
             String backgroundUrl = null;
             if (ApplicationSupport.canUseLargeHeap()) {
@@ -311,8 +309,7 @@ public class AlbumInfoFragment extends Fragment implements
         this.mProgressContainer.setVisibility(View.VISIBLE);
     }
 
-    private class AlbumTrackJsonLoaderCallback implements
-            LoaderCallbacks<Boolean> {
+    private class AlbumTrackJsonLoaderCallback implements LoaderCallbacks<Boolean> {
 
         @Override
         public Loader<Boolean> onCreateLoader(final int loaderId,
@@ -322,7 +319,7 @@ public class AlbumInfoFragment extends Fragment implements
 
             final HttpHelper http = application.getHttpHelper();
 
-            final String host = HttpConstants.getHost(application);
+            final String host = HttpConstants.getHostServer(application);
             final String part = "/fm/music/" + AlbumInfoFragment.this.mArticleBean.getArticleId();
             final String url = host + part;
 
@@ -362,8 +359,7 @@ public class AlbumInfoFragment extends Fragment implements
         private final HttpHelper http;
         private final String url;
 
-        public AlbumTrackDataLoader(final Context ctx, final HttpHelper http,
-                final String url) {
+        public AlbumTrackDataLoader(final Context ctx, final HttpHelper http, final String url) {
             super(ctx);
             this.http = http;
             this.url = url;
@@ -392,55 +388,35 @@ public class AlbumInfoFragment extends Fragment implements
             }
         }
 
-        protected void parseTrackJSON(final JSONObject responseJSON)
-                throws JSONException {
-            if (responseJSON.getBoolean("result")) {
-                final JSONObject articleObject = responseJSON.optJSONObject("articleBean");
-                final String album = articleObject.optString("title");
+        protected void parseTrackJSON(final JSONObject responseJSON) throws JSONException {
+            final JSONObject articleObject = responseJSON.optJSONObject("music");
+            final String articleId = articleObject.optString("id");
+            final String album = articleObject.optString("title");
 
-                final JSONArray playlist = responseJSON.optJSONArray("playlist");
-                final List<ContentValues> contentValuesList = new ArrayList<ContentValues>();
-                final ContentResolver contentResolver = this.getContext()
-                                                            .getContentResolver();
-                for (int i = 0; i < playlist.length(); i++) {
-                    final JSONObject trackObject = playlist.optJSONObject(i);
-                    final String articleId = trackObject.optString("articleId");
-                    final String fileId = trackObject.optString("fileId");
-                    final String songTitle = trackObject.optString("title");
-                    final String leadArtist = trackObject.optString("artist");
-                    final String original = trackObject.optString("original");
-                    final int trackNumber = i + 1;
-                    Cursor cursor = null;
-                    try {
-                        cursor = contentResolver.query(TongrenluContentProvider.TRACK_URI,
-                                                       null,
-                                                       "articleId = ? and fileId = ?",
-                                                       new String[] { articleId,
-                                                                     fileId },
-                                                       null);
-                        if (cursor.getCount() == 0) {
-                            final ContentValues contentValues = new ContentValues();
-                            contentValues.put("articleId", articleId);
-                            contentValues.put("fileId", fileId);
-                            contentValues.put("album", album);
-                            contentValues.put("songTitle", songTitle);
-                            contentValues.put("leadArtist", leadArtist);
-                            contentValues.put("original", original);
-                            contentValues.put("trackNumber", trackNumber);
-                            contentValuesList.add(contentValues);
-                        }
-                    } finally {
-                        if (cursor != null) {
-                            cursor.close();
-                        }
-                    }
-                }
-                if (CollectionUtils.isNotEmpty(contentValuesList)) {
-                    contentResolver.bulkInsert(TongrenluContentProvider.TRACK_URI,
-                                               contentValuesList.toArray(new ContentValues[] {}));
-                    contentResolver.notifyChange(TongrenluContentProvider.TRACK_URI,
-                                                 null);
-                }
+            final JSONArray playlist = responseJSON.optJSONArray("trackList");
+            final List<ContentValues> contentValuesList = new ArrayList<ContentValues>();
+            final ContentResolver contentResolver = this.getContext()
+                                                        .getContentResolver();
+            contentResolver.delete(TongrenluContentProvider.TRACK_URI,
+                                   "articleId = ?",
+                                   new String[] { articleId });
+            for (int i = 0; i < playlist.length(); i++) {
+                final JSONObject trackObject = playlist.optJSONObject(i);
+                final ContentValues contentValues = new ContentValues();
+                contentValues.put("articleId", articleId);
+                contentValues.put("album", album);
+                contentValues.put("fileId", trackObject.optString("id"));
+                contentValues.put("name", trackObject.optString("name"));
+                contentValues.put("artist", trackObject.optString("artist"));
+                contentValues.put("original", trackObject.optString("original"));
+                contentValues.put("trackNumber", i + 1);
+                contentValuesList.add(contentValues);
+            }
+            if (CollectionUtils.isNotEmpty(contentValuesList)) {
+                contentResolver.bulkInsert(TongrenluContentProvider.TRACK_URI,
+                                           contentValuesList.toArray(new ContentValues[] {}));
+                contentResolver.notifyChange(TongrenluContentProvider.TRACK_URI,
+                                             null);
             }
         }
     }
@@ -485,10 +461,10 @@ public class AlbumInfoFragment extends Fragment implements
         final TrackBean trackBean = new TrackBean();
         trackBean.setArticleId(c.getString(c.getColumnIndex("articleId")));
         trackBean.setFileId(c.getString(c.getColumnIndex("fileId")));
-        trackBean.setSongTitle(c.getString(c.getColumnIndex("songTitle")));
-        trackBean.setLeadArtist(c.getString(c.getColumnIndex("leadArtist")));
+        trackBean.setName(c.getString(c.getColumnIndex("name")));
+        trackBean.setArtist(c.getString(c.getColumnIndex("artist")));
         trackBean.setTrackNumber(0);
-        trackBean.setDownloadFlg(c.getInt(c.getColumnIndex("downloadFlg")));
+        // trackBean.setDownloadFlg(c.getColumnIndex("downloadFlg"));
         return trackBean;
     }
 
@@ -500,10 +476,10 @@ public class AlbumInfoFragment extends Fragment implements
                 final TrackBean trackBean = new TrackBean();
                 trackBean.setArticleId(c.getString(c.getColumnIndex("articleId")));
                 trackBean.setFileId(c.getString(c.getColumnIndex("fileId")));
-                trackBean.setSongTitle(c.getString(c.getColumnIndex("songTitle")));
-                trackBean.setLeadArtist(c.getString(c.getColumnIndex("leadArtist")));
+                trackBean.setName(c.getString(c.getColumnIndex("name")));
+                trackBean.setArtist(c.getString(c.getColumnIndex("artist")));
                 trackBean.setTrackNumber(c.getInt(c.getColumnIndex("trackNumber")));
-                trackBean.setDownloadFlg(c.getInt(c.getColumnIndex("downloadFlg")));
+                // trackBean.setDownloadFlg(c.getInt(c.getColumnIndex("downloadFlg")));
                 trackBeanList.add(trackBean);
             } while (c.moveToNext());
         }

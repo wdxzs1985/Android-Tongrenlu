@@ -122,10 +122,10 @@ public class DownloadService extends Service implements DownloadListener {
         } else {
             final List<DownloadTask> tasks = this.mDownloadManager.getTasks();
             final DownloadTask runningTask = this.mDownloadManager.getRunning();
-            final String songTitle = ((MusicDownloadTaskInfo) runningTask.getTaskinfo()).getTrackBean()
-                                                                                        .getSongTitle();
+            final String name = ((MusicDownloadTaskInfo) runningTask.getTaskinfo()).getTrackBean()
+                                                                                   .getName();
             final String downloading = this.getString(R.string.downloading,
-                                                      songTitle);
+                                                      name);
             builder.setTicker(downloading);
             builder.setContentTitle(downloading);
             builder.setContentText(this.getString(R.string.download_waiting,
@@ -183,7 +183,7 @@ public class DownloadService extends Service implements DownloadListener {
                                values,
                                "articleId = ? and fileId = ? and downloadFlg = 0",
                                new String[] { trackBean.getArticleId(),
-                                             trackBean.getFileId() });
+                                       trackBean.getFileId() });
 
         final Uri albumTrackContentUri = Uri.withAppendedPath(TongrenluContentProvider.ALBUM_URI,
                                                               trackBean.getArticleId() + "/track");
@@ -197,9 +197,8 @@ public class DownloadService extends Service implements DownloadListener {
         final ContentValues values = new ContentValues();
         values.put("articleId", trackBean.getArticleId());
         values.put("fileId", trackBean.getFileId());
-        values.put("album", trackBean.getAlbum());
-        values.put("songTitle", trackBean.getSongTitle());
-        values.put("leadArtist", trackBean.getLeadArtist());
+        values.put("name", trackBean.getName());
+        values.put("artist", trackBean.getArtist());
 
         final Uri contentUri = Uri.withAppendedPath(TongrenluContentProvider.PLAYLIST_URI,
                                                     playlistId + "/track");
@@ -249,7 +248,7 @@ public class DownloadService extends Service implements DownloadListener {
         protected DownloadTaskInfo doInBackground(final Object... params) {
             final MusicDownloadTaskInfo taskinfo2 = (MusicDownloadTaskInfo) this.getTaskinfo();
             final TrackBean trackBean = taskinfo2.getTrackBean();
-            if (trackBean.getDownloadFlg() == 0) {
+            if ("0".equals(trackBean.getDownloadFlg())) {
                 if (super.doInBackground(params) != null) {
                 } else {
                     return null;

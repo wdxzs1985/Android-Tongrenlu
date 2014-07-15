@@ -59,7 +59,8 @@ public class PlaylistTrackActivity extends ActionBarActivity implements Playlist
     }
 
     @Override
-    public void onPlay(ArrayList<TrackBean> trackBeanList, int position) {
+    public void onPlay(final ArrayList<TrackBean> trackBeanList,
+                       final int position) {
         final Intent serviceIntent = new Intent(this, MusicService.class);
         serviceIntent.setAction(MusicService.ACTION_ADD);
         serviceIntent.putParcelableArrayListExtra("trackBeanList",
@@ -73,10 +74,11 @@ public class PlaylistTrackActivity extends ActionBarActivity implements Playlist
     }
 
     @Override
-    public void onSwapTrack(Uri trackUri, ArrayList<ContentValues> values) {
+    public void onSwapTrack(final Uri trackUri,
+                            final ArrayList<ContentValues> values) {
         final ContentResolver contentResolver = this.getContentResolver();
-        for (ContentValues contentValues : values) {
-            Long id = contentValues.getAsLong("_id");
+        for (final ContentValues contentValues : values) {
+            final Long id = contentValues.getAsLong("_id");
             final Uri uri = ContentUris.withAppendedId(TongrenluContentProvider.PLAYLIST_TRACK_URI,
                                                        id);
             contentResolver.update(uri, contentValues, null, null);
@@ -86,7 +88,7 @@ public class PlaylistTrackActivity extends ActionBarActivity implements Playlist
     }
 
     @Override
-    public void onDeleteTrack(Uri trackUri, long id) {
+    public void onDeleteTrack(final Uri trackUri, final long id) {
         final Uri uri = ContentUris.withAppendedId(TongrenluContentProvider.PLAYLIST_TRACK_URI,
                                                    id);
         final ContentResolver contentResolver = this.getContentResolver();
@@ -97,8 +99,8 @@ public class PlaylistTrackActivity extends ActionBarActivity implements Playlist
     }
 
     @Override
-    public void onDeletePlaylist(Uri uri) {
-        Uri trackUri = Uri.withAppendedPath(uri, "track");
+    public void onDeletePlaylist(final Uri uri) {
+        final Uri trackUri = Uri.withAppendedPath(uri, "track");
 
         final ContentResolver contentResolver = this.getContentResolver();
         contentResolver.delete(uri, null, null);
@@ -110,7 +112,7 @@ public class PlaylistTrackActivity extends ActionBarActivity implements Playlist
 
     @Override
     public void onStartAddTrack() {
-        Fragment fragment = new PlaylistAddTrackFragment();
+        final Fragment fragment = new PlaylistAddTrackFragment();
         this.getSupportFragmentManager()
             .beginTransaction()
             .replace(R.id.fragment_container, fragment)
@@ -119,14 +121,14 @@ public class PlaylistTrackActivity extends ActionBarActivity implements Playlist
     }
 
     @Override
-    public void onAddTrack(TrackBean trackBean) {
+    public void onAddTrack(final TrackBean trackBean) {
         final ContentResolver contentResolver = this.getContentResolver();
         final ContentValues values = new ContentValues();
         values.put("articleId", trackBean.getArticleId());
         values.put("fileId", trackBean.getFileId());
         values.put("album", trackBean.getAlbum());
-        values.put("songTitle", trackBean.getSongTitle());
-        values.put("leadArtist", trackBean.getLeadArtist());
+        values.put("name", trackBean.getName());
+        values.put("artist", trackBean.getArtist());
 
         final Uri contentUri = Uri.withAppendedPath(TongrenluContentProvider.PLAYLIST_URI,
                                                     this.mPlaylistId + "/track");
@@ -152,8 +154,8 @@ public class PlaylistTrackActivity extends ActionBarActivity implements Playlist
         contentResolver.insert(contentUri, values);
         contentResolver.notifyChange(contentUri, null);
 
-        String msg = this.getString(R.string.message_add_track_to_playlist,
-                                    trackBean.getSongTitle());
+        final String msg = this.getString(R.string.message_add_track_to_playlist,
+                                          trackBean.getName());
         Toast.makeText(this.getApplicationContext(), msg, Toast.LENGTH_SHORT)
              .show();
 

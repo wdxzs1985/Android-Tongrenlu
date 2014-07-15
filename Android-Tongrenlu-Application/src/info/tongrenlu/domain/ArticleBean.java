@@ -8,10 +8,6 @@ public class ArticleBean {
 
     private String description;
 
-    private Integer collectCount;
-
-    private Integer commentCount;
-
     public String getArticleId() {
         return this.articleId;
     }
@@ -36,22 +32,6 @@ public class ArticleBean {
         this.description = description;
     }
 
-    public Integer getCommentCount() {
-        return this.commentCount;
-    }
-
-    public void setCommentCount(final Integer commentCount) {
-        this.commentCount = commentCount;
-    }
-
-    public Integer getCollectCount() {
-        return this.collectCount;
-    }
-
-    public void setCollectCount(final Integer collectCount) {
-        this.collectCount = collectCount;
-    }
-
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -62,7 +42,7 @@ public class ArticleBean {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
@@ -72,7 +52,7 @@ public class ArticleBean {
         if (this.getClass() != obj.getClass()) {
             return false;
         }
-        ArticleBean other = (ArticleBean) obj;
+        final ArticleBean other = (ArticleBean) obj;
         if (this.articleId == null) {
             if (other.articleId != null) {
                 return false;

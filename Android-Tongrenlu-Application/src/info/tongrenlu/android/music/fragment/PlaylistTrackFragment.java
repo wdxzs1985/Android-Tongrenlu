@@ -52,14 +52,14 @@ public class PlaylistTrackFragment extends Fragment implements LoaderCallbacks<C
 
     private final DragSortListView.DropListener onDrop = new DragSortListView.DropListener() {
         @Override
-        public void drop(int from, int to) {
+        public void drop(final int from, final int to) {
             PlaylistTrackFragment.this.swapTrack(from, to);
         }
     };
 
     private final DragSortListView.RemoveListener onRemove = new DragSortListView.RemoveListener() {
         @Override
-        public void remove(int which) {
+        public void remove(final int which) {
             PlaylistTrackFragment.this.deleteTrack(which);
         }
     };
@@ -68,8 +68,8 @@ public class PlaylistTrackFragment extends Fragment implements LoaderCallbacks<C
      * Called in onCreateView. Override this to provide a custom
      * DragSortController.
      */
-    public DragSortController buildController(DragSortListView dslv) {
-        DragSortController controller = new DragSortController(dslv);
+    public DragSortController buildController(final DragSortListView dslv) {
+        final DragSortController controller = new DragSortController(dslv);
         controller.setDragHandleId(R.id.article_cover);
         controller.setRemoveEnabled(true);
         controller.setSortEnabled(true);
@@ -92,9 +92,9 @@ public class PlaylistTrackFragment extends Fragment implements LoaderCallbacks<C
 
         this.setHasOptionsMenu(true);
 
-        long playlistId = this.getArguments()
-                              .getLong(PlaylistTrackActivity.PLAYLIST_ID,
-                                       PlaylistTrackActivity.BAD_ID);
+        final long playlistId = this.getArguments()
+                                    .getLong(PlaylistTrackActivity.PLAYLIST_ID,
+                                             PlaylistTrackActivity.BAD_ID);
 
         this.mUri = ContentUris.withAppendedId(TongrenluContentProvider.PLAYLIST_URI,
                                                playlistId);
@@ -118,16 +118,18 @@ public class PlaylistTrackFragment extends Fragment implements LoaderCallbacks<C
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(final LayoutInflater inflater,
+                             final ViewGroup container,
+                             final Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_dragsort_list_view,
                                 container,
                                 false);
     }
 
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
+    public void onViewCreated(final View view, final Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        Context context = this.getActivity().getApplicationContext();
+        final Context context = this.getActivity().getApplicationContext();
         this.mAdapter = new SimpleTrackListAdapter(context);
 
         this.mEmpty = view.findViewById(android.R.id.empty);
@@ -148,7 +150,7 @@ public class PlaylistTrackFragment extends Fragment implements LoaderCallbacks<C
     }
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
+    public void onActivityCreated(final Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         this.getActivity()
             .getSupportLoaderManager()
@@ -202,7 +204,7 @@ public class PlaylistTrackFragment extends Fragment implements LoaderCallbacks<C
     }
 
     @Override
-    public void onCreateOptionsMenu(final Menu menu, MenuInflater inflater) {
+    public void onCreateOptionsMenu(final Menu menu, final MenuInflater inflater) {
         inflater.inflate(R.menu.fragment_playlist_track, menu);
     }
 
@@ -232,8 +234,8 @@ public class PlaylistTrackFragment extends Fragment implements LoaderCallbacks<C
                 final TrackBean trackBean = new TrackBean();
                 trackBean.setArticleId(c.getString(c.getColumnIndex("articleId")));
                 trackBean.setFileId(c.getString(c.getColumnIndex("fileId")));
-                trackBean.setSongTitle(c.getString(c.getColumnIndex("songTitle")));
-                trackBean.setLeadArtist(c.getString(c.getColumnIndex("leadArtist")));
+                trackBean.setName(c.getString(c.getColumnIndex("name")));
+                trackBean.setArtist(c.getString(c.getColumnIndex("artist")));
                 trackBeanList.add(trackBean);
 
                 c.moveToNext();
@@ -242,9 +244,9 @@ public class PlaylistTrackFragment extends Fragment implements LoaderCallbacks<C
         }
     }
 
-    protected void swapTrack(int from, int to) {
+    protected void swapTrack(final int from, final int to) {
         if (from != to) {
-            ArrayList<ContentValues> values = new ArrayList<ContentValues>();
+            final ArrayList<ContentValues> values = new ArrayList<ContentValues>();
             values.add(this.getSwapTrackValues(from, to));
             if (from < to) {
                 for (int i = from + 1; i <= to; i++) {
@@ -259,9 +261,9 @@ public class PlaylistTrackFragment extends Fragment implements LoaderCallbacks<C
         }
     }
 
-    private ContentValues getSwapTrackValues(int from, int to) {
-        ContentValues values = new ContentValues();
-        Cursor c = this.mAdapter.getCursor();
+    private ContentValues getSwapTrackValues(final int from, final int to) {
+        final ContentValues values = new ContentValues();
+        final Cursor c = this.mAdapter.getCursor();
 
         c.moveToPosition(from);
         values.put("_id", c.getLong(c.getColumnIndex("_id")));
@@ -271,8 +273,8 @@ public class PlaylistTrackFragment extends Fragment implements LoaderCallbacks<C
         return values;
     }
 
-    private void deleteTrack(int position) {
-        long id = this.mListView.getItemIdAtPosition(position);
+    private void deleteTrack(final int position) {
+        final long id = this.mListView.getItemIdAtPosition(position);
         this.mListener.onDeleteTrack(this.mTrackUri, id);
     }
 
@@ -294,7 +296,10 @@ public class PlaylistTrackFragment extends Fragment implements LoaderCallbacks<C
     }
 
     @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+    public void onItemClick(final AdapterView<?> parent,
+                            final View view,
+                            final int position,
+                            final long id) {
         if (position != ListView.INVALID_POSITION) {
             this.playTrack(position);
         }

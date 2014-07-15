@@ -1,6 +1,7 @@
 package info.tongrenlu.android.music;
 
 import info.tongrenlu.android.image.LoadImageTask;
+import info.tongrenlu.android.music.fragment.SettingFragment;
 import info.tongrenlu.android.player.AudioBecomingNoisyReceiver;
 import info.tongrenlu.android.player.AudioFocusHelper;
 import info.tongrenlu.android.player.IncomingPhoneReceiver;
@@ -173,14 +174,16 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
         this.mLocalBroadcastManager.registerReceiver(this.mIncomingPhoneReceiver,
                                                      incomingPhoneFilter);
 
-        IntentFilter audioBecomingNoisyfilter = new IntentFilter();
+        final IntentFilter audioBecomingNoisyfilter = new IntentFilter();
         audioBecomingNoisyfilter.addAction(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
         this.mLocalBroadcastManager.registerReceiver(this.mAudioBecomingNoisyReceiver,
                                                      audioBecomingNoisyfilter);
     }
 
     @Override
-    public int onStartCommand(final Intent intent, final int flags, final int startId) {
+    public int onStartCommand(final Intent intent,
+                              final int flags,
+                              final int startId) {
         final String action = intent.getAction();
         if (MusicService.ACTION_TOGGLE_PLAYBACK.equals(action)) {
             this.processTogglePlaybackRequest();
@@ -204,14 +207,14 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
         } else if (MusicService.ACTION_SEEK.equals(action)) {
             this.actionSeekTo(intent);
         } else if (MusicService.ACTION_QUERY.equals(action)) {
-            boolean includePlaylist = intent.getBooleanExtra("includePlaylist",
-                                                             false);
+            final boolean includePlaylist = intent.getBooleanExtra("includePlaylist",
+                                                                   false);
             this.progressQueryStateRequest(includePlaylist);
         }
         return Service.START_NOT_STICKY;
     }
 
-    private void progressQueryStateRequest(boolean includePlaylist) {
+    private void progressQueryStateRequest(final boolean includePlaylist) {
         final Intent intent = new Intent(MusicService.EVENT_UPDATE);
         intent.putExtra("state", this.mState);
         this.mDuration = 0;
@@ -429,10 +432,11 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
     }
 
     @Override
-    public void onSharedPreferenceChanged(final SharedPreferences sharedPreferences, final String key) {
-        if (StringUtils.equals(key, SettingsActivity.PREF_KEY_SHUFFLE_PLAY)) {
+    public void onSharedPreferenceChanged(final SharedPreferences sharedPreferences,
+                                          final String key) {
+        if (StringUtils.equals(key, SettingFragment.PREF_KEY_SHUFFLE_PLAY)) {
             this.onShufflePlayChanged(sharedPreferences);
-        } else if (StringUtils.equals(key, SettingsActivity.PREF_KEY_LOOP_PLAY)) {
+        } else if (StringUtils.equals(key, SettingFragment.PREF_KEY_LOOP_PLAY)) {
             this.onLoopPlayChanged(sharedPreferences);
         }
     }
@@ -572,7 +576,7 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
             protected void onPostExecute(final Drawable result) {
                 super.onPostExecute(result);
                 if (!this.isCancelled() && result != null) {
-                    Bitmap largeIcon = ((CacheableBitmapDrawable) result).getBitmap();
+                    final Bitmap largeIcon = ((CacheableBitmapDrawable) result).getBitmap();
 
                     final Intent intent = new Intent(application,
                                                      MusicPlayerActivity.class);
@@ -585,10 +589,10 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
                     builder.setSmallIcon(R.drawable.ic_launcher);
                     builder.setOngoing(true);
                     builder.setAutoCancel(false);
-                    final String contentTitle = "正在播放:" + trackBean.getSongTitle();
+                    final String contentTitle = "正在播放:" + trackBean.getName();
                     builder.setTicker(contentTitle);
                     builder.setContentTitle(contentTitle);
-                    builder.setContentText(trackBean.getLeadArtist());
+                    builder.setContentText(trackBean.getArtist());
                     builder.setNumber(MusicService.this.mPlayList.size());
                     builder.setLargeIcon(largeIcon);
                     final Intent skipAction = new Intent(application,
@@ -632,8 +636,8 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
 
     public int getShuffleFlag() {
         final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        final String value = sharedPreferences.getString(SettingsActivity.PREF_KEY_SHUFFLE_PLAY,
-                                                         SettingsActivity.PREF_DEFAULT_SHUFFLE_PLAY);
+        final String value = sharedPreferences.getString(SettingFragment.PREF_KEY_SHUFFLE_PLAY,
+                                                         SettingFragment.PREF_DEFAULT_SHUFFLE_PLAY);
         final Resources res = this.getResources();
         final String[] entryValues = res.getStringArray(R.array.pref_entry_values_shuffle_play);
         return ArrayUtils.indexOf(entryValues, value);
@@ -648,8 +652,8 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
 
     public int getLoopFlag() {
         final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        final String value = sharedPreferences.getString(SettingsActivity.PREF_KEY_LOOP_PLAY,
-                                                         SettingsActivity.PREF_DEFAULT_LOOP_PLAY);
+        final String value = sharedPreferences.getString(SettingFragment.PREF_KEY_LOOP_PLAY,
+                                                         SettingFragment.PREF_DEFAULT_LOOP_PLAY);
         final Resources res = this.getResources();
         final String[] entryValues = res.getStringArray(R.array.pref_entry_values_loop_play);
         return ArrayUtils.indexOf(entryValues, value);

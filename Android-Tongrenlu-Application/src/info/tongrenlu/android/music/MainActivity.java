@@ -143,25 +143,25 @@ public class MainActivity extends ActionBarActivity implements TrackFragmentList
     }
 
     @Override
-    public void onDeleteTrack(TrackBean trackBean) {
+    public void onDeleteTrack(final TrackBean trackBean) {
         this.deleteTrack(trackBean);
         this.deletePlaylistTrack(trackBean);
         this.deleteMp3File(trackBean);
     }
 
-    private void deleteMp3File(TrackBean trackBean) {
-        String articleId = trackBean.getArticleId();
-        String fileId = trackBean.getFileId();
+    private void deleteMp3File(final TrackBean trackBean) {
+        final String articleId = trackBean.getArticleId();
+        final String fileId = trackBean.getFileId();
 
-        File file = HttpConstants.getMp3(this, articleId, fileId);
+        final File file = HttpConstants.getMp3(this, articleId, fileId);
         FileUtils.deleteQuietly(file);
     }
 
-    private void deleteTrack(TrackBean trackBean) {
-        String articleId = trackBean.getArticleId();
-        String fileId = trackBean.getFileId();
-        ContentResolver contentResolver = this.getContentResolver();
-        ContentValues values = new ContentValues();
+    private void deleteTrack(final TrackBean trackBean) {
+        final String articleId = trackBean.getArticleId();
+        final String fileId = trackBean.getFileId();
+        final ContentResolver contentResolver = this.getContentResolver();
+        final ContentValues values = new ContentValues();
         values.put("downloadFlg", 0);
         contentResolver.update(TongrenluContentProvider.TRACK_URI,
                                values,
@@ -170,18 +170,18 @@ public class MainActivity extends ActionBarActivity implements TrackFragmentList
         contentResolver.notifyChange(TongrenluContentProvider.TRACK_URI, null);
     }
 
-    private void deletePlaylistTrack(TrackBean trackBean) {
-        String articleId = trackBean.getArticleId();
-        String fileId = trackBean.getFileId();
-        ContentResolver contentResolver = this.getContentResolver();
+    private void deletePlaylistTrack(final TrackBean trackBean) {
+        final String articleId = trackBean.getArticleId();
+        final String fileId = trackBean.getFileId();
+        final ContentResolver contentResolver = this.getContentResolver();
         contentResolver.delete(TongrenluContentProvider.PLAYLIST_TRACK_URI,
                                "articleId = ? and fileId = ?",
                                new String[] { articleId, fileId });
     }
 
     @Override
-    public void onAddToPlaylist(TrackBean trackBean) {
-        Bundle args = new Bundle();
+    public void onAddToPlaylist(final TrackBean trackBean) {
+        final Bundle args = new Bundle();
         args.putString("title", "");
         args.putParcelable("trackBean", trackBean);
 
@@ -209,16 +209,16 @@ public class MainActivity extends ActionBarActivity implements TrackFragmentList
     }
 
     @Override
-    public void onShowCreatePlaylistDialogFragment(Bundle args) {
-        DialogFragment dialog = new CreatePlaylistDialogFragment();
+    public void onShowCreatePlaylistDialogFragment(final Bundle args) {
+        final DialogFragment dialog = new CreatePlaylistDialogFragment();
         dialog.setArguments(new Bundle(args));
         dialog.show(this.getSupportFragmentManager(), "dialog");
     }
 
     @Override
-    public void onCreatePlaylist(Bundle extras) {
-        String title = extras.getString("title",
-                                        this.getString(R.string.title_new_playlist));
+    public void onCreatePlaylist(final Bundle extras) {
+        final String title = extras.getString("title",
+                                              this.getString(R.string.title_new_playlist));
         final ContentResolver contentResolver = this.getContentResolver();
         final ContentValues values = new ContentValues();
         Cursor cursor = null;
@@ -244,24 +244,23 @@ public class MainActivity extends ActionBarActivity implements TrackFragmentList
         contentResolver.notifyChange(TongrenluContentProvider.PLAYLIST_URI,
                                      null);
 
-        long playlistId = ContentUris.parseId(uri);
+        final long playlistId = ContentUris.parseId(uri);
         extras.putLong("playlistId", playlistId);
 
         this.onSelectPlaylist(extras);
     }
 
     @Override
-    public void onSelectPlaylist(Bundle extras) {
-        long playlistId = extras.getLong("playlistId");
-        TrackBean trackBean = extras.getParcelable("trackBean");
+    public void onSelectPlaylist(final Bundle extras) {
+        final long playlistId = extras.getLong("playlistId");
+        final TrackBean trackBean = extras.getParcelable("trackBean");
 
         final ContentResolver contentResolver = this.getContentResolver();
         final ContentValues values = new ContentValues();
         values.put("articleId", trackBean.getArticleId());
         values.put("fileId", trackBean.getFileId());
-        values.put("album", trackBean.getAlbum());
-        values.put("songTitle", trackBean.getSongTitle());
-        values.put("leadArtist", trackBean.getLeadArtist());
+        values.put("name", trackBean.getName());
+        values.put("artist", trackBean.getArtist());
 
         final Uri contentUri = Uri.withAppendedPath(TongrenluContentProvider.PLAYLIST_URI,
                                                     playlistId + "/track");
@@ -287,14 +286,15 @@ public class MainActivity extends ActionBarActivity implements TrackFragmentList
         contentResolver.insert(contentUri, values);
         contentResolver.notifyChange(contentUri, null);
 
-        String msg = this.getString(R.string.message_add_track_to_playlist,
-                                    trackBean.getSongTitle());
+        final String msg = this.getString(R.string.message_add_track_to_playlist,
+                                          trackBean.getName());
         Toast.makeText(this.getApplicationContext(), msg, Toast.LENGTH_SHORT)
              .show();
     }
 
     @Override
-    public void onPlay(ArrayList<TrackBean> trackBeanList, int position) {
+    public void onPlay(final ArrayList<TrackBean> trackBeanList,
+                       final int position) {
         final Intent serviceIntent = new Intent(this, MusicService.class);
         serviceIntent.setAction(MusicService.ACTION_ADD);
         serviceIntent.putParcelableArrayListExtra("trackBeanList",

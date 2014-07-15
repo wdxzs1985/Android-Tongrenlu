@@ -35,10 +35,9 @@ public class AlbumUpdateFragment extends DialogFragment {
     private AlbumTask mTask = null;
 
     @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
+    public Dialog onCreateDialog(final Bundle savedInstanceState) {
         final FragmentActivity activity = this.getActivity();
-        ProgressDialog dialog = new ProgressDialog(activity);
-        // dialog.setTitle(R.string.loading);
+        final ProgressDialog dialog = new ProgressDialog(activity);
         dialog.setCanceledOnTouchOutside(false);
         dialog.setTitle(R.string.loading);
         dialog.setMessage(activity.getText(R.string.loading_album));
@@ -55,7 +54,7 @@ public class AlbumUpdateFragment extends DialogFragment {
     }
 
     @Override
-    public void onDismiss(DialogInterface dialog) {
+    public void onDismiss(final DialogInterface dialog) {
         super.onDismiss(dialog);
 
         if (this.mTask != null) {
@@ -67,14 +66,14 @@ public class AlbumUpdateFragment extends DialogFragment {
     private class AlbumTask extends AsyncTask<Object, Integer, Boolean> {
 
         @Override
-        protected Boolean doInBackground(Object... params) {
-            TongrenluApplication application = (TongrenluApplication) AlbumUpdateFragment.this.getActivity()
-                                                                                              .getApplication();
+        protected Boolean doInBackground(final Object... params) {
+            final TongrenluApplication application = (TongrenluApplication) AlbumUpdateFragment.this.getActivity()
+                                                                                                    .getApplication();
             return this.refreshAlbumData(application);
         }
 
         @Override
-        protected void onPostExecute(Boolean result) {
+        protected void onPostExecute(final Boolean result) {
             super.onPostExecute(result);
             if (result) {
                 AlbumUpdateFragment.this.getActivity()
@@ -89,25 +88,23 @@ public class AlbumUpdateFragment extends DialogFragment {
             AlbumUpdateFragment.this.dismissAllowingStateLoss();
         }
 
-        private Boolean refreshAlbumData(TongrenluApplication application) {
-            final int s = 10;
+        private Boolean refreshAlbumData(final TongrenluApplication application) {
             int p = 1;
             boolean isLast = false;
 
             final HttpHelper http = application.getHttpHelper();
-            final String host = HttpConstants.getHost(application);
+            final String host = HttpConstants.getHostServer(application);
             final ContentResolver contentResolver = application.getContentResolver();
 
-            ProgressDialog dialog = (ProgressDialog) AlbumUpdateFragment.this.getDialog();
+            final ProgressDialog dialog = (ProgressDialog) AlbumUpdateFragment.this.getDialog();
 
             int progress = 0;
             try {
                 while (!isLast && !this.isCancelled()) {
-                    String url = String.format("%s/fm/music?p=%d&s=%d",
-                                               host,
-                                               p,
-                                               s);
-                    JSONObject responseJSON = http.getAsJson(url);
+                    final String url = String.format("%s/fm/music?p=%d",
+                                                     host,
+                                                     p);
+                    final JSONObject responseJSON = http.getAsJson(url);
                     if (responseJSON.getBoolean("result")) {
                         final JSONObject pageJSON = responseJSON.optJSONObject("page");
                         isLast = pageJSON.optBoolean("last");
@@ -116,10 +113,10 @@ public class AlbumUpdateFragment extends DialogFragment {
                         dialog.setMax(pageJSON.getInt("itemCount"));
 
                         final JSONArray items = pageJSON.optJSONArray("items");
-                        List<ContentValues> contentValuesList = new ArrayList<ContentValues>();
+                        final List<ContentValues> contentValuesList = new ArrayList<ContentValues>();
                         for (int i = 0; i < items.length(); i++) {
                             final JSONObject albumObject = items.optJSONObject(i);
-                            final String articleId = albumObject.optString("articleId");
+                            final String articleId = albumObject.optString("id");
                             final String title = albumObject.optString("title");
                             Cursor cursor = null;
                             try {
@@ -132,7 +129,6 @@ public class AlbumUpdateFragment extends DialogFragment {
                                     final ContentValues contentValues = new ContentValues();
                                     contentValues.put("articleId", articleId);
                                     contentValues.put("title", title);
-                                    contentValues.put("collectFlg", 0);
                                     contentValuesList.add(contentValues);
                                 }
                             } finally {
@@ -153,10 +149,10 @@ public class AlbumUpdateFragment extends DialogFragment {
                         isLast = true;
                     }
                 }
-            } catch (JSONException e) {
+            } catch (final JSONException e) {
                 e.printStackTrace();
                 return false;
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 e.printStackTrace();
                 return false;
             }

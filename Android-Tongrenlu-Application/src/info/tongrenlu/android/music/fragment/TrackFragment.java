@@ -47,13 +47,13 @@ public class TrackFragment extends TitleFragment implements ActionSlideExpandabl
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         this.setHasOptionsMenu(true);
 
         final FragmentActivity activity = this.getActivity();
-        String title = activity.getString(R.string.label_track);
+        final String title = activity.getString(R.string.label_track);
         this.setTitle(title);
 
         this.contentObserver = new ContentObserver(new Handler()) {
@@ -73,9 +73,11 @@ public class TrackFragment extends TitleFragment implements ActionSlideExpandabl
     }
 
     @Override
-    public View onCreateView(final LayoutInflater inflater, final ViewGroup container, final Bundle savedInstanceState) {
+    public View onCreateView(final LayoutInflater inflater,
+                             final ViewGroup container,
+                             final Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.fragment_expandable_list_view,
-                                           null,
+                                           container,
                                            false);
         this.mAdapter = new TrackListAdapter(this.getActivity());
         this.mEmpty = view.findViewById(android.R.id.empty);
@@ -91,9 +93,9 @@ public class TrackFragment extends TitleFragment implements ActionSlideExpandabl
     }
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
+    public void onActivityCreated(final Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        FragmentActivity activity = this.getActivity();
+        final FragmentActivity activity = this.getActivity();
         activity.getSupportLoaderManager()
                 .initLoader(MainActivity.TRACK_LOADER, null, this);
     }
@@ -161,7 +163,9 @@ public class TrackFragment extends TitleFragment implements ActionSlideExpandabl
     }
 
     @Override
-    public void onClick(View itemView, View clickedView, int position) {
+    public void onClick(final View itemView,
+                        final View clickedView,
+                        final int position) {
 
         switch (clickedView.getId()) {
         case R.id.item:
@@ -178,7 +182,7 @@ public class TrackFragment extends TitleFragment implements ActionSlideExpandabl
         }
     }
 
-    protected void playTrack(int position) {
+    protected void playTrack(final int position) {
         final Cursor c = (Cursor) this.mListView.getItemAtPosition(position);
         if (c.moveToFirst()) {
             final ArrayList<TrackBean> trackBeanList = new ArrayList<TrackBean>();
@@ -186,8 +190,9 @@ public class TrackFragment extends TitleFragment implements ActionSlideExpandabl
                 final TrackBean trackBean = new TrackBean();
                 trackBean.setArticleId(c.getString(c.getColumnIndex("articleId")));
                 trackBean.setFileId(c.getString(c.getColumnIndex("fileId")));
-                trackBean.setSongTitle(c.getString(c.getColumnIndex("songTitle")));
-                trackBean.setLeadArtist(c.getString(c.getColumnIndex("leadArtist")));
+                trackBean.setName(c.getString(c.getColumnIndex("name")));
+                trackBean.setArtist(c.getString(c.getColumnIndex("artist")));
+                trackBean.setDownloadFlg(c.getString(c.getColumnIndex("downloadFlg")));
                 trackBeanList.add(trackBean);
                 c.moveToNext();
             }
@@ -196,21 +201,21 @@ public class TrackFragment extends TitleFragment implements ActionSlideExpandabl
         }
     }
 
-    private void addToPlaylist(int position) {
+    private void addToPlaylist(final int position) {
         final Cursor c = (Cursor) this.mListView.getItemAtPosition(position);
-        TrackBean trackBean = new TrackBean();
+        final TrackBean trackBean = new TrackBean();
         trackBean.setArticleId(c.getString(c.getColumnIndex("articleId")));
         trackBean.setFileId(c.getString(c.getColumnIndex("fileId")));
-        trackBean.setSongTitle(c.getString(c.getColumnIndex("songTitle")));
-        trackBean.setLeadArtist(c.getString(c.getColumnIndex("leadArtist")));
+        trackBean.setName(c.getString(c.getColumnIndex("name")));
+        trackBean.setArtist(c.getString(c.getColumnIndex("artist")));
+        trackBean.setDownloadFlg(c.getString(c.getColumnIndex("downloadFlg")));
         trackBean.setTrackNumber(0);
-
         this.mListener.onAddToPlaylist(trackBean);
     }
 
-    private void deleteTrack(int position) {
+    private void deleteTrack(final int position) {
         final Cursor c = (Cursor) this.mListView.getItemAtPosition(position);
-        TrackBean trackBean = new TrackBean();
+        final TrackBean trackBean = new TrackBean();
         trackBean.setArticleId(c.getString(c.getColumnIndex("articleId")));
         trackBean.setFileId(c.getString(c.getColumnIndex("fileId")));
 

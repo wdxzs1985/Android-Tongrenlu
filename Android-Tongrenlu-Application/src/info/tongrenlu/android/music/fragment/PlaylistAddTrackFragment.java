@@ -39,19 +39,21 @@ public class PlaylistAddTrackFragment extends Fragment implements LoaderCallback
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
     }
 
     @Override
-    public View onCreateView(final LayoutInflater inflater, final ViewGroup container, final Bundle savedInstanceState) {
+    public View onCreateView(final LayoutInflater inflater,
+                             final ViewGroup container,
+                             final Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_simple_list_view,
                                 container,
                                 false);
     }
 
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
+    public void onViewCreated(final View view, final Bundle savedInstanceState) {
         this.mEmpty = view.findViewById(android.R.id.empty);
         this.mEmpty.setVisibility(View.GONE);
 
@@ -66,9 +68,9 @@ public class PlaylistAddTrackFragment extends Fragment implements LoaderCallback
     }
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
+    public void onActivityCreated(final Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        FragmentActivity activity = this.getActivity();
+        final FragmentActivity activity = this.getActivity();
         activity.getSupportLoaderManager()
                 .initLoader(MainActivity.TRACK_LOADER, null, this);
     }
@@ -117,13 +119,16 @@ public class PlaylistAddTrackFragment extends Fragment implements LoaderCallback
     }
 
     @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+    public void onItemClick(final AdapterView<?> parent,
+                            final View view,
+                            final int position,
+                            final long id) {
         final Cursor c = (Cursor) this.mAdapter.getItem(position);
         final TrackBean trackBean = new TrackBean();
         trackBean.setArticleId(c.getString(c.getColumnIndex("articleId")));
         trackBean.setFileId(c.getString(c.getColumnIndex("fileId")));
-        trackBean.setSongTitle(c.getString(c.getColumnIndex("songTitle")));
-        trackBean.setLeadArtist(c.getString(c.getColumnIndex("leadArtist")));
+        trackBean.setName(c.getString(c.getColumnIndex("name")));
+        trackBean.setArtist(c.getString(c.getColumnIndex("artist")));
         trackBean.setTrackNumber(0);
         this.mListener.onAddTrack(trackBean);
     }

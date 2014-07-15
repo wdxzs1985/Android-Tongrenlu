@@ -11,61 +11,29 @@ public class TrackBean implements Parcelable {
 
     private String album = null;
 
-    private String leadArtist = null;
+    private String artist = null;
 
-    private String songTitle = null;
+    private String name = null;
 
     private String original = null;
 
     private int trackNumber = 0;
 
-    private int downloadFlg = 0;
-
-    public String getFileId() {
-        return this.fileId;
-    }
-
-    public void setFileId(final String fileId) {
-        this.fileId = fileId;
-    }
-
-    public String getArticleId() {
-        return this.articleId;
-    }
-
-    public void setArticleId(final String articleId) {
-        this.articleId = articleId;
-    }
+    private String downloadFlg = "0";
 
     public String getAlbum() {
         return this.album;
     }
 
-    public void setAlbum(String album) {
+    public void setAlbum(final String album) {
         this.album = album;
-    }
-
-    public String getLeadArtist() {
-        return this.leadArtist;
-    }
-
-    public void setLeadArtist(String leadArtist) {
-        this.leadArtist = leadArtist;
-    }
-
-    public String getSongTitle() {
-        return this.songTitle;
-    }
-
-    public void setSongTitle(String songTitle) {
-        this.songTitle = songTitle;
     }
 
     public String getOriginal() {
         return this.original;
     }
 
-    public void setOriginal(String original) {
+    public void setOriginal(final String original) {
         this.original = original;
     }
 
@@ -73,15 +41,15 @@ public class TrackBean implements Parcelable {
         return this.trackNumber;
     }
 
-    public void setTrackNumber(int trackNumber) {
+    public void setTrackNumber(final int trackNumber) {
         this.trackNumber = trackNumber;
     }
 
-    public int getDownloadFlg() {
+    public String getDownloadFlg() {
         return this.downloadFlg;
     }
 
-    public void setDownloadFlg(int downloadFlg) {
+    public void setDownloadFlg(final String downloadFlg) {
         this.downloadFlg = downloadFlg;
     }
 
@@ -90,14 +58,14 @@ public class TrackBean implements Parcelable {
         final int prime = 31;
         int result = 1;
         result = prime * result
-                + ((this.articleId == null) ? 0 : this.articleId.hashCode());
+                + ((this.getArticleId() == null) ? 0 : this.getArticleId().hashCode());
         result = prime * result
-                + ((this.fileId == null) ? 0 : this.fileId.hashCode());
+                + ((this.getFileId() == null) ? 0 : this.getFileId().hashCode());
         return result;
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
@@ -107,19 +75,19 @@ public class TrackBean implements Parcelable {
         if (this.getClass() != obj.getClass()) {
             return false;
         }
-        TrackBean other = (TrackBean) obj;
-        if (this.articleId == null) {
-            if (other.articleId != null) {
+        final TrackBean other = (TrackBean) obj;
+        if (this.getArticleId() == null) {
+            if (other.getArticleId() != null) {
                 return false;
             }
-        } else if (!this.articleId.equals(other.articleId)) {
+        } else if (!this.getArticleId().equals(other.getArticleId())) {
             return false;
         }
-        if (this.fileId == null) {
-            if (other.fileId != null) {
+        if (this.getFileId() == null) {
+            if (other.getFileId() != null) {
                 return false;
             }
-        } else if (!this.fileId.equals(other.fileId)) {
+        } else if (!this.getFileId().equals(other.getFileId())) {
             return false;
         }
         return true;
@@ -132,14 +100,46 @@ public class TrackBean implements Parcelable {
 
     @Override
     public void writeToParcel(final Parcel dest, final int flags) {
-        dest.writeStringArray(new String[] { this.articleId,
-                this.fileId,
+        dest.writeStringArray(new String[] { String.valueOf(this.getArticleId()),
+                String.valueOf(this.getFileId()),
                 this.album,
-                this.songTitle,
-                this.leadArtist,
+                this.name,
+                this.artist,
                 this.original,
                 String.valueOf(this.trackNumber),
                 String.valueOf(this.downloadFlg) });
+    }
+
+    public String getArtist() {
+        return this.artist;
+    }
+
+    public void setArtist(final String artist) {
+        this.artist = artist;
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
+    public void setName(final String name) {
+        this.name = name;
+    }
+
+    public String getFileId() {
+        return fileId;
+    }
+
+    public void setFileId(String fileId) {
+        this.fileId = fileId;
+    }
+
+    public String getArticleId() {
+        return articleId;
+    }
+
+    public void setArticleId(String articleId) {
+        this.articleId = articleId;
     }
 
     public static final Parcelable.Creator<TrackBean> CREATOR = new Parcelable.Creator<TrackBean>() {
@@ -149,14 +149,14 @@ public class TrackBean implements Parcelable {
             in.readStringArray(data);
 
             final TrackBean trackBean = new TrackBean();
-            trackBean.articleId = data[0];
-            trackBean.fileId = data[1];
+            trackBean.setArticleId(data[0]);
+            trackBean.setFileId(data[1]);
             trackBean.album = data[2];
-            trackBean.songTitle = data[3];
-            trackBean.leadArtist = data[4];
+            trackBean.name = data[3];
+            trackBean.artist = data[4];
             trackBean.original = data[5];
             trackBean.trackNumber = Integer.valueOf(data[6]);
-            trackBean.downloadFlg = Integer.valueOf(data[7]);
+            trackBean.downloadFlg = data[7];
             return trackBean;
         }
 

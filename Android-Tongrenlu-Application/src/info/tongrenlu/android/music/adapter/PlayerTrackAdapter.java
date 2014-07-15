@@ -127,8 +127,8 @@ public class PlayerTrackAdapter extends BaseAdapter {
             }
             this.trackBean = trackBean;
 
-            this.titleView.setText(trackBean.getSongTitle());
-            this.artistView.setText(trackBean.getLeadArtist());
+            this.titleView.setText(trackBean.getName());
+            this.artistView.setText(trackBean.getArtist());
 
             this.task = new LoadImageTask() {
                 @Override
@@ -144,7 +144,7 @@ public class PlayerTrackAdapter extends BaseAdapter {
                         if (ApplicationSupport.canUseLargeHeap()) {
                             final Drawable emptyDrawable = new ShapeDrawable();
                             final TransitionDrawable fadeInDrawable = new TransitionDrawable(new Drawable[] { emptyDrawable,
-                                                                                                             result });
+                                    result });
                             ViewHolder.this.coverView.setImageDrawable(fadeInDrawable);
                             fadeInDrawable.startTransition(LoadImageTask.TIME_SHORT);
                         } else {
@@ -175,7 +175,7 @@ public class PlayerTrackAdapter extends BaseAdapter {
             default:
                 url = HttpConstants.getCoverUrl(application,
                                                 trackBean.getArticleId(),
-                                                HttpConstants.XXS_COVER);
+                                                HttpConstants.XS_COVER);
                 break;
             }
 

@@ -69,6 +69,7 @@ public class LoadBlurImageTask extends AsyncTask<Object, Object, Drawable> {
                                          targetWidth,
                                          targetHeight);
 
-        return new BitmapDrawable(resource, blurBitmap);
+        final Drawable result = new BitmapDrawable(resource, blurBitmap);
+        return result;
     }
 }
