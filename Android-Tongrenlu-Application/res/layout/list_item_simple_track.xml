@@ -11,6 +11,7 @@
             android:layout_alignParentTop="true"
             android:scaleType="centerCrop" />
     <TextView android:id="@+id/track_title"
+            style="@style/WhiteText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_toRightOf="@+id/article_cover"
@@ -23,6 +24,7 @@
             android:paddingLeft="16dp"
             android:paddingTop="8dp"/>
     <TextView android:id="@+id/track_artist"
+            style="@style/WhiteText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/track_title"
@@ -33,5 +35,5 @@
             android:text="@string/track_artist"
             android:textSize="@dimen/track_artist_size"
             android:paddingLeft="16dp"
-            android:paddingTop="8dp"/>
+            android:paddingTop="8dp" />
 </RelativeLayout>
